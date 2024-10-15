@@ -1,0 +1,67 @@
+<template>
+    <!-- This will toggle the consult request from eye+ to eye only during request-->
+    <template lwc:if={props.isConsultRequestOngoing}>
+        <div class='eye_consult_div ongoing_request'>
+            <lightning-button-icon icon-name="utility:preview"
+                variant='bare'
+                title="Ongoing consult request"
+                disabled
+                size='large'></lightning-button-icon>
+        </div>
+        <!--More icon please visit : https://www.lightningdesignsystem.com/icons/ -->
+    </template>
+    <template lwc:else>
+        <lightning-button-icon alternative-text="consult"
+            title="consult"
+            onclick={openConsultModal}
+            disabled={props.disabledCoachingRequest}></lightning-button-icon>
+    </template>
+     <!--End-->
+    <template if:true={isOpenConsultModal}>
+        <section role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                    onclick={closeConsultModal}>
+                    <svg class="slds-button__icon slds-button__icon_large"
+                        aria-hidden="true">
+                        <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#close"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Cancel and close</span>
+                </button>
+                <div class="slds-modal__header modal-header">
+                    <lightning-icon icon-name="custom:custom112"></lightning-icon>
+                    <h1 id="modal-heading-02"
+                        class="slds-modal__title slds-hyphenate">Request Assistance</h1>
+                </div>
+                <template if:true={isNotesStep}>
+                    <c-consult-notes notes={notes}
+                        onnext={handleNext}
+                        onchange={handleNoteChange}
+                        oncancel={closeConsultModal}></c-consult-notes>
+                </template>
+                <template if:true={isSendRequestStep}>
+                    <c-consult-supervisor-list notes={notes}
+                        is-loading={isLoading}
+                        onconsult={handleConsult}
+                        onloading={handleLoading}
+                        supervisors={supervisors}
+                        onprevious={closeConsultModal}
+                        is-supervisor-name-flag={isSupervisorNameFlag}
+                        is-empty-supervisors-name={isEmptySupervisorsName}
+                        ></c-consult-supervisor-list>
+                </template>
+
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"
+            role="presentation"></div>
+
+    </template>
+
+
+
+</template>

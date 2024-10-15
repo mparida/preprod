@@ -1,0 +1,35 @@
+<template>
+    <lightning-card class = "slds-p-around_medium slds-m-around_medium">
+        <!--Release selection-->
+        <div class = "combobox">
+            <lightning-combobox
+            class = "release-dropdown slds-m-bottom_medium"
+            name="release"
+            label="Release"
+            value={selectedRelease}
+            placeholder="Select Release"
+            options={releaseOptions}
+            onchange={handleReleaseChange} >
+            </lightning-combobox>
+        </div>
+        <!-- Check-in button-->
+        <lightning-button 
+            class="slds-m-bottom_medium"
+            variant="brand" 
+            label="Check-in" 
+            title="Check-in" 
+            onclick={handleCheckin} >
+        </lightning-button>
+        <!--My checked out components-->
+        <lightning-datatable
+                class="slds-m-top_medium"
+                key-field="id"
+                data={componentTrackerRecords}
+                columns={columns}
+                selected-rows={selectedRowsForCheckin}
+                hide-checkbox-column="false"
+                onrowselection={handleCheckInRowSelect}
+                >
+        </lightning-datatable>
+    </lightning-card>
+</template>

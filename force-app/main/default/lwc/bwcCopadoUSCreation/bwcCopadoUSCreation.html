@@ -1,0 +1,65 @@
+<template>
+    <div class="slds-theme_default">
+        <h1 class="slds-text-heading_large slds-align_absolute-center">ITrack Story Retrieval Panel</h1>
+        <div lwc:if={showSpinner}>
+            <lightning-spinner alternative-text="Loading"></lightning-spinner>
+        </div>
+        <lightning-layout>
+            <lightning-layout-item size="4" padding="around-small">
+                <lightning-combobox name="BoardName" label="Board Name" value={selectedBoard} options={boardNameOptions} onchange={handleBoardSelection}></lightning-combobox>
+            </lightning-layout-item>
+            <lightning-layout-item size="4" padding="around-small">
+                <lightning-combobox name="SprintName" label="Sprint Name" value={selectedSprint} disabled={disableSprintCombo} options={sprintNameOptions} onchange={handleSprintSelection}></lightning-combobox>
+            </lightning-layout-item>
+            <lightning-layout-item size="4" padding="around-small">
+                <lightning-input type="search" label="Search an Issue" value={searchIssueKey} onchange={handleIssueSearch}></lightning-input>
+            </lightning-layout-item>
+        </lightning-layout>
+        <lightning-layout multiple-rows>
+            <lightning-layout-item size="4" padding="around-small">
+                <lightning-button variant="brand" label="Fetch Stories" title="Fetch" onclick={handleFetch}></lightning-button>
+            </lightning-layout-item>
+            <lightning-layout-item size="4" padding="around-small">
+                <lightning-button variant="brand" label="Sync Stories" title="Create" onclick={handleCreate}></lightning-button>
+            </lightning-layout-item>
+        </lightning-layout>
+
+            <template lwc:if={isFetechTable}>
+                <div>
+                    <lightning-layout>
+                        <lightning-layout-item size="8">
+                        </lightning-layout-item>
+                        <lightning-layout-item size="4">
+                            <lightning-input type="search" label="search" value={searchText} onchange={handleSearch}></lightning-input>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                    <div class="table-container slds-p-top_small">
+                        <lightning-datatable
+                            key-field="id"
+                            data={displayFetchData}
+                            columns={columnsOnSearch}
+                            data-id="fetchTable"
+                            onrowselection={handleRowSelection}
+                            selected-rows={selectedRows}>
+                        </lightning-datatable>
+                    </div>
+                    <div class="slds-box slds-theme_shade slds-m-top_x-small">
+                        <lightning-layout>
+                            <lightning-layout-item size="4" class="slds-text-align_left">
+                                <p>Total Records: {totalRecords}</p>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="4" class="slds-align_absolute-center">
+                                <lightning-button-group class="slds-text-align_center">
+                                    <lightning-button label="Previous" onclick={handlePrevious} disabled={disablePrevious}></lightning-button>
+                                    <lightning-button label="Next" onclick={handleNext} disabled={disableNext}></lightning-button>
+                                </lightning-button-group>    
+                            </lightning-layout-item>
+                            <lightning-layout-item size="4" class="slds-text-align_right">
+                                <p>Page {currentPage} of {totalPages}</p>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>
+                </div>
+            </template>
+    </div>
+</template>

@@ -1,0 +1,112 @@
+<template>
+    <div class="slds-modal__content slds-p-around_medium"
+        id="modal-content-id-1">
+        <div class='slds-grid slds-wrap slds-constult-modal__content'>
+            <div class="slds-col slds-size_1-of-1 consult-modal__search">
+                <lightning-input placeholder="Search"
+                    class="searchChatInput"
+                    type="search"
+                    onkeyup={handleSearch}>
+                </lightning-input>
+            </div>
+            <div
+                class="slds-col slds-size_1-of-1 slds-m-top_medium slds-is-relative consult-modal__supervisor-list-wrapper">
+                <template lwc:if={isLoading}>
+                    <div class="slds-align_absolute-center">
+                        <lightning-spinner class=''
+                            alternative-text="Loading"
+                            size="large" title="Waiting for list of supervisor"></lightning-spinner>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <template lwc:if={isSupervisorNameFlag}>
+                        <template lwc:if={isEmptySupervisorsName}>
+                            <template for:each={consultList}
+                                for:item="item">
+                                <div key={item.id}
+                                    class='consult-list'>
+                                    <div class='consult-list_name'>
+                                        <lightning-icon icon-name="custom:custom103"
+                                            size="large"
+                                            class='slds-m-right_medium consult-main-icon'>
+                                        </lightning-icon>
+                                        <div class='consult-list__detail'>
+                                            <div class='slds-text-body_regular slds-text-title_bold'>
+                                                {item.name}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='consult__button'>
+                                        <lightning-button label="Consult"
+                                            data-id={item.id}
+                                            class="slds-button"
+                                            icon-position="left"
+                                            onclick={onConsult}
+                                            icon-name="standard:question_feed">
+                                        </lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template lwc:else>
+                            <lightning-card variant="base">
+                                <div class="slds-box slds-box_small">
+                                    <div class='slds-align_absolute-center'>
+                                        No Supervisors logged in.
+                                    </div>
+                                </div>
+                            </lightning-card>
+                        </template>
+                    </template>
+                    <template lwc:else
+                        for:each={supervisorList}
+                        for:item="item">
+                        <div key={item.id}
+                            class='consult-list'
+                            onclick={handleSelectedConsult}
+                            data-id={item.id}>
+                            <lightning-icon icon-name="custom:custom103"
+                                size="large"
+                                class='slds-m-right_medium consult-main-icon'></lightning-icon>
+                            <div class='consult-list__detail '>
+                                <div class='slds-text-body_regular slds-text-title_bold'>
+                                    {item.name}
+                                </div>
+                                <div class='detail__users_time'>
+                                    <div class='slds-m-right_x-small'>
+                                        <lightning-icon icon-name="utility:user"
+                                            size='xx-small'
+                                            class="number-of-users slds-m-right_xxx-small"></lightning-icon>
+                                        <span>{item.numAgents}</span>
+                                    </div>
+                                    <div>
+                                        <lightning-icon icon-name="utility:clock"
+                                            size='xx-small'
+                                            class='slds-m-right_xxx-small'></lightning-icon>
+                                        <span>{item.time}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='consult__button'>
+                                <lightning-button icon-name="utility:info"
+                                    icon-position=""
+                                    label="Consult"
+                                    class="slds-button"
+                                    data-id={item.name}
+                                    onclick={handleClickConsult}></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                    <template lwc:if={noSearchFound}>
+                        <h1>No supervisor group result were found...</h1>
+                    </template>
+                </template>
+
+            </div>
+        </div>
+    </div>
+    <div class="slds-modal__footer slds-text-align_left">
+        <button class="slds-button slds-button_text-destructive"
+            onclick={onPrevious}>Cancel</button>
+    </div>
+</template>

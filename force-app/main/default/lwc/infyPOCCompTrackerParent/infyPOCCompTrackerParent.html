@@ -1,0 +1,100 @@
+<template>
+    <div class="slds-grid slds-grid_vertical slds-p-around-medium slds-p-left_large slds-theme_shade">
+            <!--Release selection-->
+            <div class = "combobox slds-col slds-m-top_large slds-m-bottom_medium slds-p-left_large">
+                <lightning-combobox
+                class = "release-dropdown slds-m-bottom_medium"
+                name="RELEASE"
+                label="RELEASE"
+                value={selectedRelease}
+                placeholder="Select Release"
+                options={releaseOptions}
+                onchange={handleReleaseChange} >
+                </lightning-combobox>
+            </div>
+            <!--Spinner while data is loading-->
+            <template if:true={isLoading}>
+                <div class = "slds-col slds-m-bottom_medium slds-p-left_large">
+                    <lightning-spinner
+                        alternative-text="Loading..."
+                        size="medium">
+                    </lightning-spinner>
+                </div>
+            </template>
+            <div class = "slds-col slds-m-bottom_small slds-p-left_large">
+                <lightning-accordion class="custom-accordion"
+                        allow-multiple-sections-open
+                        onsectiontoggle={toggleMyCheckedinCompsTable}
+                        active-section-name="myCheckedInComponents">
+                    <!--Collapsible Header: My Checked In Components-->
+                    <lightning-accordion-section name="myCheckedInComponents" label="MY CHECKED IN COMPONENTS" class = "section-label">
+                        <!-- Message: No components-->    
+                        <template if:false={myCheckedInRecords.length}>
+                            <div class = "slds-col slds-p-left_large">
+                                <h1 class="slds-text-color_success slds-text-heading_small">No checked-in components to display.</h1>
+                            </div>
+                        </template>
+                        <template if:false={isLoading}>
+                            <template if:true={myCheckedInRecords.length}>
+                            <!-- Button: Check-out-->
+                            <div class = "slds-col slds-m-bottom_small slds-m-top_small slds-p-left_large">
+                                <lightning-button 
+                                    class="slds-m-bottom_medium"
+                                    variant="brand" 
+                                    label="Check-Out" 
+                                    title="Check-Out" 
+                                    onclick={handleCheckOut}>
+                                </lightning-button>
+                            </div>
+                            <!--Data table: My checked in components-->
+                            <div class = "slds-col slds-m-bottom_small slds-p-left_large">
+                                <lightning-datatable
+                                class="slds-m-bottom_medium"
+                                key-field="id"
+                                data={myCheckedInRecords}
+                                columns={myCheckInColumns}
+                                selected-rows={selectedRowstoCheckIn}
+                                onrowselection={handleMyRecordsSelection}>
+                                </lightning-datatable>
+                            </div>
+                            </template>
+                        </template>
+                    </lightning-accordion-section>
+                    <!--Collapsible Header: Other Components-->
+                    <lightning-accordion-section name="otherComponents" label="OTHER COMPONENTS IN THE RELEASE">
+                        <!-- Message: No components-->    
+                        <template if:false={otherRecords.length}>
+                            <div class = "slds-col slds-p-left_large">
+                                <h1 class="slds-text-color_success slds-text-heading_small">No components to display.</h1>
+                            </div>
+                        </template>
+                        <template if:false={isLoading}>
+                            <template if:true={otherRecords.length}>
+                            <!-- Button: Check-In-->
+                            <div class = "slds-col slds-m-bottom_small slds-m-top_small slds-p-left_large">
+                                <lightning-button 
+                                    class="slds-m-bottom_medium"
+                                    variant="brand" 
+                                    label="Check-In" 
+                                    title="Check-In" 
+                                    onclick={handleCheckIn}>
+                                </lightning-button>
+                            </div>
+                            <!--Data table: Other components in release-->
+                            <div class = "slds-col slds-m-bottom_small slds-p-left_large">
+                                <lightning-datatable
+                                class="slds-m-bottom_medium"
+                                key-field="id"
+                                data={otherRecords}
+                                columns={myCheckInColumns}
+                                selected-rows={selectedRowstoCheckIn}
+                                onrowselection={handleOtherRecordsSelection}>
+                                </lightning-datatable>
+                            </div>
+                            </template>
+                        </template>
+                    </lightning-accordion-section>
+                </lightning-accordion>
+            </div>
+    </div>
+</template>

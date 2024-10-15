@@ -1,0 +1,1477 @@
+<template>
+    <!-- Direct to Agent LWC -->
+    <c-count-messages message={currentText}></c-count-messages>
+    <!--END Direct to Agent LWC -->
+    
+    <!-- ACTIVE CHAT LIST -->
+    <div class="content noCoral" if:true={showActiveChatsPage} onload={handleOpen}>
+        <div class="chat_list noContent">
+            <p class="slds-text-heading_large">Active Chats</p>
+           
+            <template for:each={activeChats} for:item="chat">
+                <div 
+                    data-entityid={chat.entityid}
+                    data-item={chat.customerName}
+                    onclick={clickCustomer}
+                    data-state={chat.state}
+                    class={chat.className}
+                    data-time={chat.time}
+                    key={chat.entityid}>
+                    <lightning-avatar class="userImg "
+                        initials=""
+                        variant="circle"
+                        fallback-icon-name="standard:user"
+                        size="medium">
+                    </lightning-avatar>
+                    <div class="chat_ib">
+                        <h5>{chat.customerName} <span class="chat_date">{chat.time}</span></h5>
+                        <div class="customerListChatSubject">
+                            <b>Subject:</b>
+                            <p title={chatSubjectText}>{chat.subject}</p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    <!-- CHAT WINDOW -->
+    <div if:true={showChatPage} class={embeddedChatContainerClass}>
+        <!-- CHAt HEADER ICON-->
+        <div class="slds-grid slds-wrap slds-p-around_x-small chatHeader">
+            <div class="slds-col slds-size_2-of-12 slds-align_absolute-center">
+                <lightning-icon class="slds-m-right_xx-small backToActiveChatButton" icon-name="utility:chevronleft"
+                    title="Back to Chat List Page" onclick={handleBacktoActiveChats} size="x-small">
+                </lightning-icon>
+                <!-- NOTE: Need to add feature flag for async chat and apple business chat -->
+                <c-chat-type-icon 
+                    is-timeout={isTimeout}
+                    record-id={recordId}
+                    active-chats={activeChats}
+                    ></c-chat-type-icon>
+            </div>
+            <div class="slds-col slds-size_6-of-12 customerNameDiv chatSubjectHeader">
+                <div class="slds-col slds-size_1-of-1">
+                    <p class="slds-p-left_x-small customerName"
+                        displaymode={typingState}>{customerName}
+                    </p>
+                    <p class="slds-p-left_x-small authenticationStatus">
+                        <span>Not Authenticated</span>
+                        <lightning-icon size="xx-small" icon-name="action:close">
+                        </lightning-icon>
+                    </p>
+                </div>
+
+                <div if:true={isSubjectPositionTop} class="slds-col slds-size_1-of-1 ">
+                    <span title={chatSubjectText}>{chatSubjectText}</span>
+                </div>
+            </div>
+            <div class="slds-col slds-size_4-of-12 slds-clearfix slds-align_absolute-center">
+               
+                <c-timer record-id={recordId}></c-timer>
+
+            </div>
+
+        </div>
+        <!-- CHAT TAB WRAPPER CHAT , TRANSFER INFO and SEARCH CHAT TAB -->
+        <div class="slds-grid slds-wrap slds-border_bottom chatTabWrap">
+            <div class="slds-col slds-grid slds-wrap slds-p-top_x-small slds-p-bottom_x-small chatTab active"
+                onclick={handleShowChatPage} title="Chat">
+                <lightning-icon class="slds-size_12-of-12 slds-align_absolute-center " icon-name="utility:chat"
+                    size="medium">
+                </lightning-icon>
+                <span class="slds-align_absolute-center chatText">Chat</span>
+            </div>
+            <div class="slds-col slds-grid slds-wrap slds-p-top_x-small slds-p-bottom_x-small transferTab "
+                onclick={clickTransferTab} title="Transfer">
+                <lightning-icon class="slds-size_12-of-12 slds-align_absolute-center transferLogo"
+                    icon-name="utility:product_transfer" size="medium">
+                </lightning-icon>
+                <span class="slds-align_absolute-center chatText">Transfer</span>
+            </div>
+            <template if:true={showDetailsTab}>
+                <div class="slds-col slds-grid slds-wrap slds-p-top_x-small slds-p-bottom_x-small detailsTab"
+                    onclick={handleDetails} title="Details">
+                    <lightning-icon class="slds-size_12-of-12 slds-align_absolute-center " icon-name="utility:info"
+                        size="medium">
+                    </lightning-icon>
+                    <span class="slds-align_absolute-center chatText">Details</span>
+                </div>
+            </template>
+
+            <div class="slds-col slds-grid slds-wrap slds-p-top_x-small slds-p-bottom_x-small searchTab"
+                onclick={handleSearch} title="Search">
+                <lightning-icon class="slds-size_12-of-12 slds-align_absolute-center " icon-name="utility:search"
+                    size="medium">
+                </lightning-icon>
+                <span class="slds-align_absolute-center chatText">Search</span>
+            </div>
+
+        </div>
+        <!-- CHAT CONVERSATION -->
+        <template if:true={showConversation}>
+
+            <div class="slds-grid slds-wrap chatArea" displaymode={chatAreaMode}>
+                <div if:false={isSubjectPositionTop} class="chatSubject"><b>Subject:</b>
+                    <p title={chatSubjectText}>{chatSubjectText}</p>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-grid">
+                    <div if:true={showNormalChat}
+                        class="slds-col slds-grid slds-align_absolute-center chatSubtab subtab testDemo" data-tab="chat"
+                        onclick={clickSubtab}>
+                        <!--<lightning-icon icon-name="utility:user" alternative-text="Approved" title="Chat"></lightning-icon>-->
+                        <span>{chatHeaderLabel}</span>
+                    </div>
+
+                    <div if:true={showConsultingChat}
+                        class="slds-col slds-grid slds-align_absolute-center subtab testDemo" data-tab="consultation"
+                        onclick={clickSubtab}>
+                        <!--<lightning-icon icon-name="standard:question_feed" alternative-text="Approved" title={selectedSupervisor}></lightning-icon>-->
+                      <!--   <span>Consultation</span> -->
+                    </div>
+                </div>
+
+                <div class="slds-col slds-grid slds-wrap mainChatContent chatContent" data-id="chat">
+                    <template if:true={openChat}>
+                        <template lwc:if={isResizableTextarea}>
+                            <section role="log" class="slds-size_1-of-1 chat-section chatWrapper">
+                                <div class="chat-window">
+                                    <ul class="slds-chat-list chat-window__list chatul">
+                                        <template for:each={messagesArray} for:item="msg" for:index="index">
+                                            <li class={msg.class} key={msg.UserName}>
+                                                <template lwc:if={msg.isConversationSummary}>
+                                                    <div class='summary_container'>
+                                                        <div class='summary_title'>
+                                                            <lightning-icon icon-name="utility:edit_form"
+                                                                size="x-small"
+                                                                title="Summary"
+                                                                class="summary_icon"></lightning-icon>
+                                                            <span>Conversation Summary</span>
+                                                        </div>
+                                                        <div class='summary'>
+                                                            <p>{msg.text}</p>
+                                                        </div>
+                                                    
+                                                    </div>   
+                                                </template>
+                                                <template lwc:else>
+                                                    <div class="slds-chat-message chatMessage slds-var-p-horizontal_x-small">
+                                                        <span aria-hidden="true"
+                                                            class="slds-avatar slds-avatar_circle slds-chat-avatar">
+                                                            <abbr class="slds-avatar__initials slds-avatar__initials_inverse"
+                                                                title={msg.UserName}>{msg.UserName}</abbr>
+                                                        </span>
+                                                        <div class="slds-chat-message__body messageBody">
+                                                            <template lwc:if={msg.isSytemMessage}>
+                                                                <div class="slds-chat-message__text slds-chat-message__text_inbound textInbound"
+                                                                    data-msg={msg.bubbleid}>
+                                                                    <span data-messagespan={msg.text}
+                                                                        data-bubbleid={msg.bubbleid}>{msg.text}</span>
+                                                                </div>
+                                                            </template>
+                                                            <template lwc:elseif={msg.isPendingChat}>
+                                                                <div class="slds-chat-message__text slds-chat-message__text_inbound textInbound"
+                                                                    data-msg={msg.bubbleid}>
+                                                                    <span data-messagespan={msg.text}
+                                                                        data-bubbleid={msg.bubbleid} class='pending_message'>{msg.text}</span>
+                                                                </div>
+                                                            </template>
+                                                            <template lwc:else>
+                                                                <div class="slds-chat-message__text slds-chat-message__text_inbound textInbound"
+                                                                    data-msg={msg.bubbleid}>
+                                                                    <template for:each={msg.message}
+                                                                        for:item="msgArray"
+                                                                        for:index="msgId">
+                                                                        <template lwc:if={msgArray.isUrl}>
+                                                                           <!--  <span key={msgArray.text}
+                                                                            data-messagespan={msgArray.text}
+                                                                            data-bubbleid={msg.bubbleid}
+                                                                            class='url'
+                                                                            data-msgid={msgId}>{msgArray.text}</span> -->
+                                                                            <c-url-with-copy-button key={msg.bubbleid} url-text={msgArray.text}></c-url-with-copy-button>
+
+                                                                        </template>
+                                                                        <template lwc:elseif={msgArray.isLongText}>
+                                                                            <span key={msgArray.text}
+                                                                            data-messagespan={msgArray.text}
+                                                                            data-bubbleid={msg.bubbleid}
+                                                                            class='longtext'
+                                                                            data-msgid={msgId}>{msgArray.text}</span>
+                                                                        </template>
+                                                                        <template lwc:else>
+                                                                            
+                                                                            <span key={msgArray.text}
+                                                                            data-messagespan={msgArray.text}
+                                                                            data-bubbleid={msg.bubbleid}
+                                                                            data-msgid={msgId}>{msgArray.text}</span>
+                                                                        </template>
+                                                                        
+                                                                        &nbsp;
+                                                                    </template>
+                                                
+                                                                </div>
+                                                            </template>
+                                                
+                                                            <div class="slds-chat-message__meta"
+                                                                aria-label=""> <span class="agent">{msg.UserName}</span>
+                                                                <span class="time">{msg.date}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div if:true={isDisplayManualRedactButton}
+                                                        class="manualRedactionButton">
+                                                        <lightning-button-icon icon-name="utility:note"
+                                                            onclick={handleShowRedactionModal}
+                                                            data-msg={msg.message}
+                                                            data-bubbleid={msg.bubbleid}></lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                            </li>
+                                        </template>
+                                     
+                                        <template lwc:if={isCoachOrConferenceMode}>
+                                             <template lwc:if={typingText}>
+                                                <li class={typingClass}>
+                                                    <div class="slds-chat-message">
+                                                        <div class="slds-chat-message__body">
+                                                            <div class="slds-chat-message__text slds-chat-message__text_inbound">
+                                                                <span class="slds-icon-typing slds-is-animated"
+                                                                    title="Customer is typing">
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-assistive-text">{typingText}</span>
+                                                                </span>
+                                                            </div>
+                                                            <div class="slds-chat-message__meta"
+                                                                aria-label=""> <span class="agent"><i>{typingText}</i></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </template>   
+                                        </template>
+                                        <template lwc:else>
+                                            <template lwc:if={isTypingCustomer}>
+                                                <li
+                                                    class="slds-chat-listitem slds-chat-listitem_inbound Customer typingWrapper">
+                                                    <div class="slds-chat-message">
+                                                        <span aria-hidden="true"
+                                                            class="slds-avatar slds-avatar_circle slds-chat-avatar">
+                                                            <abbr
+                                                                class="slds-avatar__initials slds-avatar__initials_inverse"
+                                                                title="Taylor Watson-Rice"></abbr>
+                                                        </span>
+                                                        <div class="slds-chat-message__body">
+                                                            <div
+                                                                class="slds-chat-message__text slds-chat-message__text_inbound">
+                                                                <span class="slds-icon-typing slds-is-animated"
+                                                                    title="Customer is typing">
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-icon-typing__dot"></span>
+                                                                    <span class="slds-icon-typing__dot"></span>
+    
+                                                                    <span class="slds-assistive-text">Customer is
+                                                                        typing</span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </template>
+                                        </template>
+                                        <li class="last-li">
+                                                <c-park-async-notif is-timeout={isTimeout} timeout-date={timeoutDate} message={parkMessage}></c-park-async-notif>
+                                        </li>
+
+                                    </ul>
+                                </div>
+
+
+
+
+
+                                <!--ATT692 New Chat UI controls and textarea -->
+                                <div class="textareaWrapper chat-controls" data-chatmode={chatmode}>
+                                    <div class="">
+                                        <c-dynamic-resize placeholder={chatInputPlaceholder} value={currentText}
+                                            onkeyup={handleSend} onclick={selectedTextInput}
+                                            onchange={chatInputOnchange} new-height={newHeight} onsetheight={onSetHeight}>
+                                        </c-dynamic-resize>
+                                    </div>
+                                    <div class="">
+                                        <div class='slds-grid slds-wrap chatButtons'>
+                                            <div class='chatButtons_left'>
+                                                <div class='leave_chat_div'>
+                                                    <lightning-button-icon icon-name="utility:logout" title="Leave Chat"
+                                                        onclick={showLeaveReasonsPage} class="leaveButton">
+                                                    </lightning-button-icon>
+                                                </div>
+                                            </div>
+                                            <div class='chatButtons_right'>
+                                                <!-- Coaching Session -->
+                                                <template lwc:if={isSupervisorSession}>
+                                                    <div class='customer_toggle_button_div customerButtonDiv'>
+                                                        <lightning-button-icon title="Chat with Customer"
+                                                            onclick={toggleCustomerButton} class="customerButton"
+                                                            data-name="customerToggleButton">
+                                                        </lightning-button-icon>
+                                                    </div>
+                                                    <div class='supervisor_toggle_button_div supervisorButtonDiv'>
+                                                        <lightning-button-icon icon-name="utility:preview"
+                                                            title="Chat with Supervisor" onclick={toggleSupervisorButton}
+                                                            class="supervisorButton" data-name="supervisorToggleButton">
+                                                        </lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                                 <!-- Consult Request -->
+                                                <template lwc:else>
+                                                    <template lwc:if={twoWayConsultFlag}>
+                                                        <div class='eye_consult_div'>
+                                                            <c-consult 
+                                                                record-id={recordId}
+                                                                is-supervisor-name-flag={isSupervisorNameFlag}
+                                                                is-empty-supervisors-name={isEmptySupervisorsName}
+                                                                ></c-consult>
+                                                        </div>
+                                                    </template>
+
+                                                </template>
+                                                
+                                                <div class='standar_reponse_div'>
+                                                    <lightning-button-icon icon-name="utility:comments"
+                                                        onclick={handleShowStandardResponse} class="standard_response">
+                                                    </lightning-button-icon>
+                                                </div>
+                                                <div class='sendButtonDiv'>
+                                                    <lightning-button-icon icon-name="utility:send" class="sendButton"
+                                                        variant="brand" label="Send" title="Send" onclick={handleSend}
+                                                        data-name="sendChatButton">
+                                                    </lightning-button-icon>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </template>
+                        <!-- Original Coral Product textarea/chatarea -->
+                        <template lwc:else>
+                            <section role="log" class="slds-chat slds-theme_default slds-size_1-of-1 chatWrapper">
+                                <div class="slds-grid slds-wrap slds-col slds-size_1-of-1">
+                                    <ul class="slds-col slds-chat-list slds-m-around_small chatul">
+                                        <template for:each={messagesArray} for:item="msg" for:index="index">
+                                            <li class={msg.class} key={msg.UserName}>
+                                                <div class="slds-chat-message chatMessage">
+                                                    <span aria-hidden="true"
+                                                        class="slds-avatar slds-avatar_circle slds-chat-avatar">
+                                                        <abbr
+                                                            class="slds-avatar__initials slds-avatar__initials_inverse"
+                                                            title={msg.UserName}>{msg.UserName}</abbr>
+                                                    </span>
+                                                    <div class="slds-chat-message__body messageBody">
+                                                        <div class="slds-chat-message__text slds-chat-message__text_inbound textInbound"
+                                                            data-msg={msg.bubbleid}>
+                                                            <template for:each={msg.message} for:item="msgArray"
+                                                                for:index="msgId">
+                                                                <span key={msgArray.text} data-messagespan={msgArray.text}
+                                                                    data-bubbleid={msg.bubbleid}
+                                                                    data-msgid={msgId}>{msgArray.text}</span>
+                                                                &nbsp;
+                                                            </template>
+
+                                                        </div>
+                                                        <div class="slds-chat-message__meta" aria-label=""> <span
+                                                                class="agent">{msg.UserName}</span>
+                                                            <span class="time">{msg.date}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div if:true={isDisplayManualRedactButton}
+                                                    class="manualRedactionButton">
+                                                    <lightning-button-icon icon-name="utility:note"
+                                                        onclick={handleShowRedactionModal} data-msg={msg.message}
+                                                        data-bubbleid={msg.bubbleid}></lightning-button-icon>
+                                                </div>
+                                            </li>
+                                        </template> 
+                                        <template lwc:if={isTypingCustomer}>
+                                            <li class="slds-chat-listitem slds-chat-listitem_inbound Customer typingWrapper">
+                                                <div class="slds-chat-message">
+                                                    <span aria-hidden="true"
+                                                        class="slds-avatar slds-avatar_circle slds-chat-avatar">
+                                                        <abbr class="slds-avatar__initials slds-avatar__initials_inverse"
+                                                            title="Taylor Watson-Rice"></abbr>
+                                                    </span>
+                                                    <div class="slds-chat-message__body">
+                                                        <div class="slds-chat-message__text slds-chat-message__text_inbound">
+                                                            <span class="slds-icon-typing slds-is-animated"
+                                                                title="Customer is typing">
+                                                                <span class="slds-icon-typing__dot"></span>
+                                                                <span class="slds-icon-typing__dot"></span>
+                                                                <span class="slds-icon-typing__dot"></span>
+                                                                <span class="slds-icon-typing__dot"></span>
+                                        
+                                                                <span class="slds-assistive-text">Customer is
+                                                                    typing</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                        
+                                                </div>
+                                            </li>
+                                        
+                                        </template>
+                                       
+                                        <li class="last-li">
+
+                                        </li>
+
+                                    </ul>
+                                </div>
+
+
+
+                                <div class="slds-grid slds-wrap slds-col slds-size_1-of-1">
+                                    <div class="slds-grid slds-wrap">
+                                        <div class="slds-col">
+                                            <lightning-button icon-name="utility:up"
+                                                onclick={handleShowStandardResponse}
+                                                class="slds-float_right btnToStandardResponse slds-button_icon-x-small">
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+
+                                    <div class="slds-grid slds-wrap textareaWrapper" data-chatmode={chatmode}>
+                                        <div class="slds-grid slds-wrap">
+                                            <lightning-button variant="brand" label="Leave Chat" title="Leave Chat"
+                                                onclick={showLeaveReasonsPage}
+                                                class="slds-m-left_x-small slds-float_left leaveButton">
+                                            </lightning-button>
+                                        </div>
+                                        <div if:true={twoWayCoachingMode} class="slds-grid coaching">
+                                            <div class="slds-col slds-size_12-of-12 customerButtonDiv">
+                                                <lightning-button-icon alternative-text="Settings"
+                                                    title="Chat with Customer" onclick={toggleCustomerButton}
+                                                    class="customerButton" data-name="customerToggleButton">
+                                                </lightning-button-icon>
+
+                                            </div>
+                                            <div class="slds-grid slds-size_12-of-12 supervisorButtonDiv">
+                                                <lightning-button-icon icon-name="utility:preview"
+                                                    alternative-text="Settings" title="Chat with Supervisor"
+                                                    onclick={toggleSupervisorButton} class="supervisorButton"
+                                                    data-name="supervisorToggleButton">
+                                                </lightning-button-icon>
+                                            </div>
+                                        </div>
+                                        <div class="slds-grid slds-wrap chatInputFieldDiv default">
+
+                                            <lightning-textarea class="chatInputField" value={chatInputField} label=""
+                                                name="input" placeholder={chatInputPlaceholder}
+                                                onchange={chatInputOnchange} onkeyup={handleSend}
+                                                onclick={selectedTextInput} data-name="chatTextArea">
+                                            </lightning-textarea>
+                                        </div>
+                                        <div class="slds-grid slds-wrap sendButtonDiv">
+                                            <lightning-button class="sendButton" variant="brand" label="Send"
+                                                title="Send" onclick={handleSend} data-name="sendChatButton">
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </section>
+                        </template>
+
+                    </template>
+                </div>
+                <!-- CONSULTING -->
+                <div if:true={showConsultingChatContent}
+                    class="slds-col slds-grid slds-wrap slds-size_1-of-1 consultationContent chatContent"
+                    data-id="consultation">
+
+                    <div class="slds-col slds-grid slds-wrap consultChatContent" data-id="chat">
+                        <template if:true={openChat}>
+                            <section role="log" class="slds-chat slds-theme_default slds-size_1-of-1 chatWrapper">
+                                <div class="slds-grid slds-wrap slds-col slds-size_1-of-1">
+                                    <ul class="slds-col slds-chat-list slds-m-around_small consult_chatul">
+                                        <template for:each={consultMessagesArray} for:item="msg" for:index="index">
+                                            <li class={msg.class} key={msg.UserName}>
+                                                <div class="slds-chat-message chatMessage">
+                                                    <span aria-hidden="true"
+                                                        class="slds-avatar slds-avatar_circle slds-chat-avatar">
+                                                        <abbr
+                                                            class="slds-avatar__initials slds-avatar__initials_inverse"
+                                                            title={msg.UserName}>{msg.UserName}</abbr>
+                                                    </span>
+                                                    <div class="slds-chat-message__body messageBody">
+                                                        <div
+                                                            class="slds-chat-message__text slds-chat-message__text_inbound textInbound">
+                                                            <span>{msg.message}</span>
+                                                        </div>
+                                                        <div class="slds-chat-message__meta" aria-label=""> <span
+                                                                class="agent">{msg.UserName}</span>
+                                                            <span class="time">{msg.date}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </template>
+                                        <li class="last-li">
+                                        </li>
+                                        <div class="typingWrapper">
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
+                                        </div>
+                                    </ul>
+                                </div>
+                                <div class="slds-grid slds-wrap slds-col slds-size_1-of-1">
+                                    <div class="slds-grid slds-wrap">
+                                        <div class="slds-col">
+
+                                        </div>
+                                    </div>
+
+                                    <div class="slds-grid slds-wrap textareaWrapper consultTextAreaWrapper">
+                                        <div class="slds-col slds-size_1-of-6">
+                                            <lightning-button-icon icon-name="standard:join_group"
+                                                disabled={conferencebuttonFlag}
+                                                alternative-text={conferenceButtonTooltip}
+                                                class="slds-m-left_xx-small conferenceButton" title="Join Main Chat"
+                                                onclick={handleConference}></lightning-button-icon>
+                                            <lightning-button variant="brand" title="Leave Consultation"
+                                                label="Leave Consultation"
+                                                class="slds-m-left_x-small slds-float_left leaveButton dropConsultButton"
+                                                onclick={handleDropConsult}>
+                                            </lightning-button>
+                                        </div>
+                                        <div class="slds-col slds-size_4-of-6">
+                                            <lightning-textarea class="consult_chatInputField"
+                                                value={consult_chatInputField} name="input"
+                                                placeholder="Type a new message" onkeyup={handleSend}
+                                                onclick={selectedTextInput} data-name="chatTextAreaConsult">
+                                            </lightning-textarea>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-6">
+                                            <lightning-button variant="brand" label="Send" title="Send"
+                                                onclick={handleSend} data-name="sendChatButtonConsult">
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <!-- PROFANITY -->
+        <div if:true={showProfanityPage} class="profanityModal">
+            <span class="profanityIcon"></span>
+            <p>PROFANITY DETECTED</p>
+            <p>It appears you may have used a profane word.</p>
+            <div class="detectedProfanities" if:true={profaneWordsFlag}>
+                <p>({detectedProfaneWords})</p>
+            </div>
+            <button class="slds-button slds-button_brand cancelProfanityButton"
+                onclick={cancelProfanity}>Review</button>
+        </div>
+        <!-- PROFANITY CONFIRMATION-->
+        <div if:true={showSecondProfanityPage} class="profanityModal">
+            <span class="profanityIcon"></span>
+            <p>PROFANITY DETECTED</p>
+            <p>There still appears to be profanity. Are you sure you want to send?</p>
+            <div class="detectedProfanities" if:true={profaneWordsFlag}>
+                <p>({detectedProfaneWords})</p>
+            </div>
+            <div class="yesNoContainer">
+                <button class="slds-button slds-button_brand cancelProfanityButton"
+                    onclick={handleSendProfanity}>Yes</button>
+                <button class="slds-button slds-button_neutral " onclick={cancelProfanity}>No</button>
+            </div>
+
+        </div>
+        
+        <!-- TRANSFER TAB -->
+        <template if:true={showTransfer}>
+            <div class="slds-grid slds-wrap slds-col transferContent">
+                <div class="slds-tabs_scoped slds-m-around_small contentTransferTo">
+
+                    <ul class="slds-tabs_scoped__nav" role="tablist">
+                        <li class="slds-tabs_scoped__item slds-is-active agentsupervisortab" role="presentation"
+                            onclick={handleShowAgentSupervisortab}>
+                            <a class="slds-tabs_scoped__link" role="tab" tabindex="0" aria-selected="true"
+                                aria-controls="tab-scoped-1" id="tab-scoped-1__item">Supervisors
+                            </a>
+                        </li>
+                        <li class="slds-tabs_scoped__item queuetab" role="presentation" onclick={handleShowQueuetab}>
+                            <a class="slds-tabs_scoped__link" role="tab" tabindex="-1" aria-selected="false"
+                                aria-controls="tab-scoped-2" id="tab-scoped-2__item">Agents
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div if:true={showAgentSupervisorPage} id="tab-scoped-1"
+                        class="slds-tabs_scoped__content slds-show transferToAgent" role="tabpanel"
+                        aria-labelledby="tab-scoped-1__item">
+                        <div if:false={isSubjectPositionTop} class="chatSubject"><b>Subject:</b>
+                            <p title={chatSubjectText}>{chatSubjectText}</p>
+                        </div>
+                        <div class="slds-m-bottom_small ">
+                            <lightning-input value={searchAgent} placeholder="Search" onchange={handleSearchAgent}
+                                type="search" class="searchAgent">
+                            </lightning-input>
+                        </div>
+                        <div class="agentSuper">
+
+                            <ul class="super">
+                                <template lwc:if={isSupervisorNameFlag}>
+                                    <template lwc:if={isEmptySupervisorsName}>
+                                        <template for:each={supervisors} for:item="supervisor">
+                                            <li key={supervisor.name}
+                                                class="slds-item slds-p-bottom_small groupList">
+                                                <span class="slds-avatar slds-avatar_small">
+                                                    <lightning-icon icon-name="standard:queue"
+                                                        alternative-text="member"
+                                                        title="Member">
+                                                    </lightning-icon>
+                                                </span>
+                                                <div class="labelIcon">
+                                                    <div class="label"
+                                                        title={supervisor.name}>{supervisor.name}</div>
+                                                    <div class="queueAvailable">
+                                                        <div if:true={queueWaitingTimeFlag}
+                                                            class="queueTime">
+                                                            {supervisor.queueTime}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="">
+                                                    <template if:true={transferFlag}>
+                                                        <lightning-button-icon data-supervisorqueue={supervisor.id}
+                                                            data-supervisorname={supervisor.name}
+                                                            onclick={handleShowTransferReason}
+                                                            icon-name="utility:sync"
+                                                            alternative-text="Transfer"
+                                                            class={supervisor.disable}
+                                                            title="Transfer">
+                                                        </lightning-button-icon>
+                                                    </template>
+                                                    <template if:true={consultFlag}>
+                                                        <lightning-button-icon icon-name="standard:question_feed"
+                                                            data-supervisorqueue={supervisor.id}
+                                                            onclick={handleShowConsultInquiry}
+                                                            alternative-text="Consult"
+                                                            class={supervisor.disable}
+                                                            title="Consult">
+                                                        </lightning-button-icon>
+                                                    </template>
+                                                    <template if:true={conferenceFlag}>
+                                                        <lightning-button-icon icon-name="standard:groups"
+                                                            alternative-text="Conference"
+                                                            class={supervisor.disable}
+                                                            title="Conference"
+                                                            onclick={handleConference}>
+                                                        </lightning-button-icon>
+                                                    </template>
+                                                </span>
+                                            </li>
+                                        </template>
+                                    </template>
+                                    <template lwc:else>
+                                        <lightning-card variant="base">
+                                            <div class="slds-box slds-box_small">
+                                                <div class='slds-align_absolute-center'>
+                                                    No Supervisors logged in.
+                                                </div>
+                                            </div>
+                                        </lightning-card>
+                                    </template>
+                                
+                                </template>
+                                <template lwc:else
+                                    for:each={supervisors}
+                                    for:item="supervisor">
+                                    <li key={supervisor.name}
+                                        class="slds-item slds-p-bottom_small groupList">
+                                        <span class="slds-avatar slds-avatar_small">
+                                            <lightning-icon icon-name="standard:queue"
+                                                alternative-text="member"
+                                                title="Member">
+                                            </lightning-icon>
+                                        </span>
+                                        <div class="labelIcon">
+                                            <div class="label"
+                                                title={supervisor.name}>{supervisor.name}</div>
+                                            <div class="queueAvailable">
+                                                <div if:true={queueWaitingTimeFlag}
+                                                    class="queueTime">
+                                                    {supervisor.queueTime}</div>
+                                                <div if:true={agentqueuecount}
+                                                    class="available">{supervisor.numAgents}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="">
+                                            <template if:true={transferFlag}>
+                                                <lightning-button-icon data-supervisorqueue={supervisor.name}
+                                                    onclick={handleShowTransferReason}
+                                                    icon-name="utility:sync"
+                                                    alternative-text="Transfer"
+                                                    class={supervisor.disable}
+                                                    title="Transfer">
+                                                </lightning-button-icon>
+                                            </template>
+                                            <template if:true={consultFlag}>
+                                                <lightning-button-icon icon-name="standard:question_feed"
+                                                    data-supervisorqueue={supervisor.name}
+                                                    onclick={handleShowConsultInquiry}
+                                                    alternative-text="Consult"
+                                                    class={supervisor.disable}
+                                                    title="Consult">
+                                                </lightning-button-icon>
+                                            </template>
+                                            <template if:true={conferenceFlag}>
+                                                <lightning-button-icon icon-name="standard:groups"
+                                                    alternative-text="Conference"
+                                                    class={supervisor.disable}
+                                                    title="Conference"
+                                                    onclick={handleConference}>
+                                                </lightning-button-icon>
+                                            </template>
+                                        </span>
+                                    </li>
+                                </template>
+                               
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div if:true={showQueuePage} id="tab-scoped-2"
+                        class="slds-tabs_scoped__content slds-show transferToAgent" role="tabpanel"
+                        aria-labelledby="tab-scoped-2__item">
+                        <div if:false={isSubjectPositionTop} class="chatSubject"><b>Subject:</b>
+                            <p title={chatSubjectText}>{chatSubjectText}</p>
+                        </div>
+                        <div class="slds-m-bottom_small">
+                            <lightning-input value="" placeholder="Search" onchange={handleSearchQueue}
+                                class="searchQueue" type="search">
+                            </lightning-input>
+                        </div>
+                        <div class="queueContent">
+                            <template lwc:if={isAgentNameFlag}>
+                            <ul>
+                                <template for:each={searchedQueues} for:item="queue">
+                                  
+                                    <li key={queue.name} class="slds-item slds-p-bottom_small groupList">
+                                        <span class="slds-avatar slds-avatar_small">
+                                            <lightning-icon icon-name="standard:queue" alternative-text="member"
+                                                title="Member">
+                                            </lightning-icon>
+                                        </span>
+                                        <div class="labelIcon">
+                                            <div class="label"
+                                                title={queue.name}>{queue.name}</div>
+                                            <div class="queueAvailable">
+                                                <div if:true={queueWaitingTimeFlag}
+                                                    class="queueTime">{queue.queueTime}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="">
+                                            <template if:true={transferFlag}>
+                                                <lightning-button-icon data-queue={queue.name}
+                                                    data-agentname={queue.name}
+                                                    onclick={handleShowTransferReason}
+                                                    icon-name="utility:sync"
+                                                    alternative-text="Transfer"
+                                                    class={queue.disable}
+                                                    title="Transfer">
+                                                </lightning-button-icon>
+                                            </template>
+                                            <template if:true={consultFlag}>
+                                                <lightning-button-icon icon-name="standard:question_feed"
+                                                    data-queue={queue.name}
+                                                    onclick={handleShowConsultInquiry}
+                                                    alternative-text="Consult"
+                                                    class={queue.disable}
+                                                    title="Consult">
+                                                </lightning-button-icon>
+                                            </template>
+                                            <template if:true={conferenceFlag}>
+                                                <lightning-button-icon icon-name="standard:groups"
+                                                    alternative-text="Conference" class={queue.disable}
+                                                    data-queue={queue} title="Conference" onclick={handleConference}>
+                                                </lightning-button-icon>
+                                            </template>
+                                        </span>
+                                    </li>
+                                </template>
+                            </ul>
+                            </template>
+                            <template lwc:else>
+                                <ul>
+                                    <template for:each={searchedQueues} for:item="queue">
+                                        <li key={queue.name} class="slds-item slds-p-bottom_small groupList">
+                                            <span class="slds-avatar slds-avatar_small">
+                                                <lightning-icon icon-name="standard:queue" alternative-text="member"
+                                                    title="Member">
+                                                </lightning-icon>
+                                            </span>
+                                            <div class="labelIcon">
+                                                <div class="label" title={queue.name}>{queue.name}</div>
+                                                <div class="queueAvailable">
+                                                    <div if:true={queueWaitingTimeFlag} class="queueTime">{queue.queueTime}
+                                                    </div>
+                                                    <div if:true={agentqueuecount} class="available">{queue.numAgents}</div>
+                                                </div>
+                                            </div>
+                                            <span class="">
+                                                <template if:true={transferFlag}>
+                                                    <lightning-button-icon data-queue={queue.name}
+                                                        onclick={handleShowTransferReason}
+                                                        icon-name="utility:sync"
+                                                        alternative-text="Transfer"
+                                                        class={queue.disable}
+                                                        title="Transfer">
+                                                    </lightning-button-icon>
+                                                </template>
+                                                <template if:true={consultFlag}>
+                                                    <lightning-button-icon icon-name="standard:question_feed"
+                                                        data-queue={queue.name}
+                                                        onclick={handleShowConsultInquiry}
+                                                        alternative-text="Consult"
+                                                        class={queue.disable}
+                                                        title="Consult">
+                                                    </lightning-button-icon>
+                                                </template>
+                                                <template if:true={conferenceFlag}>
+                                                    <lightning-button-icon icon-name="standard:groups"
+                                                        alternative-text="Conference" class={queue.disable}
+                                                        data-queue={queue} title="Conference" onclick={handleConference}>
+                                                    </lightning-button-icon>
+                                                </template>
+                                            </span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </template>
+        <!-- END TRANSFER TAB -->
+
+
+        <!-- TRANSFER REASON -->
+        <template if:true={showTransferReason}>
+            <div class="slds-grid slds-col slds-wrap transferReason">
+                <div class="slds-grid slds-col slds-size_12-of-12 slds-m-around_small">
+                    <div class="slds-grid slds-col">
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-avatar class="transferReasonLogo" fallback-icon-name="utility:sync">
+                            </lightning-avatar>
+                        </div>
+                        <div class="slds-col slds-size_8-of-12">
+                            Transfer Reason
+                        </div>
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-avatar onclick={handleCloseTransferReason} class="slds-float_right" initials="X"
+                                fallback-icon-name="action:close" size="x-small" alternative-text="close">
+                            </lightning-avatar>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-grid slds-col slds-size_12-of-12">
+                    <div class="slds-col">
+                        <lightning-button class="transferStatus" label={transferringTo} title="Non-primary action">
+                        </lightning-button>
+                    </div>
+                </div>
+                <template lwc:if={displayTransferReasons}>
+                    <div class="slds-grid slds-col slds-size_12-of-12">
+                        <div class="slds-col">
+                            <ul class="slds-m-around_large">
+                                <template for:each={transferReasons}
+                                    for:item="transferReason">
+                                    <li key={transferReason}
+                                        class="slds-m-bottom_x-small slds-border_bottom transferReasonli"
+                                        data-transferreason={transferReason}
+                                        onclick={selectTransferReason}>
+                                        <p>{transferReason}</p>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="slds-m-top_medium slds-grid slds-col slds-size_12-of-12">
+                    <div class="slds-col slds-size_12-of-12">
+                        <lightning-textarea name="txtTransferReason" class="txtTransferReason"
+                            placeholder="Transfer Notes" message-when-too-long="Character limit reached"
+                            max-length={maxTextCount} onkeyup={characterCounter}>
+                        </lightning-textarea>
+                    </div>
+                </div>
+
+                <div class="slds-grid slds-col slds-size_12-of-12">
+                    <div if:true={transferNotesFlag} class="the-count">
+                        <span class="characterLimit">{characterLimitReached}</span>
+                        <div class="charCountDiv">
+                            <span class="current">{currentTextCount}</span>
+                            <span class="maximum">/{maxTextCount}</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="slds-grid slds-col slds-size_12-of-12">
+                    <div class="slds-col">
+                        <lightning-button class="" label="Transfer" title="Transfer" onclick={transfer}
+                            icon-name="utility:sync">
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+
+        </template>
+        <!-- END OF TRANSFER REASON -->
+
+
+
+        <template if:true={showConsultingInquiry}>
+            <div class="slds-grid slds-col slds-wrap slds-m-around_small consultingInquiry">
+                <div class="slds-grid slds-col">
+                    <div class="slds-grid slds-col">
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-avatar class="transferReasonLogo" fallback-icon-name="standard:question_feed">
+                            </lightning-avatar>
+                        </div>
+                        <div class="slds-col slds-size_10-of-12">
+                            Consultation Subject
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-grid slds-col slds-size_12-of-12">
+                    <div class="slds-col">
+                        <lightning-textarea name="txtConsultation" class="txtConsultation" placeholder="Type here...">
+                        </lightning-textarea>
+                    </div>
+                </div>
+
+                <div class="slds-grid slds-col slds-size_12-of-12">
+                    <div class="slds-col">
+                        <lightning-button class="" label="Cancel" title="Cancel" variant="Neutral"
+                            onclick={handleCloseConsultingInquiry}>
+                        </lightning-button>
+                        <lightning-button class="" label="Consult" title="Consult" variant="brand"
+                            onclick={showConsultingPage}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+
+        </template>
+
+        <!-- SHOW DETAIL TAB -->
+        <template if:true={showDetailsPage}>
+            <div class="slds-grid slds-wrap slds-col detailsContents">
+                <div if:false={isSubjectPositionTop} class="slds-grid slds-wrap slds-col slds-size_1-of-1 chatSubject">
+                    <b>Subject:</b>
+                    <p title={chatSubjectText}>{chatSubjectText}</p>
+                </div>
+
+                <!--<div class="slds-grid slds-wrap slds-col slds-size_1-of-1">-->
+                <ul class="slds-m-around_large">
+                    <template for:each={kvps} for:item="kvpdetails">
+                        <li key={kvpdetails} class="slds-m-bottom_x-small">
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-col slds-size_2-of-12">
+                                    <lightning-icon class="slds-m-right_small" size="small" icon-name="utility:clock"
+                                        alternative-text="Copy" title="Copy">
+                                    </lightning-icon>
+                                </div>
+                                <div class="slds-col slds-size_8-of-12">
+                                    <p>{kvpdetails.value}</p>
+                                    <p>{kvpdetails.key}</p>
+                                </div>
+                                <div class="slds-col slds-size_2-of-12">
+                                    <lightning-icon data-kvp={kvpdetails.value} onclick={copydetail}
+                                        class="slds-m-right_small slds-float_right" size="xx-small"
+                                        icon-name="utility:copy" alternative-text="Copy" title="Copy">
+                                    </lightning-icon>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+                <!--</div>-->
+                <div class="slds-grid slds-wrap slds-col slds-size_1-of-1">
+                    <button class="slds-button slds-button_neutral" onclick={showSFDetailsTab}>Click here for
+                        more</button>
+                </div>
+            </div>
+        </template>
+
+
+        <!-- Search TAB -->
+        <template if:true={showSearchPage}>
+            <div class="slds-col slds-wrap searchContent">
+                <div if:false={isSubjectPositionTop} class="chatSubject">
+                    <b>Subject:</b>
+                    <p title={chatSubjectText}>{chatSubjectText}</p>
+                </div>
+                <div class="slds-grid slds-m-top_small searchtxtContainer">
+                    <div class="slds-col ">
+                        <lightning-input placeholder="Search" onchange={handleSearchChat} class="searchChatInput"
+                            type="search"> 
+                        </lightning-input>
+                    </div>
+                </div>
+                <ul>
+                    <template for:each={searchMessageList} for:item="chatHistory">
+                        <li key={chatHistory.message} class="slds-m-bottom_x-small slds-border_bottom "
+                            data-searchmessage={chatHistory.bubbleid} onclick={clickSearchedText}>
+                            <div class="slds-grid">
+                                <div class="slds-col slds-size_2-of-12">
+                                    <lightning-avatar initials="" variant="circle" fallback-icon-name="standard:user"
+                                        size="medium" class={chatHistory.class}>
+                                    </lightning-avatar>
+
+                                </div>
+                                <div class="slds-col slds-size_7-of-12 search-wrapper">
+                                    <span class="searchedChat">
+                                        {chatHistory.message}
+                                    </span>
+                                  <!--   <lightning-formatted-rich-text
+                                      value={chatHistory.message}
+                                       
+                                    ></lightning-formatted-rich-text> -->
+                                </div>
+                                <div class="slds-col slds-size_3-of-12 ">
+                                    <p class="slds-float_right">{chatHistory.date}</p>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </template>
+        <!-- END OF Search TAB -->
+
+
+        <!-- STANDARD RESPONSE -->
+        <template if:true={showStandardResponse}>
+            <div class="slds-grid slds-col slds-wrap slds-m-around_small standardResponsesPopup">
+                <div class="slds-col slds-size_12-of-12 ">
+                    <div class="slds-grid slds-col slds-m-bottom_small">
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-avatar class="" fallback-icon-name="standard:orders">
+                            </lightning-avatar>
+                        </div>
+                        <div class="slds-col slds-size_8-of-12">
+                            Standard Responses
+                        </div>
+                        <div class="slds-col slds-size_2-of-12">
+                            <lightning-button-icon onclick={handleCloseStandardResponse}
+                                class="slds-float_right slds-button_icon-x-small" icon-name="utility:down"
+                                size="x-small">
+                            </lightning-button-icon>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-grid slds-col slds-size_12-of-12 slds-m-bottom_medium">
+                    <div class="slds-col">
+                        <lightning-input placeholder="Search" onchange={handleSearchStandardReponse} type="search"
+                            class="standardResponseSearchInput">
+                        </lightning-input>
+                    </div>
+                </div>
+                <div class="slds-grid slds-col slds-size_12-of-12 standardResponseContainer">
+                    <div class="slds-col">
+                        <template if:true={searchedStandardResponses}>
+                            <ul class="slds-m-top_small">
+                                <template for:each={searchedStandardResponses} for:item="standardResponse">
+                                    <template if:true={standardResponse.menu}>
+                                        <li class="slds-m-bottom_x-small" key={standardResponse}
+                                            data-item={standardResponse.value}>
+                                            <div
+                                                class="slds-grid slds-wrap responseContainer parentStandardResponse folder-close">
+                                                <div class="slds-col slds-size_1-of-12">
+                                                    <lightning-icon size="small" icon-name="standard:folder">
+                                                    </lightning-icon>
+                                                </div>
+                                                <div class="slds-col slds-size_10-of-12">
+                                                    <p>{standardResponse.label}</p>
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-12">
+                                                    <lightning-icon class="slds-float_right standardResponseCaret"
+                                                        size="x-small" icon-name='utility:up'
+                                                        onclick={handleToggleClick}>
+                                                    </lightning-icon>
+                                                </div>
+                                                <ul
+                                                    class="slds-col slds-wrap slds-grid slds-m-top_x-small slds-m-left_medium ">
+                                                    <template for:each={standardResponse.menu}
+                                                        for:item="standardResponseC1">
+                                                        <template if:true={standardResponseC1.menu}>
+                                                            <li key={standardResponseC1.label}
+                                                                data-item={standardResponseC1.value}
+                                                                class="slds-m-bottom_x-small">
+                                                                <div
+                                                                    class="slds-grid slds-wrap slds-col responseContainer folder-close">
+                                                                    <div class="slds-col slds-size_1-of-12">
+                                                                        <lightning-icon size="small"
+                                                                            icon-name="standard:folder">
+                                                                        </lightning-icon>
+                                                                    </div>
+                                                                    <div class="slds-col slds-size_10-of-12">
+                                                                        <p>{standardResponseC1.label}</p>
+                                                                    </div>
+                                                                    <div class="slds-col slds-size_1-of-12 ">
+                                                                        <lightning-icon
+                                                                            class="slds-float_right standardResponseCaret"
+                                                                            size="x-small" icon-name='utility:up'
+                                                                            onclick={handleToggleClick}>
+                                                                        </lightning-icon>
+                                                                    </div>
+                                                                    <ul
+                                                                        class="slds-col slds-wrap slds-grid slds-m-top_x-small slds-m-left_medium">
+                                                                        <template for:each={standardResponseC1.menu}
+                                                                            for:item="standardResponseC2">
+                                                                            <li key={standardResponseC2.label}
+                                                                                data-item={standardResponseC2.value}
+                                                                                class="slds-m-bottom_x-small"
+                                                                                onclick={handleClickStandardResponses}>
+                                                                                <div
+                                                                                    class="slds-grid slds-wrap slds-col">
+                                                                                    <lightning-icon size="small"
+                                                                                        icon-name="utility:new_direct_message">
+                                                                                    </lightning-icon>
+                                                                                </div>
+                                                                                <div
+                                                                                    class="slds-col slds-size_10-of-12">
+                                                                                    <p class="standardResponseText">
+                                                                                        <span
+                                                                                            class="standardResponseLabel">{standardResponseC2.label}</span>
+                                                                                        <span
+                                                                                            class="standardResponseTextValue"
+                                                                                            data-contents={standardResponseC2.value}>{standardResponseC2.value}</span>
+                                                                                    </p>
+                                                                                </div>
+                                                                            </li>
+                                                                        </template>
+                                                                    </ul>
+                                                                </div>
+                                                            </li>
+                                                        </template>
+                                                        <template if:false={standardResponseC1.menu}>
+                                                            <li key={standardResponseC1.label}
+                                                                data-item={standardResponseC1.value}
+                                                                class="slds-m-bottom_x-small"
+                                                                onclick={handleClickStandardResponses}>
+                                                                <div class="slds-grid slds-wrap slds-col">
+                                                                    <div class="slds-col slds-size_1-of-12">
+                                                                        <lightning-icon size="small"
+                                                                            icon-name="utility:new_direct_message">
+                                                                        </lightning-icon>
+                                                                    </div>
+                                                                    <div class="slds-col slds-size_11-of-12">
+                                                                        <p class="standardResponseText">
+                                                                            <span
+                                                                                class="standardResponseLabel">{standardResponseC1.label}</span>
+                                                                            <span class="standardResponseTextValue"
+                                                                                data-contents={standardResponseC1.value}>{standardResponseC1.value}</span>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </template>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </template>
+                                    <template if:false={standardResponse.menu}>
+                                        <li class="slds-m-bottom_x-small" key={standardResponse}
+                                            data-item={standardResponse.value} onclick={handleClickStandardResponses}>
+                                            <div class="slds-grid slds-wrap">
+                                                <div class="slds-col slds-size_1-of-12">
+                                                    <lightning-icon size="small" icon-name="utility:new_direct_message">
+                                                    </lightning-icon>
+                                                </div>
+                                                <div class="slds-col slds-size_10-of-12">
+                                                    <p class="standardResponseText">
+                                                        <span
+                                                            class="standardResponseLabel">{standardResponse.label}</span>
+                                                        <span class="standardResponseTextValue"
+                                                            data-contents={standardResponse.value}>{standardResponse.value}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </template>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <!-- END OF STANDARD RESPONSE -->
+
+
+
+        <template if:true={showLeaveReasons}>
+            <div class="slds-grid slds-col slds-wrap leaveReason">
+                <div class="slds-grid slds-col slds-size_12-of-12 slds-m-around_small leaveAgent">
+
+                    <div class="slds-grid slds-col slds-size_12-of-12">
+                        <lightning-icon class="leaveIcon" size="medium" icon-name="utility:logout"></lightning-icon>
+                        <h3>LEAVE CHAT</h3>
+                    </div>
+                    <div class="slds-grid slds-col slds-size_12-of-12">
+                        Are you sure you want to leave the chat?
+                    </div>
+                    <div class="slds-grid slds-col slds-size_12-of-12">
+                        <lightning-button class="" label="Go Back" variant="neutral" onclick={handleCloseLeaveReason}>
+                        </lightning-button>
+                        <lightning-button class="" label="Leave" variant="brand" onclick={handleLeave}>
+                        </lightning-button>
+
+
+                    </div>
+
+                </div>
+
+                <!--<div class="slds-grid slds-col slds-size_12-of-12">
+                        <ul class="slds-m-around_large">
+                            <template for:each={leaveReasons} 
+                                        for:item="leaveReason">
+                                <li key={transferReason} 
+                                    class="slds-m-bottom_x-small slds-border_bottom leaveReasonli" 
+                                    data-leavereason={leaveReason} 
+                                    onclick={selectLeaveReason}>
+                                    <p>{leaveReason}</p>
+                                </li>
+                            </template>
+                        </ul>
+                </div>
+                    <template if:true={txtLeaveReasonFlag}>
+                        <div class="slds-grid slds-wrap slds-col slds-size_12-of-12">
+                            <lightning-textarea name="txtLeaveReason" 
+                                                class="txtLeaveReason" 
+                                                placeholder="Additional Details">
+                            </lightning-textarea>
+                        </div>
+                    </template>
+                <div class="slds-grid slds-wrap slds-col slds-size_12-of-12 slds-clearfix">
+                    <lightning-button class="slds-float_right" 
+                                        label="Leave" 
+                                        title="leave"
+                                        variant="brand"
+                                        onclick={handleLeave}>
+                    </lightning-button>
+                </div>-->
+            </div>
+        </template>
+    </div>
+
+    <template if:true={showSettingsPage} class="coralWrapper">
+        <div class="slds-grid slds-wrap statsContents">
+            <div class="slds-col slds-size_12-of-12">
+                <lightning-icon class="slds-m-right_x-small" icon-name="utility:graph" variant="brand"
+                    alternative-text="Agent Stats" size="large" title="Agent Stats">
+                </lightning-icon>
+                <span class="slds-align_absolute-center">Agent Statistics</span>
+            </div>
+            <div class="slds-col slds-size_12-of-12">
+                <ul class="slds-m-around_large slds-m-top_small slds-text-body_small ">
+                    <li class="slds-m-bottom_x-small slds-border_bottom ">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="greendot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Chat AHT</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">00:03:42</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="slds-m-bottom_x-small slds-border_bottom">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="greendot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Chat Offered</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">15</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="slds-m-bottom_x-small slds-border_bottom">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="greendot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Chat Accepted</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">11</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="slds-m-bottom_x-small slds-border_bottom">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="reddot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Chat Rejected</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">1</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="slds-m-bottom_x-small slds-border_bottom">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="reddot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Chat Missed</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">3</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="slds-m-bottom_x-small slds-border_bottom">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="greendot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Chat Closed by Agent</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">2</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="slds-m-bottom_x-small slds-border_bottom">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-12">
+                                <span class="greendot"></span>
+                            </div>
+                            <div class="slds-col slds-size_8-of-12">
+                                <p>Total Login Time</p>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12 ">
+                                <p class="slds-float_right">02:12:45</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </template>
+
+    <div if:true={showBottomButtons}
+        class="slds-grid slds-wrap slds-border_top slds-grid_vertical-align-end mainButtonWrap agentStatsWrapper">
+        <div class="slds-col slds-grid slds-wrap slds-p-top_x-small slds-p-bottom_x-small chatIcon chattabbottom"
+            onclick={selectActiveTabAgentStats}>
+            <lightning-icon class="slds-size_12-of-12 slds-align_absolute-center" icon-name="utility:chat"
+                alternative-text="Chat" size="medium" title="Chat">
+            </lightning-icon>
+            <span class="slds-align_absolute-center chatText">Chat</span>
+        </div>
+        <div class="slds-col slds-grid slds-wrap slds-p-top_x-small slds-p-bottom_x-small chatIcon agentstatstab"
+            onclick={selectActiveTabAgentStats}>
+            <lightning-icon class="slds-size_12-of-12 slds-align_absolute-center" icon-name="utility:graph"
+                variant="brand" alternative-text="Agent Stats" size="medium" title="Agent Stats">
+            </lightning-icon>
+            <span class="slds-align_absolute-center chatText">Agent Stats</span>
+        </div>
+    </div>
+
+
+    <!-- REDACTION MODAL -->
+    <div if:true={isDisplayRedactionModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container manualRedactModal">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                    onclick={handleCloseRedactionModal}>
+                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                        <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#close"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Cancel and close</span>
+                </button>
+                <div class="slds-modal__header">
+                    <lightning-icon icon-name="custom:custom83"></lightning-icon>
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Manual Redaction</h1>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <div>
+                        <lightning-button-icon icon-name="utility:edit"
+                            onclick={enableCustomSelectManualRedaction}></lightning-button-icon>
+                        <lightning-button variant="success" label="Select All" title="Select All"
+                            onclick={handleSelectAllManualRedaction} icon-name="utility:multi_select_checkbox"
+                            class="slds-p-around_xxx-small redactionSelectAll">
+                        </lightning-button>
+                    </div>
+                    <div>
+                        <div class="txtManualRedaction" onmouseup={handleCustomSelectionManualRedaction}>
+                            <template for:each={manualRedactionWordListModal} for:item="redactionWord">
+                                <span key={redactionWord.text} class="" data-redactedwordtextarea={redactionWord.text}
+                                    data-index={redactionWord.id} onclick={handleClickManualRedactionText}>
+                                    {redactionWord.text}
+                                </span>
+                            </template>
+                        </div>
+                        <div class="manualRedactList">
+                            <template for:each={manualRedactedListModal} for:item="redactedWord">
+                                <li key={redactedWord}>
+                                    <lightning-icon icon-name="utility:ban" alternative-text="Remove" title="Remove"
+                                        data-redactedword={redactedWord.text} data-index={redactedWord.id}
+                                        onclick={handleClickRemoveRedactedText}></lightning-icon>
+                                    <div>{redactedWord.text}</div>
+                                </li>
+                            </template>
+                        </div>
+                        <lightning-button variant="success" label="Clear All" title="Clear All"
+                            onclick={handleClearAllManualRedaction} icon-name="utility:multi_select_checkbox"
+                            class="slds-p-around_xxx-small redactionClearAll">
+                        </lightning-button>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" aria-label="Cancel and close"
+                        onclick={handleCloseRedactionModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand redactionSave" onclick={updateRedactions}>Save</button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </div>
+
+    <!-- SHOW REDACTION MODAL -->
+</template>

@@ -1,0 +1,22 @@
+.slds-accordion__summary-content{
+    font-size: large;
+    text-transform: uppercase;
+}
+
+.combobox
+lightning-combobox .slds-form-element__label{
+    font-size: small;
+    font-weight: bold;
+}
+
+.release-dropdown{
+    width: 200px;
+}
+
+.lightning-card{
+    padding: 1rem;
+}
+
+.lightning-datatable{
+    margin-top: 1rem;
+}

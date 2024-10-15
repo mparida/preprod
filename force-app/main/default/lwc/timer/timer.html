@@ -1,0 +1,23 @@
+<template>
+        <template lwc:if={showTimer}>
+
+       
+        <div class="slds-p-around_xx-small chatTimerdiv">
+            <lightning-icon 
+                class="slds-m-right_small"
+                size="xx-small"
+                icon-name="utility:clock"
+                alternative-text="member"
+                title="Member">
+            </lightning-icon>
+            <span>{timer}</span>
+        </div>
+    </template>
+   
+   
+    <!-- <div>
+        <lightning-button variant="base" label="Start" title="titleName" onclick={startTimer}>Start</lightning-button>
+        <lightning-button variant="base" label="Stop" title="titleName" onclick={stopTimer}>Stop</lightning-button>
+        <lightning-button variant="base" label="Reset" title="titleName" onclick={resetTimer}>Reset</lightning-button>
+    </div> -->
+</template>

@@ -1,0 +1,16 @@
+<template>
+    <div class={urlContainerClass}>
+        <div class="url-wrapper">
+            <span class="url-text" title="Click to copy URL">{urlText}</span>
+        </div>
+        <div class="copy-wrapper">
+            <lightning-helptext 
+                class="icon"
+                icon-name={icon}
+                content={urlText}
+                onclick={copydetail}
+                ></lightning-helptext>
+
+        </div>
+    </div>
+</template>

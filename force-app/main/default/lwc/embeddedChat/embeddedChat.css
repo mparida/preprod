@@ -1,0 +1,84 @@
+.chatButtons{
+    display: flex;
+    justify-content: space-between;
+}
+.chatButtons_right{
+    display: flex;
+    
+}
+
+.chatButtons > lightning-button-icon {
+    border: none;
+}
+
+.chat-controls.completed{
+    display: none;
+}
+
+.chat-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-window{
+    flex: 1;
+    overflow: auto;
+    width: 100%;
+    position: relative;
+}
+
+.chat-window__list{
+    position: absolute;
+    width: 100%;
+    height: 100% !important;
+
+}
+
+
+.chat-controls{
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+.summary_container{
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+   
+    
+}
+
+.summary_title{
+  display:flex;
+  align-items: center;
+  column-gap: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #626262;
+}
+
+.summary_icon {
+
+  color : #626262;
+}
+
+.summary{
+    margin: auto;
+    border-radius: 2%;
+    background-color: #EEEEEE;
+}
+
+.summary >p {
+    padding: 14.5px;
+}
+
+
+.search-wrapper{
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

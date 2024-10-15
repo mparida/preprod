@@ -1,0 +1,64 @@
+.consult-list{
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+.consult-list:hover{
+    background-color: #b9cae8;
+    
+}
+
+.consult-list__detail{
+    display: flex;
+    flex-direction: column;
+}
+
+.consult-list_name {
+    display: flex;
+    flex-direction:row;
+    gap: 3px;
+    align-items: center;
+}
+
+.detail__users_time{
+    display: flex;
+}
+
+.number-of-users > span > lightning-primitive-icon > .slds-icon.slds-icon-text-default{
+    width: 10px !important;
+}
+
+.consult-list_name > .consult-main-icon {
+    background-color: #7f3e7fec;
+}
+
+.consult__button{
+    display: none;
+}
+
+.consult-list:hover .consult__button {
+    display: block;
+   
+}
+
+.consult-modal__supervisor-list-wrapper { 
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    height: 250px;
+    
+    overflow-y: auto;
+
+}
+
+.send-request__button{
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+.consult__button > lightning-button > button > lightning-primitive-icon > svg {
+    display: flex !important;
+}

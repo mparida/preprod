@@ -1,0 +1,23 @@
+.chatTimerdiv {
+    background-color: #fff;
+    border: 1px solid #e1e1e1;
+    border-radius: .25rem;
+}
+
+.chatTimerdiv lightning-icon {
+    margin: 0 5px 1px 2px;
+}
+
+.chatTimerdiv {
+    display: flex;
+    align-items: center;
+    padding: 2px 0px 2px 8px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    align-content: center;
+    width: 91px;
+}
+
+.chatTimerdiv span {
+    margin-bottom: 1px;
+}

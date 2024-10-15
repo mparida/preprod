@@ -1,0 +1,34 @@
+.inatcivity_container {
+  background-color: #FFF6A2;
+  padding: 5px 5px;
+  border-radius: 5px;
+  
+  border: 1px #FBDE7C solid;
+  font-weight: bold;
+  font-size: smaller;
+
+  max-width: 380px;
+  margin: auto;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.inactivity_icon {
+  --slds-c-icon-color-foreground-default: #B21010;
+}
+
+.inactivity_date {
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  font-size: xx-small;
+
+}
+
+.inactivity_notif {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+}

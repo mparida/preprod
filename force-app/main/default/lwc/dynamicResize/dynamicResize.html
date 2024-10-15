@@ -1,0 +1,19 @@
+<template>
+
+    <div class='dynamic_resize_textarea' data-id="myDiv" onmousedown={handleMouseDown}>
+        <div class="top-border"></div>
+        <textarea 
+            name="input"
+            onkeyup={handleSend}
+            onchange={handleChange}
+            data-name="chatTextArea"
+            placeholder={placeholder}
+            onclick={selectedTextInput}
+            class="myTextarea chatInputField">
+
+            {value}
+            
+        </textarea>
+    </div>
+
+</template>

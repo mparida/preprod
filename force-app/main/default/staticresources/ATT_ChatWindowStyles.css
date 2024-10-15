@@ -1,0 +1,566 @@
+:root {
+    --CWS-supervisorMode-color: #F35F30;
+    --CWS-supervisorMode-box-shadow: 0 0 3px #F35F30;
+    --hover-background-color: #eaf1fa;
+    --CWS-customerMode-color: #0076d3;
+}
+
+
+/* width */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+
+/* Track */
+
+ ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+
+/* Handle */
+
+ ::-webkit-scrollbar-thumb {
+    background: #424242;
+}
+
+
+/* Handle on hover */
+
+ ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+c-chatwindow-l-w-c p.slds-p-left_x-small:first-child {
+    top: 3px;
+}
+
+div.chatPage .chatHeader {
+    min-height: 45px;
+}
+
+.chatHeader .chatLogo svg.slds-icon {
+    height: 28px;
+    width: 29px;
+}
+
+.chatTabWrap div .chatText {
+    display: none;
+}
+
+c-chatwindow-l-w-c p.slds-p-left_x-small:first-child {
+    top: 3px;
+}
+
+div.chatPage .chatHeader {
+    min-height: 45px;
+}
+
+.chatHeader .chatLogo svg.slds-icon {
+    height: 28px;
+    width: 29px;
+}
+
+.chatTabWrap div .chatText {
+    display: none;
+}
+
+.slds-grid.slds-wrap.textareaWrapper {
+    height: unset;
+    bottom: -6px;
+}
+
+.chatInputField .slds-textarea {
+    height: 85px;
+}
+
+.textareaWrapper lightning-button button[title="Send"],
+.textareaWrapper lightning-button.leaveButton button {
+    height: 84px;
+}
+
+.chatWrapper lightning-button.btnToStandardResponse button {
+    bottom: 32px;
+}
+
+
+/*---------*/
+
+.slds-grid.slds-wrap.textareaWrapper {
+    height: unset;
+}
+
+.chatInputField .slds-textarea {
+    height: 85px;
+}
+
+.textareaWrapper lightning-button button[title="Send"],
+.textareaWrapper lightning-button.leaveButton button {
+    height: 84px;
+}
+
+.chatWrapper lightning-button.btnToStandardResponse button {
+    bottom: 32px;
+}
+
+
+/** ***/
+
+.chatButtons_right .supervisorButton button,
+.chatButtons_right .customerButton button {
+    height: 100%;
+}
+
+.textareaWrapper div:nth-child(2) .chatButtons_left .leave_chat_div .leaveButton button {
+    border-radius: 0px;
+    height: 100%;
+    width: 40px;
+    border: 0;
+}
+
+.textareaWrapper div:nth-child(2) .chatButtons_left .leave_chat_div .leaveButton button lightning-primitive-icon svg,
+.textareaWrapper .chatButtons_right .sendButtonDiv button lightning-primitive-icon svg {
+    height: 100%;
+    width: 20px;
+}
+
+.textareaWrapper div:nth-child(2) .chatButtons_right .standar_reponse_div button,
+.textareaWrapper div:nth-child(2) .chatButtons_right .sendButtonDiv button,
+.textareaWrapper .chatButtons .leave_chat_div {
+    border: 0;
+    border-radius: 0px;
+    height: 50px;
+    width: 40px;
+}
+
+.textareaWrapper textarea.myTextarea.chatInputField {
+    border-color: var(--slds-g-color-border-base-4, var(--lwc-buttonColorBorderPrimary, rgb(201, 201, 201)));
+    padding: 10px;
+    border-top: 1px solid var(--slds-g-color-border-base-4, var(--lwc-buttonColorBorderPrimary, rgb(201, 201, 201)));
+}
+
+.textareaWrapper .dynamic_resize_textarea[c-dynamicResize_dynamicResize] {
+    border: 1px solid #e5e5e5;
+}
+
+.textareaWrapper.chat-controls div:nth-child(2) .chatButtons {
+    min-height: 50px;
+}
+
+.standar_reponse_div {
+    margin: 0 10px 0 0;
+}
+
+.Customer .slds-chat-message.chatMessage.slds-var-p-horizontal_x-small,
+.Agent.Me .slds-chat-message.chatMessage.slds-var-p-horizontal_x-small {
+    z-index: 1;
+}
+
+/** standard response **/
+
+.standard_response svg g {
+    display: none;
+}
+
+.chatButtons_right .standar_reponse_div button {
+    background: url(/resource/standardResponseDefault) center / 26px no-repeat;
+}
+
+.chatButtons_right .standar_reponse_div button:hover {
+    background: url(/resource/standardResponseFilled) center / 26px no-repeat;
+}
+
+.textareaWrapper div:nth-child(2) .chatButtons_left .leave_chat_div .leaveButton button:hover
+/*, .textareaWrapper div:nth-child(2) .chatButtons_right .standar_reponse_div button:hover  */
+
+{
+    background-color: var(--hover-background-color);
+    width: 40px;
+}
+
+.chat-controls .chatButtons .standard_response button:hover lightning-primitive-icon:before {
+    content: 'Open Standard Responses';
+    background: #032d60;
+    padding: 10px;
+    position: absolute;
+    top: -50px;
+    white-space: break-spaces;
+    height: 44px;
+    width: 120px;
+    right: -15px;
+    border-radius: 0.25rem;
+    line-height: 0.8rem;
+    color: white;
+    font-size: 0.7rem;
+    z-index: 2;
+}
+
+.chat-controls .chatButtons .standard_response button:hover lightning-primitive-icon:after {
+    width: 1rem;
+    height: 1rem;
+    background: #032d60 !important;
+    position: absolute;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    content: " ";
+    background-color: inherit;
+    left: 50%;
+    bottom: -.5rem;
+    margin-left: -.5rem;
+    left: 0.7rem;
+    top: -0.7rem;
+    margin-top: -.5rem;
+    z-index: 1;
+}
+
+
+/** ATT 2 way coaching **/
+
+.supervisorButtonDiv.active lightning-button-icon.supervisorButton button svg {
+    position: relative;
+    width: 20px;
+    height: 20px;
+}
+
+.customerButtonDiv lightning-button-icon.customerButton button {
+    border-radius: 0px;
+    background: url(/resource/customerToggle) no-repeat center / 17px;
+    border: 0;
+    height: 20px;
+}
+
+.customer_toggle_button_div.customerButtonDiv {
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: var(--lwc-borderWidthThin, 1px) solid var(--lwc-colorBorder, #dddbda);
+}
+
+.customer_toggle_button_div.customerButtonDiv.active {
+    border: none;
+    width: 40px;
+}
+
+
+/* ATT-590 */
+
+.supervisor_toggle_button_div.supervisorButtonDiv:hover,
+.customer_toggle_button_div.customerButtonDiv:hover {
+    background: var(--hover-background-color);
+}
+
+.supervisor_toggle_button_div.supervisorButtonDiv.active:hover {
+    background: var( --CWS-supervisorMode-color);
+    filter: contrast(1.5);
+}
+
+.customer_toggle_button_div.customerButtonDiv.active:hover {
+    background: var(--CWS-customerMode-color);
+    filter: contrast(1.5);
+}
+
+textarea.myTextarea.chatInputField.supervisorMode {
+    border-color: var(--CWS-supervisorMode-color);
+    outline: 0.4px solid var(--CWS-supervisorMode-color);
+}
+
+textarea.myTextarea.chatInputField.supervisorMode:focus {
+    outline: 2px solid #feab90 !important;
+    border-color: #feab90 !important;
+}
+
+textarea.myTextarea.chatInputField.customerMode {
+    border-color: var(--CWS-customerMode-color);
+    outline: 0.4px solid var(--CWS-customerMode-color);
+}
+
+textarea.myTextarea.chatInputField.customerMode:focus {
+    outline: 2px solid #4fb2ff !important;
+}
+
+
+/* --- Customer Mode -- */
+
+.customerButtonDiv lightning-button-icon.customerButton button {
+    border-radius: 0px;
+    background: url(/resource/customerToggle) no-repeat center / 17px;
+    border-right: 0;
+    height: 50px;
+    ;
+}
+
+.customerButtonDiv.active lightning-button-icon.customerButton button {
+    border-radius: 0px;
+    background: url(/resource/customerToggleActive) no-repeat center / 17px;
+    border: 0;
+    height: 50px;
+}
+
+.customerButtonDiv.active {
+    background-color: var(--CWS-customerMode-color);
+    width: 2rem;
+}
+
+.customerButtonDiv lightning-button-icon.customerButton button.slds-button:hover,
+.customerButtonDiv lightning-button-icon.customerButton button.slds-button:focus {
+    box-shadow: none;
+}
+
+
+/* --- Supervisor Mode -- */
+
+.supervisorButtonDiv lightning-button-icon.supervisorButton button {
+    border-radius: 0px;
+    border: 0;
+    color: var(--CWS-supervisorMode-color);
+    height: 50px;
+}
+
+.supervisorButtonDiv.active lightning-button-icon.supervisorButton button {
+    color: white;
+    padding: 0;
+    border: 0;
+    height: 50px;
+}
+
+.supervisorButtonDiv.active {
+    background-color: var(--CWS-supervisorMode-color);
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.supervisorButtonDiv lightning-button-icon.supervisorButton button.slds-button:hover,
+.supervisorButtonDiv lightning-button-icon.supervisorButton button.slds-button:focus {
+    box-shadow: none;
+}
+
+.textareaWrapper div.slds-col.slds-size_9-of-12 .slds-form-element__control.slds-grow.textarea-container textarea,
+.textareaWrapper .coaching {
+    border-radius: 0px;
+}
+
+lightning-textarea.chatInputField.slds-form-element.supervisorMode .slds-form-element__control.slds-grow.textarea-container textarea,
+lightning-textarea.chatInputField.slds-form-element.customerMode .slds-form-element__control.slds-grow.textarea-container textarea {
+    border-radius: 0px;
+    resize: none;
+    /* width: 97% !important;
+float: right;
+resize: none; */
+}
+
+.supervisor_toggle_button_div.supervisorButtonDiv {
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: var(--lwc-borderWidthThin, 1px) solid var(--lwc-colorBorder, #dddbda);
+}
+
+.supervisor_toggle_button_div.supervisorButtonDiv.active {
+    border-right: 0;
+}
+
+.supervisor_toggle_button_div.supervisorButtonDiv lightning-primitive-icon svg,
+.supervisorButtonDiv.active lightning-button-icon.supervisorButton button svg {
+    height: 20px;
+    width: auto;
+}
+
+.supervisor_toggle_button_div.supervisorButtonDiv.active,
+.supervisor_toggle_button_div.supervisorButtonDiv {
+    margin: 0 10px 0 0;
+}
+
+.supervisorButtonDiv.active .supervisorButton lightning-primitive-icon {
+    padding-top: 5px;
+}
+
+li.Agent.Me.Whisper .messageBody .textInbound {
+    background-color: var(--CWS-supervisorMode-color);
+}
+
+.sendButtonDiv .sendButton.supervisorMode button.slds-button.slds-button_icon.slds-button_icon-brand {
+    background-color: var(--CWS-supervisorMode-color);
+}
+
+
+/** Dynamic Resize for ATT **/
+
+.dynamic_resize_textarea {
+    position: relative;
+    height: 100px;
+    width: 100%;
+    max-height: 300px;
+    min-height: 80px;
+    cursor: ns-resize;
+    z-index: 1;
+    border-top: 5px solid transparent;
+    /* Set cursor style to vertical resize */
+}
+
+.dynamic_resize_textarea:focus {
+    border: 2px solid gray
+}
+
+.myTextarea {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    resize: none;
+}
+
+.small-screen .dynamic_resize_textarea {
+    height: 20px !important;
+    cursor: default;
+}
+
+
+/* textarea.myTextarea.chatInputField {
+    background: url(/resource/borderResize) center / 12px no-repeat;
+    background-position-x: calc(100% - 3px);
+    background-position-y: 3px;
+} */
+
+ 
+.small-screen .dynamic_resize_textarea .top-border:hover {
+    background: none;
+    display: none;
+}
+
+.small-screen .dynamic_resize_textarea .top-border {
+    cursor: none;
+    height: 0;
+}
+.dynamic_resize_textarea .top-border:hover {
+    background: #4094f9;
+}
+
+.dynamic_resize_textarea .top-border {
+    background: transparent;
+    position: absolute;
+    top: -5px;
+    width: 100%;
+    height: 8px;
+}
+
+
+/* .dynamic_resize_textarea .top-border:hover {
+    position: absolute;
+    background: url(/resource/resizeVerticalIcon) center / 20px no-repeat;
+    background-color: #f4f4f4;
+    height: 10px;
+    width: 100%;
+    top: -10px;
+    border-top: 1px solid var(--lwc-buttonColorBorderPrimary, rgb(201, 201, 201));
+    z-index: 2;
+    border-right: 1px solid var(--lwc-buttonColorBorderPrimary, rgb(201, 201, 201));
+    border-left: 1px solid var(--lwc-buttonColorBorderPrimary, rgb(201, 201, 201));
+} */
+
+textarea.myTextarea.chatInputField:focus {
+    border-color: #4194f9 !important;
+}
+
+.small-screen textarea.myTextarea.chatInputField {
+    background: none;
+}
+
+.small-screen .slds-grid.slds-wrap.chatButtons {
+    min-height: 0 !important;
+}
+
+.small-screen .textareaWrapper div:nth-child(2) .chatButtons_right .standar_reponse_div button,
+.small-screen .textareaWrapper div:nth-child(2) .chatButtons_right .sendButtonDiv button,
+.small-screen .textareaWrapper .chatButtons .leave_chat_div,
+.small-screen .textareaWrapper div:nth-child(2) .chatButtons_right .standar_reponse_div button {
+    border: 0;
+    border-radius: 0px;
+    height: 30px;
+    width: 40px;
+}
+
+.small-screen .textareaWrapper div:nth-child(2) .chatButtons_left .leave_chat_div .leaveButton button lightning-primitive-icon svg,
+.small-screen .textareaWrapper .chatButtons_right .sendButtonDiv button lightning-primitive-icon svg {
+    height: 100%;
+    width: 18px;
+}
+
+.small-screen .chatButtons_right .standar_reponse_div button {
+    background: url(/resource/standardResponseDefault) center / 20px no-repeat;
+}
+
+/*ATT 602*/
+.chatButtons_right[c-chatwindowLWC_chatwindowLWC] {
+
+    align-items: center;
+}
+.eye_consult_div button[title="consult"]:focus{
+    outline: none !important;
+}
+.eye_consult_div button[title="consult"]
+{
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg id='Layer_2' data-name='Layer 2' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 65.56 47.44'%3E%3Cdefs%3E%3Cstyle%3E .cls-1 %7B fill: %23656360; %7D %3C/style%3E%3C/defs%3E%3Cg id='Layer_1-2' data-name='Layer 1'%3E%3Cg%3E%3Cpath class='cls-1' d='m25.31,14.39C14.52,14.39,5.11,21.05.04,30.92c5.07,9.91,14.47,16.52,25.27,16.52s20.2-6.62,25.27-16.52c-5.07-9.87-14.48-16.53-25.27-16.53Zm0,26.85c-5.69,0-10.32-4.63-10.32-10.32s4.63-10.32,10.32-10.32,10.32,4.63,10.32,10.32-4.63,10.32-10.32,10.32Z'/%3E%3Cpath class='cls-1' d='m0,30.99s.03-.05.04-.07c-.01-.03-.03-.05-.04-.08v.15Z'/%3E%3Cpath class='cls-1' d='m50.62,30.84s-.03.05-.04.08c.01.03.03.05.04.07v-.15Z'/%3E%3Cpath class='cls-1' d='m25.31,24.6c-3.49,0-6.32,2.83-6.32,6.32s2.83,6.32,6.32,6.32,6.32-2.83,6.32-6.32-2.84-6.32-6.32-6.32Z'/%3E%3C/g%3E%3Cpolygon class='cls-1' points='65.56 8.15 57.41 8.15 57.41 0 52.41 0 52.41 8.15 44.26 8.15 44.26 13.15 52.41 13.15 52.41 21.3 57.41 21.3 57.41 13.15 65.56 13.15 65.56 8.15'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 25px;
+    background-repeat: no-repeat;
+    background-position:center;
+    border: none;
+}
+
+.eye_consult_div button[title='consult']:disabled {
+    opacity: 0.5;
+}
+
+
+.eye_consult_div button[title="consult"]:hover{
+opacity:0.7;
+    
+    }
+.eye_consult_div button[title="consult"] lightning-primitive-icon
+{
+    visibility:hidden;
+}
+
+
+
+/**Request Assistance**/
+
+.slds-col.slds-size_1-of-1.slds-m-top_medium.slds-is-relative.consult-modal__supervisor-list-wrapper lightning-icon.slds-m-right_medium.consult-main-icon.slds-icon-custom-custom103.slds-icon_container {
+    background: #9C27B0;
+    height: 35px;
+    width: 35px;
+    background-size:75%;
+    background-repeat:no-repeat;
+    background-position:4px 3px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28.35 28.32'%3E%3Cdefs%3E%3Cstyle%3E.cls-1%7Bfill:none;%7D.cls-2%7Bfill:%23ffffff;%7D%3C/style%3E%3C/defs%3E%3Ctitle%3ECI_CO_queue%3C/title%3E%3Cg id='Layer_2' data-name='Layer 2'%3E%3Cg id='Layer_6' data-name='Layer 6'%3E%3Crect class='cls-1' width='28.35' height='28.32'/%3E%3Cpath class='cls-2' d='M20.6,4.26A2.4,2.4,0,0,0,18.41,6,4.8,4.8,0,0,1,21,9.36a2.49,2.49,0,0,0,1.85-2.5A2.44,2.44,0,0,0,20.6,4.26Zm2.12,6.09a3,3,0,0,1-1.61.79,5,5,0,0,1-1,2.47H24a.85.85,0,0,0,.86-.86v-.41C24.81,11.42,23.78,10.83,22.72,10.35ZM19.09,14.5a3.7,3.7,0,0,1-2.46,1,6.44,6.44,0,0,1-.86,2.84h4.79a1,1,0,0,0,1-1V16.9C21.56,15.77,20.32,15.08,19.09,14.5Zm-4.42,5.2A5.11,5.11,0,0,1,11,21.21a5.05,5.05,0,0,1-3.66-1.58c-1.57.76-3.08,1.72-3.08,3.12v.65a1.34,1.34,0,0,0,1.33,1.34H16.35a1.34,1.34,0,0,0,1.34-1.34v-.61C17.69,21.35,16.25,20.42,14.67,19.7Z'/%3E%3Cellipse class='cls-2' cx='11.01' cy='15.05' rx='3.66' ry='4.04'/%3E%3Cpath class='cls-2' d='M16.52,7.48A2.76,2.76,0,0,0,13.89,9.7a6.32,6.32,0,0,1,2.57,3.84h.06a2.91,2.91,0,0,0,2.74-3A2.86,2.86,0,0,0,16.52,7.48Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.slds-col.slds-size_1-of-1.slds-m-top_medium.slds-is-relative.consult-modal__supervisor-list-wrapper .consult__button button
+{
+    border:1px solid #efefef;
+    padding: 1px 12px 2px 7px;
+}
+
+.slds-col.slds-size_1-of-1.slds-m-top_medium.slds-is-relative.consult-modal__supervisor-list-wrapper lightning-icon.slds-m-right_medium.consult-main-icon.slds-icon-custom-custom103.slds-icon_container svg
+{
+    display:none;
+}
+
+
+
+.slds-col.slds-size_1-of-1.slds-m-top_medium.slds-is-relative.consult-modal__supervisor-list-wrapper .consult__button button lightning-primitive-icon svg {
+    width: 22px;
+    height:20px;
+    margin-right: 5px;
+    display: flex;
+}
+
+.copy-wrapper > lightning-helptext > div {
+    padding-top: 0rem !important;
+}
+

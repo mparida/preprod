@@ -1,0 +1,26 @@
+<template>
+    <div class="slds-modal__content slds-p-around_medium"
+        id="modal-content-id-2">
+        <div class='slds-grid slds-wrap slds-constult-modal__content send-request_content'>
+            <div class='send-request__body'>
+                <textarea maxlength=300
+                    class='send-request__notes'
+                    onkeyup={handleChange}
+                    placeholder='Please type notes here for the supervisor.....'>
+                    {notes}
+                </textarea>
+                <div class="send-request__counter">
+                    <span class="current">{currentCounterValue}</span>
+                    <span class="maximum">/300</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slds-modal__footer send-request__button">
+        <button class="slds-button slds-button_text-destructive"
+            onclick={onCancel}>Cancel</button>
+        <button class="slds-button slds-button_brand"
+            onclick={onNext}>Consult</button>
+    </div>
+
+</template>

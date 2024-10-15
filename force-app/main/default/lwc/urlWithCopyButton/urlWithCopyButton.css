@@ -1,0 +1,54 @@
+/* Inprogress status */
+.url-container.inprogress {
+    padding: 7px;
+    display:flex;
+    flex-wrap: nowrap;
+    max-width: 250px;
+    background-color: white;
+    justify-items: center;
+    align-items: center;
+    border-radius: 10px;
+    gap: 1px;
+}
+
+.inprogress > .url-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #0070d2;
+}
+
+.inprogress > .copy-wrapper > .icon{
+    --slds-g-color-neutral-base-50:  #0070d2 !important;
+    padding: var(--lwc-spacingXxSmall,0 rem) !important;
+}
+
+/* Complete Status */
+
+
+.url-container.complete {
+    padding: 7px;
+    display:flex;
+    flex-wrap: nowrap;
+    max-width: 250px;
+    background-color: rgba(255, 255, 255, 0.446);
+    justify-items: center;
+    border-radius: 10px;
+}
+
+
+.complete > .url-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+
+
+.complete > .copy-wrapper > .icon{
+    --slds-g-color-neutral-base-50:  #83898d !important;
+    padding-top: var(--lwc-spacingXxSmall,0rem) !important;
+  
+   
+}
