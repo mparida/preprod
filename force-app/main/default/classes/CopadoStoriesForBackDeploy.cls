@@ -25,7 +25,8 @@ global class CopadoStoriesForBackDeploy {
                                                 Source_Environment__c = sourceEnv, Destination_Environment__c  = targetEnv);
         	insert master;
             masterList.add(master);
-        }catch(Exception ex){ 
+        }catch(Exception ex){
+            System.debug('Exception Stack trace:'+ex.getStackTraceString());
             return null;
         }
         for(copado__Promoted_User_Story__c promUST: [SELECT 
@@ -56,7 +57,7 @@ global class CopadoStoriesForBackDeploy {
             }else if(wrapMap.containsKey(wrap.User_Story__c) && !String.isBlank(wrap.Status__c) && wrap.Status__c.equalsIgnoreCase('Completed')){
                	wrapMap.remove(wrap.User_Story__c);
                 completedSet.add(wrap.User_Story__c);
-            }else if(wrap.Status__c.equalsIgnoreCase('Completed')){
+            }else if(wrap.Status__c != null && wrap.Status__c.equalsIgnoreCase('Completed')){
                completedSet.add(wrap.User_Story__c); 
             }
         }
