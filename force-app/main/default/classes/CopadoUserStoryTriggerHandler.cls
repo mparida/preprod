@@ -3,6 +3,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
     public static void performItrackUSTVersioning(List<String> itrackList, List <copado__User_Story__c> newList) {
 		Map<String, ItrackWrapper> itrackSTYMap = new Map<String, ItrackWrapper>();
         Map<String, String> parentItrackSTYMap = new Map<String, String>();
+        //Either you create from Main Parent or from Any child, Parent is going to be Main Parent
         for(copado__User_Story__c ust : [SELECT Id, Name, iTrack_US__c, Shadow_ITrack_US__c, Itrack_UST_Version__c,
                                     Parent_User_Story__r.Id, Parent_User_Story__r.iTrack_US__c  FROM
                                          copado__User_Story__c WHERE iTrack_US__c IN : itrackList OR
