@@ -42,17 +42,23 @@ public with sharing class CopadoUserStoryTriggerHandler {
         List<copado__User_Story__c> ustUpdateList = new List<copado__User_Story__c>();
         Set<Id> oldParentUSTSet = new Set<Id> ();
         Map<String, String> oldvsNewMap = new Map<String, String>();//mapping old nd new parent ids
+        Map<String, String> oldParentItrackId = new Map<String, String>();//Store old Parent Itrack Id#
+        //prepare the mapping between old parent to New Parent
         for(copado__User_Story__c ust : newMap.values()){
             if(ust.Parent_User_Story__c != null && ust.Parent_User_Story__c != oldMap.get(ust.Id).Parent_User_Story__c){
                 oldParentUSTSet.add(oldMap.get(ust.Id).Parent_User_Story__c);//Collect old parents
                 oldvsNewMap.put(oldMap.get(ust.Id).Parent_User_Story__c, ust.Parent_User_Story__c);
+                oldParentItrackId.put(oldMap.get(ust.Id).Parent_User_Story__c, ust.Shadow_ITrack_US__c);
             }
         }
-        //Set old parents version to null
+        //Set old parents version to null and Itrack Id # to invalid, retrieve as above and store in oldParentItrackId Map?
         for(Id id : oldParentUSTSet){
-            copado__User_Story__c sty = new copado__User_Story__c(Id = id, Itrack_UST_Version__c = null);
-            ustUpdateList.add(sty);
+            copado__User_Story__c OldParentsty = new copado__User_Story__c(Id = id, Itrack_UST_Version__c = null, iTrack_US__c = oldParentItrackId.get(id)+'_Invalid');
+            ustUpdateList.add(OldParentsty);
+            copado__User_Story__c newParentSty = new copado__User_Story__c(id = oldvsNewMap.get(id), Itrack_UST_Version__c = 1, iTrack_US__c = oldParentItrackId.get(id));
+            ustUpdateList.add(newParentSty);
         }
+        //Set New Parent Version and Itrack Id # to actual
         Map<Id, List<copado__User_Story__c>> oldParentUSTMap = new Map<Id, List<copado__User_Story__c>>();
         //Collect UST for Old Parents
         for(copado__User_Story__c ust : [SELECT Id, Parent_User_Story__c FROM copado__User_Story__c WHERE
@@ -65,7 +71,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
         }
         //Assign new versions to the child stories and attach new Parent
         for(String Id : oldParentUSTMap.keySet()){
-            Decimal v = 1;
+            Decimal v = 2;
             List<copado__User_Story__c> lst = oldParentUSTMap.get(Id);
             for(copado__User_Story__c ust : lst){
                 ust.Parent_User_Story__c = oldvsNewMap.get(Id);
@@ -77,9 +83,13 @@ public with sharing class CopadoUserStoryTriggerHandler {
         
         if(ustUpdateList.size() > 0){
             try{
-                update ustUpdateList;
+                //Test by printing
+                for(copado__User_Story__c ust: ustUpdateList){
+                    System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c);
+                }
+                //update ustUpdateList;
             }catch(Exception ex){
-           		System.debug(ex.getStackTraceString());
+           		System.debug('PRINT STACK TRACE:::'+ex.getStackTraceString());
                 throw new UserStoryException('There is an error while updating the Parent story, contact Devops team');
             }
         }
