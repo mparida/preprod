@@ -24,6 +24,10 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after up
     List<copado__User_Story__c> styList;
      if(Trigger.isAfter && Trigger.isUpdate) {
          styList = CopadoUserStoryTriggerHandler.changeParentUserStory(Trigger.newMap, Trigger.oldMap);
-         //update styList;
+         for(copado__User_Story__c ust: styList){
+             System.debug(ust);
+             //System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id+' Parent ='+ust.Parent_User_Story__c);
+         }
+         update styList;
      }
 }
