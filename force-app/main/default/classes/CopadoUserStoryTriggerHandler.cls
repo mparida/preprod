@@ -52,6 +52,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 }
             }
         }
+        System.debug('Print oldvsNewMap = '+oldvsNewMap);
         //Set old parents version to null and Itrack Id # to invalid, retrieve as above and store in oldParentItrackId Map?
         for(Id id : oldParentUSTSet){
             //Set old Parent Itrack Version to Null, and Itrack Id to invalid.
@@ -72,23 +73,21 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 Parent_User_Story__c IN : oldParentUSTSet AND
                 Id NOT IN : oldvsNewMap.values()
                 ORDER BY CreatedDate ASC]){
-            System.debug('ust>>>>>'+ust);
-            if(!oldParentUSTMap.containsKey(ust.Shadow_ITrack_US__c)){
-                oldParentUSTMap.put(ust.Shadow_ITrack_US__c, new List<copado__User_Story__c>{ust});
+            //System.debug('ust>>>>>'+ust);
+            if(!oldParentUSTMap.containsKey(ust.Parent_User_Story__c)){
+                oldParentUSTMap.put(ust.Parent_User_Story__c, new List<copado__User_Story__c>{ust});
             }else{
-                oldParentUSTMap.get(ust.Shadow_ITrack_US__c).add(ust);
+                oldParentUSTMap.get(ust.Parent_User_Story__c).add(ust);
             }
         }
-        System.debug('oldParentUSTMap>>>>>'+oldParentUSTMap.size());
+        //System.debug('oldParentUSTMap>>>>>'+oldParentUSTMap);
         //Assign new versions to the child stories and attach new Parent
         for(String Id : oldParentUSTMap.keySet()){
-            //System.debug('Parent id in Map : '+Id);
             Decimal v = 2;
             List<copado__User_Story__c> lst = oldParentUSTMap.get(Id);
-            //System.debug('lst size:'+lst.size());
             Set<Decimal> versions = new Set<Decimal>();
             for(copado__User_Story__c ust : lst){
-                ust.Parent_User_Story__c = oldvsNewMap.get(Id);
+                ust.Parent_User_Story__c = oldvsNewMap.get(Id)!=null?oldvsNewMap.get(Id):ust.Parent_User_Story__c;
                 ust.Itrack_UST_Version__c = v;
                 ust.iTrack_US__c = Id+'_v'+v;
                 ustUpdateList.add(ust); // Only update if it hasn't been processed
@@ -98,10 +97,10 @@ public with sharing class CopadoUserStoryTriggerHandler {
         
         if(ustUpdateList.size() > 0){
             for(copado__User_Story__c ust: ustUpdateList){
-                System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id);
+                System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c +
+                        ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id+' Parent ='+ust.Parent_User_Story__c);
             }
         }
-        //
         return ustUpdateList;
     }
 }
