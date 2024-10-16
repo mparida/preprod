@@ -71,13 +71,11 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 Parent_User_Story__c IN : oldParentUSTSet AND
                 Id NOT IN : oldvsNewMap.values()
                 ORDER BY CreatedDate ASC]){
-            //System.debug('ust>>>>>'+ust);
             if(!oldParentUSTMap.containsKey(ust.Shadow_ITrack_US__c)){
                 oldParentUSTMap.put(ust.Shadow_ITrack_US__c, new List<copado__User_Story__c>{ust});
             }else{
                 oldParentUSTMap.get(ust.Shadow_ITrack_US__c).add(ust);
             }
-            //System.debug('oldParentUSTMap.get(ust.Shadow_ITrack_US__c)+++++'+oldParentUSTMap.get(ust.Shadow_ITrack_US__c).size());
         }
         System.debug('oldParentUSTMap>>>>>'+oldParentUSTMap.size());
         //Assign new versions to the child stories and attach new Parent
@@ -92,25 +90,10 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 ust.Itrack_UST_Version__c = v;
                 ust.iTrack_US__c = Id+'_v'+v;
                 ustUpdateList.add(ust); // Only update if it hasn't been processed
-
-                //ustUpdateList.add(ust);
                 //System.debug('Print the User Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id);
                 v++;//increment version
             }
         }
-        
-        /*if(ustUpdateList.size() > 0){
-            //try{
-                //Test by printing
-                for(copado__User_Story__c ust: ustUpdateList){
-                    System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id);
-                }
-                //update ustUpdateList;
-            //}catch(Exception ex){
-           		//System.debug('PRINT STACK TRACE:::'+ex.getStackTraceString());
-                //throw new UserStoryException('There is an error while updating the Parent story, contact Devops team');
-            //}
-        }*/
         return ustUpdateList;
     }
 }
