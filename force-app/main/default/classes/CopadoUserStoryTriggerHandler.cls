@@ -102,5 +102,6 @@ public with sharing class CopadoUserStoryTriggerHandler {
             }
         }
         return ustUpdateList;
+
     }
 }
