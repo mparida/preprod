@@ -9,7 +9,7 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after up
         return;
     }
 
-    /*List<String> itrackList = new List<String>();
+    List<String> itrackList = new List<String>();
     if(trigger.isBefore && trigger.isInsert){
         for(copado__User_Story__c ust : trigger.new){
             if(!String.isBlank(ust.iTrack_US__c) && !ust.Is_Created_from_Itrack_Utility__c){
@@ -19,14 +19,11 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after up
         if(!itrackList.isEmpty()){//When a new UST is created after rolling out this, this wont be executed if created from Utility
             CopadoUserStoryTriggerHandler.performItrackUSTVersioning(itrackList, trigger.new);
         }
-    }*/
+    }
 
     List<copado__User_Story__c> styList;
      if(Trigger.isAfter && Trigger.isUpdate) {
          styList = CopadoUserStoryTriggerHandler.changeParentUserStory(Trigger.newMap, Trigger.oldMap);
-         update styList;
+         //update styList;
      }
-    /*if(styList != null && !styList.isEmpty()){
-        update styList;
-    }*/
 }

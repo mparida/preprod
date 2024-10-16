@@ -48,7 +48,6 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 if(oldMap.get(ust.Id).Parent_User_Story__c!=null){
                     oldParentUSTSet.add(oldMap.get(ust.Id).Parent_User_Story__c);//Collect old parents
                 }
-
                 oldvsNewMap.put(oldMap.get(ust.Id).Parent_User_Story__c, ust.Parent_User_Story__c);
                 oldParentItrackId.put(oldMap.get(ust.Id).Parent_User_Story__c, ust.Shadow_ITrack_US__c);
             }
@@ -90,7 +89,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 ust.Itrack_UST_Version__c = v;
                 ust.iTrack_US__c = Id+'_v'+v;
                 ustUpdateList.add(ust); // Only update if it hasn't been processed
-                //System.debug('Print the User Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id);
+                System.debug('Print the User Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c + ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id);
                 v++;//increment version
             }
         }
