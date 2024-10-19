@@ -5,7 +5,7 @@
     <option name="apexLogLevel" value="DEBUG" />
     <option name="calloutsLogLevel" value="INFO" />
     <option name="changedOnly" value="false" />
-    <option name="connectionName" value="copadopreprod" />
+    <option name="connectionName" value="preprod-devops" />
     <option name="connectionType" value="OAUTH" />
     <option name="contextConfiguration" value="false" />
     <option name="databaseLogLevel" value="INFO" />

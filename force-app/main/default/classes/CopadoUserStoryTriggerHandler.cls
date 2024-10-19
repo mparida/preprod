@@ -57,7 +57,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
         for(Id id : oldParentUSTSet){
             //Set old Parent Itrack Version to Null, and Itrack Id to invalid.
             //Case: What id someone again tries to make this as Parent??
-            copado__User_Story__c OldParentsty = new copado__User_Story__c(Id = id, Itrack_UST_Version__c = null, iTrack_US__c = oldParentItrackId.get(id)+'_Invalid');
+            copado__User_Story__c OldParentsty = new copado__User_Story__c(Id = id, Itrack_UST_Version__c = null, iTrack_US__c = oldParentItrackId.get(id)+'_Invalid'+RandomTextGenerator.generateRandomText(5));
             ustUpdateList.add(OldParentsty);
             //Set New Parent Itrack Version to 1, and Itrack Id to Actual.
             copado__User_Story__c newParentSty = new copado__User_Story__c(id = oldvsNewMap.get(id), Itrack_UST_Version__c = 1, iTrack_US__c = oldParentItrackId.get(id), Parent_User_Story__c = null);
