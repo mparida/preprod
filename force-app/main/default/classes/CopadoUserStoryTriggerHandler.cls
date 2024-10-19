@@ -37,7 +37,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
         }
     }
 
-    public static List<copado__User_Story__c> changeParentUserStory(Map <Id, copado__User_Story__c> newMap, Map<Id, copado__User_Story__c> oldMap) {
+    public static void changeParentUserStory(Map <Id, copado__User_Story__c> newMap, Map<Id, copado__User_Story__c> oldMap) {
         List<copado__User_Story__c> ustUpdateList = new List<copado__User_Story__c>();
         Set<String> oldParentUSTSet = new Set<String> ();
         Map<String, String> oldvsNewMap = new Map<String, String>();//mapping old nd new parent ids
@@ -99,11 +99,10 @@ public with sharing class CopadoUserStoryTriggerHandler {
         
         if(ustUpdateList.size() > 0){
             for(copado__User_Story__c ust: ustUpdateList){
-                /*System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c +
-                        ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id+' Parent ='+ust.Parent_User_Story__c);*/
+                System.debug('Print the USer Story , Name = ' + ust.Name + ', Itrack # =  '+ust.iTrack_US__c + ', Version ='+ust.Itrack_UST_Version__c +
+                        ', Shadow Itrack Id = '+ust.Shadow_ITrack_US__c+' Id ='+ust.Id+' Parent ='+ust.Parent_User_Story__c);
             }
+            update ustUpdateList;
         }
-        return ustUpdateList;
-
     }
 }
