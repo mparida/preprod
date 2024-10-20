@@ -161,7 +161,6 @@ public with sharing class CopadoUserStoryTriggerHandler {
     }
 
     public static void beforeUpdateCircularParentCheck(Map<Id, copado__User_Story__c> newMap){
-        System.debug('newMap:'+newMap);
         Map<Id, Id>childParentMap = new Map<Id, Id>();
         for(copado__User_Story__c sty : newMap.values()){
             if(sty.Parent_User_Story__c != null ){
@@ -170,7 +169,6 @@ public with sharing class CopadoUserStoryTriggerHandler {
         }
         for(copado__User_Story__c sty : [SELECT Id, Name, Parent_User_Story__c FROM copado__User_Story__c WHERE Id IN : childParentMap.values()]){
             if(childParentMap.containsKey(sty.Parent_User_Story__c)){
-                System.debug('newMap::'+sty);
                 newMap.get(sty.Parent_User_Story__c).addError('The Parent ' + sty.Name + ' you are trying to attach is having a circular relationship with current story');
             }
         }
