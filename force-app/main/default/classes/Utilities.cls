@@ -1,4 +1,7 @@
 public class Utilities {
+    public static Boolean runOnce = true;
+    public static List<SObject> commonSobjectListForDML = new List<SObject>();
+
     public static String getObjectNameFromId(Id recordId) {
         // Get the prefix from the ID
         String prefix = String.valueOf(recordId).substring(0, 3);
