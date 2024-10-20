@@ -3,12 +3,10 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, before u
         return;
     }
     System.debug('Value of runOnce in Trigger: '+TriggerFlags.runOnce);
-    TriggerFlags.runOnce = false;
     CustomTrigger__mdt trgMdt = CustomTrigger__mdt.getInstance('UserStoryTrigger');
     if(!trgMdt.On_off__c){
         return;
     }
-
     List<String> itrackList = new List<String>();
     if(trigger.isBefore && trigger.isInsert){
         for(copado__User_Story__c ust : trigger.new){
@@ -27,6 +25,7 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, before u
     }
 
      if(Trigger.isAfter && Trigger.isUpdate) {
+         TriggerFlags.runOnce = false;
          Map<Id, copado__User_Story__c> newStyParentNotNULLMap = new Map<Id, copado__User_Story__c>();
          Map<Id, copado__User_Story__c> oldStyParentNULLMap = new Map<Id, copado__User_Story__c>();
          for(copado__User_Story__c ust : Trigger.newMap.values()){
