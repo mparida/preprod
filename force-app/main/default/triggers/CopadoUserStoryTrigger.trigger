@@ -1,4 +1,4 @@
-trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after update) {
+trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, before update, after update) {
     if(!TriggerFlags.runOnce){
         return;
     }
@@ -19,6 +19,11 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after up
         if(!itrackList.isEmpty()){//When a new UST is created after rolling out this, this wont be executed if created from Utility
             CopadoUserStoryTriggerHandler.performItrackUSTVersioning(itrackList, trigger.new);
         }
+    }
+
+    if(Trigger.isBefore && Trigger.isUpdate){
+        System.debug('BEFORE TRIGGER UPDATE');
+        CopadoUserStoryTriggerHandler.beforeUpdateCircularParentCheck(Trigger.newMap);
     }
 
      if(Trigger.isAfter && Trigger.isUpdate) {
