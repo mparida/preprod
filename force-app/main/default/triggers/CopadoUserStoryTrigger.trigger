@@ -1,4 +1,4 @@
-trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, before update, after update) {
+trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after update) {
     if(!TriggerFlags.runOnce){
         return;
     }
@@ -21,10 +21,6 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, before u
         }
     }
 
-    /*if(Trigger.isBefore && Trigger.isUpdate){
-        CopadoUserStoryTriggerHandler.beforeUpdateCircularParentCheck(Trigger.newMap);
-    }*/
-
      if(Trigger.isAfter && Trigger.isUpdate) {
          Map<Id, copado__User_Story__c> newStyParentNotNULLMap = new Map<Id, copado__User_Story__c>();
          Map<Id, copado__User_Story__c> oldStyParentNULLMap = new Map<Id, copado__User_Story__c>();
@@ -33,17 +29,14 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, before u
                  if(Trigger.oldMap.get(ust.Id).Parent_User_Story__c == null){
                      System.debug('GETTING OLD PARENT NULL');
                      oldStyParentNULLMap.put(ust.Id, ust);
-                 }else{
-                     newStyParentNotNULLMap.put(ust.Id, ust);
                  }
              }
          }
-         CopadoUserStoryTriggerHandler.changeParentUserStory(Trigger.newMap, Trigger.oldMap);
-         /*if(newStyParentNotNULLMap.size() > 0) {
-             CopadoUserStoryTriggerHandler.changeParentUserStory(newStyParentNotNULLMap, Trigger.oldMap);
-         }*/
-         /*if(oldStyParentNULLMap.size() > 0) {
+         if(oldStyParentNULLMap.size() == 0) {
+             CopadoUserStoryTriggerHandler.changeParentUserStory(Trigger.newMap, Trigger.oldMap);
+         }
+         if(oldStyParentNULLMap.size() > 0) {
              CopadoUserStoryTriggerHandler.versionForOldParentAsNULL(oldStyParentNULLMap, Trigger.oldMap);
-         }*/
+         }
      }
 }
