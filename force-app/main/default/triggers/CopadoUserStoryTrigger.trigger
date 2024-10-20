@@ -36,7 +36,7 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after up
              CopadoUserStoryTriggerHandler.changeParentUserStory(Trigger.newMap, Trigger.oldMap);
          }
          if(oldStyParentNULLMap.size() > 0) {
-             CopadoUserStoryTriggerHandler.changeParentUserStoryNULLParent(oldStyParentNULLMap, Trigger.oldMap);
+             CopadoUserStoryTriggerHandler.versionForOldParentAsNULL(oldStyParentNULLMap, Trigger.oldMap);
          }
      }
 }

@@ -110,7 +110,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
         }
     }
 
-    public static void changeParentUserStoryNULLParent(Map <Id, copado__User_Story__c> newMap, Map<Id, copado__User_Story__c> oldMap) {
+    public static void versionForOldParentAsNULL(Map <Id, copado__User_Story__c> newMap, Map<Id, copado__User_Story__c> oldMap) {
         Map<String, String> itrackToNewParentMap = new Map<String, String>();
         List<copado__User_Story__c> ustUpdateList = new List<copado__User_Story__c>();
         for(copado__User_Story__c ust : newMap.values()){
