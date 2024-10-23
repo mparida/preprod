@@ -4,10 +4,10 @@
     <option name="connections">
       <list>
         <IlluminatedCloudConnection>
-          <option name="connectionName" value="preprod-devops" />
+          <option name="connectionName" value="devopspreprod1" />
           <option name="connectionType" value="OAUTH" />
           <option name="defaultModuleName" value="preprodcopado" />
-          <option name="offlineSymbolTablePath" value="$PROJECT_DIR$/IlluminatedCloud/preprod_devops/OfflineSymbolTable.zip" />
+          <option name="offlineSymbolTablePath" value="$PROJECT_DIR$/IlluminatedCloud/devopspreprod1/OfflineSymbolTable.zip" />
         </IlluminatedCloudConnection>
       </list>
     </option>
