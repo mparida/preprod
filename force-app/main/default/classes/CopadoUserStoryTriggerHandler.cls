@@ -30,6 +30,7 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 itrackSTYMap.put(temp.id, temp);
             }
         }
+        System.debug('parentItrackSTYMap>>>>>'+parentItrackSTYMap);
         for (copado__User_Story__c ust : newList) {
             if(itrackSTYMap.get(ust.iTrack_US__c) != null){
                 ust.Shadow_ITrack_US__c = parentItrackSTYMap.containsKey(ust.Parent_User_Story__c) ? parentItrackSTYMap.get(ust.Parent_User_Story__c) : ust.iTrack_US__c;
@@ -42,6 +43,32 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 ust.Itrack_UST_Version__c = v;
             }
 
+        }
+    }
+
+    public static void createUserStoryRelationship(List<String> ustList, Map<Id, copado__User_Story__c> newMap) {
+        Map<String, String> itrackToParentMap = new Map<String, String>();
+        for(copado__User_Story__c ust : [SELECT Id, Name, iTrack_US__c, Shadow_ITrack_US__c FROM copado__User_Story__c
+        WHERE Shadow_ITrack_US__c IN :ustList
+        ORDER BY CreatedDate ASC]){
+            if (!itrackToParentMap.containsKey(ust.Shadow_ITrack_US__c)) {
+                itrackToParentMap.put(ust.Shadow_ITrack_US__c, ust.Id);
+            }
+        }
+        List<copado__Team_Dependency__c> dependencyList = new List<copado__Team_Dependency__c>();
+        for(copado__User_Story__c ust : newMap.values()){
+            if(ust.Shadow_ITrack_US__c != null && itrackToParentMap.containsKey(ust.Shadow_ITrack_US__c)){
+                copado__Team_Dependency__c dep = new copado__Team_Dependency__c();
+                dep.copado__Provider_User_Story__c = itrackToParentMap.get(ust.Shadow_ITrack_US__c);
+                dep.copado__Dependent_User_Story__c = ust.Id;
+                dep.copado__Relationship_Type__c = 'blocking';
+                dep.copado__Dependency_Status__c = 'New';
+                dependencyList.add(dep);
+            }
+        }
+
+        if(dependencyList.size() > 0){
+            insert dependencyList;
         }
     }
 }
