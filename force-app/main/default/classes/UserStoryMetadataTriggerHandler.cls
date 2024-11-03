@@ -21,6 +21,7 @@ public class UserStoryMetadataTriggerHandler {
                 System.debug(ustMeta.copado__Metadata_API_Name__c + '---'+ustMeta.copado__ModuleDirectory__c );
                 NotificationEvent__e event = new NotificationEvent__e(
                         UserId__c = currentUserId,
+                        RecordId__c = ustMeta.copado__User_Story__c,
                         Title__c = 'CLI Commit Error',
                         Message__c = 'Attention!! \n' +
                                 'The metadata cannot be saved since it ' +
