@@ -25,7 +25,8 @@ public class UserStoryMetadataTriggerHandler {
                         Title__c = 'CLI Commit Error',
                         Message__c = 'The metadata cannot be saved since it ' +
                                 'was committed from CLI : \n' +
-                                ''+ustMeta.Name,
+                                'User Story Name: ' + ustMeta.User_Story_Name__c + '\n' +
+                                'Metadata Name : '+ustMeta.Name,
                         Variant__c = 'Error'
                 );
                 listEbents.add(event);

@@ -1,14 +1,29 @@
 import { LightningElement, api } from 'lwc';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import customCSS from '@salesforce/resourceUrl/toastCSS';
 import USER_ID from '@salesforce/user/Id'; 
 
 export default class PlatformEventListener extends LightningElement {
+    isCSSLoaded = false;
     @api recordId;
     channelName = '/event/NotificationEvent__e';
     subscription = null;
     storageKey = 'lastEventId';
     replayIdKey = 'lastReplayId'; // Key for storing the last replay ID in sessionStorage
+
+    renderedCallback() {
+        if(this.isCSSLoaded) return;
+        this.isCSSLoaded = true;
+        loadStyle(this, customCSS)
+            .then(result => {
+                console.log('CSS Loaded...');
+            })
+            .catch(reason => {
+                console.log('Error CSS Loading...');
+            });
+    }
 
     connectedCallback() {
         this.ensureSubscription(); // Ensure subscription is active on load
@@ -31,11 +46,10 @@ export default class PlatformEventListener extends LightningElement {
             subscribe(this.channelName, replayId, (message) => {
                 const payload = message.data.payload;
                 console.log('Received Platform Event:', message);
-
-                console.log('Current User ID:', USER_ID);
+                /*console.log('Current User ID:', USER_ID);
                 console.log('Current Record ID:', this.recordId);
                 console.log('Event UserId__c:', payload.UserId__c);
-                console.log('Event RecordId__c:', payload.RecordId__c);
+                console.log('Event RecordId__c:', payload.RecordId__c);*/
 
                 if (payload.UserId__c === USER_ID && payload.RecordId__c === this.recordId) {
                     console.log('Event matches current user and record');
