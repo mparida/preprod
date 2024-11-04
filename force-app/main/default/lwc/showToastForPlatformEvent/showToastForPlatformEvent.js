@@ -65,6 +65,7 @@ export default class PlatformEventListener extends LightningElement {
 
     // Display a toast notification
     showToast(payload) {
+        const message = '• This is the first line\n• This is the second line\n• Here is the third line';
         const event = new ShowToastEvent({
             title: payload.Title__c,
             message: payload.Message__c,

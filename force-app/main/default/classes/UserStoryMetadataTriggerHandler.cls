@@ -23,8 +23,7 @@ public class UserStoryMetadataTriggerHandler {
                         UserId__c = currentUserId,
                         RecordId__c = ustMeta.copado__User_Story__c,
                         Title__c = 'CLI Commit Error',
-                        Message__c = 'Attention!! \n' +
-                                'The metadata cannot be saved since it ' +
+                        Message__c = 'The metadata cannot be saved since it ' +
                                 'was committed from CLI : \n' +
                                 ''+ustMeta.Name,
                         Variant__c = 'Error'
