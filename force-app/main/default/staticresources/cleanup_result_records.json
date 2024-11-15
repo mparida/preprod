@@ -1,0 +1,28 @@
+{
+  "recordTypeMap": {},
+  "RecordSetBundles": [
+    {
+      "Records": [
+        {
+          "attributes": {
+            "type": "copado__Function__c",
+            "url": "/services/data/v58.0/sobjects/copado__Function__c/a0k7Q000000SgzrQAC"
+          },
+          "Id": "a0k7Q000000SgzrQAC",
+          "Name": "cleanup-result-records",
+          "copado__API_Name__c": "cleanup_result_records",
+          "copado__Image_Name__c": "copado-multicloud-metadata:v1",
+          "copado__Options__c": "[]",
+          "copado__Parameters__c": "[{\"required\":true,\"name\":\"DAYS_TO_PRESERVE_RESULTS\",\"defaultValue\":\"30\"}]",
+          "copado__Script__c": "#!/bin/bash\r\nset -eup pipefail\r\n\r\necho \"\r\nInteger daysToPreserve = $DAYS_TO_PRESERVE_RESULTS;\r\nDate dateToDelete = System.today().addDays(-daysToPreserve);\r\nSet<Id> deletes = new Set<Id>();\r\nfor(copado__Result__c r : [SELECT Id, CreatedDate FROM copado__Result__c WHERE CreatedDate < :dateToDelete ORDER BY CreatedDate ASC limit 200]) {\r\n    deletes.add(r.Id);\r\n}\r\n// now, query the files of those ids.\r\nfor(ContentDocumentLink r : [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId IN :deletes limit 600]) {\r\n    deletes.add(r.ContentDocumentId);\r\n}\r\nSystem.debug('Will delete '+deletes.size()+' Results and Files');\r\nif(deletes.size()>0) {\r\n    Database.delete(new List<Id>(deletes), false);\r\n}\r\n\" > /tmp/run.apex\r\n\r\n# fix urls\r\nexport CF_SF_ENDPOINT=\"https://$(echo $CF_SF_ENDPOINT | sed -e 's/[^/]*\\/\\/\\([^@]*@\\)\\?\\([^:/]*\\).*/\\2/')\"\r\n\r\ncopado -p \"Deleting Results older than $DAYS_TO_PRESERVE_RESULTS days (1)\"\r\nSFDX_ACCESS_TOKEN=\"$CF_SF_SESSIONID\" sf org login access-token --alias copadoOrg --instance-url \"$CF_SF_ENDPOINT\" --no-prompt\r\nsf apex run --file /tmp/run.apex --target-org copadoOrg --json\r\n\r\ncopado -p \"Deleting Results older than $DAYS_TO_PRESERVE_RESULTS days (2)\"\r\nsf apex run --file /tmp/run.apex --target-org copadoOrg --json",
+          "copado__Timeout__c": 30,
+          "copado__Type__c": "Custom",
+          "copado__Version__c": "1",
+          "copado__Worker_Size__c": "S"
+        }
+      ],
+      "ObjectType": "copado__Function__c"
+    }
+  ],
+  "blobsByUID": {}
+}

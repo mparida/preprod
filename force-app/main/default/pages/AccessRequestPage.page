@@ -1,0 +1,78 @@
+<apex:page controller="AccessRequestController" showHeader="false" sidebar="false">
+    <!-- Header Section with Logo and Title -->
+    <div style="text-align: center; padding: 10px; background-color: #003366; color: white;">
+        <img src="{!$Resource.AT_T_Logo}" alt="AT&T Logo" style="width: 80px; vertical-align: middle;"/>
+        <h2 style="display: inline; margin-left: 20px;font-size: 1.5em; font-weight: bold;">ACC User Access Management</h2>
+    </div>
+
+    <!-- Custom CSS for Styling -->
+    <style>
+        .form-container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100% !important; /* Ensures all fields are aligned */
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+    </style>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <apex:form >
+            <apex:pageMessages />
+
+            <!-- Environment Selection -->
+            <div class="form-group">
+                <label for="envSelect">Environment</label>
+                <apex:selectList value="{!selectedEnvironmentId}" size="1" id="envSelect" required="true">
+                    <apex:selectOptions value="{!environmentOptions}" />
+                </apex:selectList>
+            </div>
+
+            <!-- User Name -->
+            <div class="form-group">
+                <label for="userName">User Name</label>
+                <apex:inputText value="{!accessRequest.ATT_UID__c}" id="userName" styleClass="text-input" required="true"/>
+            </div>
+
+            <!-- Profile -->
+            <div class="form-group">
+                <label for="profile">Profile</label>
+                <apex:inputField value="{!accessRequest.Profile_Access__c}" id="profile" required="true"/>
+            </div>
+
+            <!-- Duration for Access -->
+            <div class="form-group">
+                <label for="duration">Duration for Access</label>
+                <apex:inputField value="{!accessRequest.Access_Given_For__c}" id="duration" required="true"/>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group">
+                <apex:commandButton value="Submit Request" action="{!saveAccessRequest}" styleClass="btn"/>
+            </div>
+        </apex:form>
+    </div>
+</apex:page>
