@@ -56,46 +56,4 @@ private class UserStoryMetadataTriggerTest {
 
         Test.stopTest();
     }
-
-    /*@isTest
-    static void testUserStoryMetadataTrigger_DisallowedMetadata() {
-        Test.startTest();
-
-        // Insert a User Story Metadata with disallowed metadata type
-        copado__User_Story_Metadata__c disallowedMetadata = new copado__User_Story_Metadata__c(
-                copado__User_Story__c = [SELECT Id FROM copado__User_Story__c LIMIT 1].Id,
-                copado__Type__c = 'DisallowedMetadata',
-                copado__ModuleDirectory__c = 'src/classes/Disallowed.cls'
-        );
-
-        try {
-            insert disallowedMetadata;
-            System.assert(false, 'Expected an exception due to disallowed metadata.');
-        } catch (DmlException e) {
-            System.assert(e.getMessage().contains('The metadata cannot be saved since it was comitted from CLI'),
-                    'Correct error message should be thrown.');
-        }
-
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testUserStoryMetadataTrigger_DisallowedPattern() {
-        Test.startTest();
-
-        // Insert a User Story Metadata with disallowed pattern in ModuleDirectory
-        copado__User_Story_Metadata__c patternViolationMetadata = new copado__User_Story_Metadata__c(
-                copado__User_Story__c = [SELECT Id FROM copado__User_Story__c LIMIT 1].Id,
-                copado__Type__c = 'AllowedMetadata',
-                copado__ModuleDirectory__c = 'disallowed_path/src/classes/SomeClass.cls'
-        );
-
-        try {
-            insert patternViolationMetadata;
-            System.assert(false, 'Expected an exception due to disallowed pattern.');
-        } catch (DmlException e) {
-            System.assert(e.getMessage().contains('The metadata cannot be saved since it was comitted from CLI'),
-                    'Correct error message should be thrown.');
-        }
-    }*/
 }
