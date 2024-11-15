@@ -4,6 +4,7 @@ public with sharing class AccessRequestController {
 
     public AccessRequestController() {
         accessRequest = new ACC_Environment_Access__c();
+        ApexPages.getMessages().clear();
     }
 
     public List<SelectOption> getEnvironmentOptions() {
@@ -48,12 +49,46 @@ public with sharing class AccessRequestController {
     }
 
     private Boolean validateFields() {
-        return selectedEnvironmentId != null && !selectedEnvironmentId.equals('Select') && accessRequest.ATT_UID__c != null && accessRequest.Profile_Access__c != null;
+        Boolean isValid = true;
+
+        if (selectedEnvironmentId == null || selectedEnvironmentId.equals('Select')) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Environment is required.'));
+            isValid = false;
+        }
+        if (String.isBlank(accessRequest.ATT_UID__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'User Name is required.'));
+            isValid = false;
+        }
+        if (accessRequest.Profile_Access__c == null) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Profile is required.'));
+            isValid = false;
+        }
+        return isValid;
     }
 
     private Boolean validateCreateAccessFields() {
-        return selectedEnvironmentId != null && !selectedEnvironmentId.equals('Select') &&
-                accessRequest.First_Name__c != null && accessRequest.Last_Name__c != null &&
-                accessRequest.ATT_Email__c != null && accessRequest.Replicate_UserName__c != null;
+        Boolean isValid = true;
+
+        if (selectedEnvironmentId == null || selectedEnvironmentId.equals('Select')) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Environment is required.'));
+            isValid = false;
+        }
+        if (String.isBlank(accessRequest.First_Name__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'First Name is required.'));
+            isValid = false;
+        }
+        if (String.isBlank(accessRequest.Last_Name__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Last Name is required.'));
+            isValid = false;
+        }
+        if (String.isBlank(accessRequest.ATT_Email__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Email is required.'));
+            isValid = false;
+        }
+        if (String.isBlank(accessRequest.Replicate_UserName__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Replicate UserName is required.'));
+            isValid = false;
+        }
+        return isValid;
     }
 }

@@ -7,13 +7,25 @@
 
     <!-- Custom CSS for Styling -->
     <style>
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto 20px auto; /* Align to center, with margin bottom */
+            padding: 20px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+        }
+
         .tab-container {
             max-width: 400px;
-            margin: 0 auto;
+            margin: 0 auto; /* Center the tabs */
             display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid #003366;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            overflow: hidden;
         }
+
         .tab {
             width: 50%;
             text-align: center;
@@ -23,35 +35,27 @@
             color: #003366;
             background-color: #f1f1f1;
             border: 1px solid #d9d9d9;
-            border-bottom: none;
             transition: background-color 0.3s;
+            box-sizing: border-box;
         }
+
         .tab.active {
-            background-color: #fff;
+            background-color: #00a8e0; /* Light green for active tab */
             color: #003366;
-            border-top: 2px solid #003366;
-            border-left: 1px solid #d9d9d9;
-            border-right: 1px solid #d9d9d9;
         }
-        .form-container {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #d9d9d9;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            background-color: #f9f9f9;
-        }
+
         .form-group {
             margin-bottom: 15px;
             text-align: left;
         }
+
         .form-group label {
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
             color: #333;
         }
+
         .form-group input,
         .form-group select {
             width: 100% !important;
@@ -65,8 +69,8 @@
 
     <!-- Tab Navigation -->
     <div class="tab-container">
-        <div class="tab active" onclick="showTab('modify')">Modify Access</div>
-        <div class="tab" onclick="showTab('create')">Create Access</div>
+        <div class="tab active" onclick="showTab('modify', this)">Modify Access</div>
+        <div class="tab" onclick="showTab('create', this)">New User Access</div>
     </div>
 
     <!-- Form Containers for Each Tab -->
@@ -132,7 +136,7 @@
 
     <!-- JavaScript for Tab Functionality -->
     <script>
-        function showTab(tabId) {
+        function showTab(tabId, element) {
             // Hide all form containers
             document.getElementById('modify').style.display = 'none';
             document.getElementById('create').style.display = 'none';
@@ -145,7 +149,7 @@
             document.getElementById(tabId).style.display = 'block';
 
             // Add active class to the clicked tab
-            event.currentTarget.classList.add('active');
+            element.classList.add('active');
         }
     </script>
 </apex:page>
