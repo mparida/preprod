@@ -28,51 +28,140 @@
         }
         .form-group input,
         .form-group select {
-            width: 100% !important; /* Ensures all fields are aligned */
+            width: 100% !important;
             padding: 8px;
             font-size: 14px;
             border: 1px solid #d9d9d9;
             border-radius: 4px;
             box-sizing: border-box;
         }
-        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .tabs button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            background-color: #003366;
+            color: blue;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .tabs button.active {
+            background-color: #005bb5;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 
-    <!-- Form Container -->
-    <div class="form-container">
-        <apex:form >
-            <apex:pageMessages />
-
-            <!-- Environment Selection -->
-            <div class="form-group">
-                <label for="envSelect">Environment</label>
-                <apex:selectList value="{!selectedEnvironmentId}" size="1" id="envSelect" required="true">
-                    <apex:selectOptions value="{!environmentOptions}" />
-                </apex:selectList>
-            </div>
-
-            <!-- User Name -->
-            <div class="form-group">
-                <label for="userName">User Name</label>
-                <apex:inputText value="{!accessRequest.ATT_UID__c}" id="userName" styleClass="text-input" required="true"/>
-            </div>
-
-            <!-- Profile -->
-            <div class="form-group">
-                <label for="profile">Profile</label>
-                <apex:inputField value="{!accessRequest.Profile_Access__c}" id="profile" required="true"/>
-            </div>
-
-            <!-- Duration for Access -->
-            <div class="form-group">
-                <label for="duration">Duration for Access</label>
-                <apex:inputField value="{!accessRequest.Access_Given_For__c}" id="duration" required="true"/>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="form-group">
-                <apex:commandButton value="Submit Request" action="{!saveAccessRequest}" styleClass="btn"/>
-            </div>
-        </apex:form>
+    <!-- Tabs -->
+    <div class="tabs">
+        <button id="tab1" onclick="showTab(1)" class="active">Modify Access</button>
+        <button id="tab2" onclick="showTab(2)">Create Access</button>
     </div>
+
+    <!-- Tab Contents -->
+    <div id="tabContent1" class="tab-content active">
+        <div class="form-container">
+            <apex:form>
+                <apex:pageMessages />
+
+                <!-- Environment Selection -->
+                <div class="form-group">
+                    <label for="envSelect">Environment</label>
+                    <apex:selectList value="{!selectedEnvironmentId}" size="1" id="envSelect" required="true">
+                        <apex:selectOptions value="{!environmentOptions}" />
+                    </apex:selectList>
+                </div>
+
+                <!-- User Name -->
+                <div class="form-group">
+                    <label for="userName">User Name</label>
+                    <apex:inputText value="{!accessRequest.ATT_UID__c}" id="userName" required="true"/>
+                </div>
+
+                <!-- Profile -->
+                <div class="form-group">
+                    <label for="profile">Profile</label>
+                    <apex:inputField value="{!accessRequest.Profile_Access__c}" id="profile" required="true"/>
+                </div>
+
+                <!-- Duration for Access -->
+                <div class="form-group">
+                    <label for="duration">Duration for Access</label>
+                    <apex:inputField value="{!accessRequest.Access_Given_For__c}" id="duration" required="true"/>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <apex:commandButton value="Submit Request" action="{!saveAccessRequest}" styleClass="btn"/>
+                </div>
+            </apex:form>
+        </div>
+    </div>
+
+    <div id="tabContent2" class="tab-content">
+        <div class="form-container">
+            <apex:form>
+                <apex:pageMessages />
+
+                <!-- Environment Selection -->
+                <div class="form-group">
+                    <label for="envSelect2">Environment</label>
+                    <apex:selectList value="{!selectedEnvironmentId}" size="1" id="envSelect2" required="true">
+                        <apex:selectOptions value="{!environmentOptions}" />
+                    </apex:selectList>
+                </div>
+
+                <!-- First Name -->
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <apex:inputText value="{!accessRequest.First_Name__c}" id="firstName" required="true"/>
+                </div>
+
+                <!-- Last Name -->
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <apex:inputText value="{!accessRequest.Last_Name__c}" id="lastName" required="true"/>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <apex:inputText value="{!accessRequest.ATT_Email__c}" id="email" required="true"/>
+                </div>
+
+                <!-- Replicate UserName -->
+                <div class="form-group">
+                    <label for="replicateUserName">Replicate UserName</label>
+                    <apex:inputText value="{!accessRequest.Replicate_UserName__c}" id="replicateUserName" required="true"/>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <apex:commandButton value="Create User" action="{!saveCreateAccessRequest}" styleClass="btn"/>
+                </div>
+            </apex:form>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabIndex) {
+            document.querySelectorAll('.tab-content').forEach((tab) => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tabs button').forEach((btn) => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`tabContent${tabIndex}`).classList.add('active');
+            document.getElementById(`tab${tabIndex}`).classList.add('active');
+        }
+    </script>
 </apex:page>
