@@ -22,6 +22,7 @@ public with sharing class AccessRequestController {
             if (validateFields()) {
                 copado__Org__c org = [SELECT Id FROM copado__Org__c WHERE Name = :selectedEnvironmentId];
                 accessRequest.Environment_Name__c = org.Id;
+                accessRequest.RecordTypeId = Schema.SObjectType.ACC_Environment_Access__c.getRecordTypeInfosByDeveloperName().get('Update_Access').getRecordTypeId();
                 insert accessRequest;
                 ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM, 'Access Request Submitted Successfully!'));
                 accessRequest = new ACC_Environment_Access__c();

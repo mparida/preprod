@@ -45,7 +45,7 @@ public with sharing class AccessProvisioningService {
             DateTime now = DateTime.now();
             DateTime futureDateTime = days < 1.0 ? now.addHours (Integer.valueOf(days*24)): now.addDays(Integer.valueOf(accessRecord.Access_Given_For__c) );
             accessRecord.End_Time__c  = futureDateTime;
-            //accessRecord.End_Time__c = DateTime.now().addMinutes(1);
+            accessRecord.End_Time__c = DateTime.now().addMinutes(1);
             
             update accessRecord;
        /* } catch (Exception e) {
