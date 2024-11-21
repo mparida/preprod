@@ -46,13 +46,14 @@ public with sharing class NewUserAccessProvisioningManager {
         }
 
         // Step 4: Retrieve Permission Set Groups
-        String queryPSG = EncodingUtil.urlEncode('SELECT PermissionSetGroupId FROM PermissionSetGroupAssignment WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
+        /*String queryPSG = EncodingUtil.urlEncode('SELECT PermissionSetGroupId FROM PermissionSetGroupAssignment WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
         HttpRequest reqPSG = new HttpRequest();
         reqPSG.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + queryPSG);
         reqPSG.setMethod('GET');
 
         HttpResponse resPSG = http.send(reqPSG);
         if (resPSG.getStatusCode() == 200) {
+            System.debug('resPSG.getBody():::'+resPSG.getBody());
             Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(resPSG.getBody());
             List<Object> records = (List<Object>) queryResponse.get('records');
             List<String> psgIds = new List<String>();
@@ -61,7 +62,7 @@ public with sharing class NewUserAccessProvisioningManager {
                 psgIds.add((String) psgRecord.get('PermissionSetGroupId'));
             }
             accessDetails.put('PermissionSetGroupIds', String.join(psgIds, ','));
-        }
+        }*/
 
         return accessDetails;
     }
@@ -177,7 +178,7 @@ public with sharing class NewUserAccessProvisioningManager {
         // Step 4: Assign Permission Set Groups to the new user
         List<String> permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
         assignPermissionSetGroups(namedCredentialName, newUserId, permissionSetGroupIds);
-
+        System.debug('permissionSetGroupIds::'+permissionSetGroupIds);
         try {
             ACC_Environment_Access__c accessRecord = [SELECT Id, Prior_Profile__c, Prior_PS_Assignment__c, Prior_PSG_Assigments__c
             FROM ACC_Environment_Access__c WHERE Id = :accessRecordId LIMIT 1];
