@@ -27,8 +27,8 @@ public with sharing class NewUserAccessProvisioningManager {
             accessDetails.put('ProfileId', (String) userResponse.get('ProfileId'));
         }
 
-        // Step 3: Retrieve Permission Sets
-        String queryPermissions = EncodingUtil.urlEncode('SELECT PermissionSetId FROM PermissionSetAssignment WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
+        // Step 3: Retrieve Permission Sets and Permission Set Groups
+        String queryPermissions = EncodingUtil.urlEncode('SELECT PermissionSetId, PermissionSetGroupId FROM PermissionSetAssignment WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
         HttpRequest reqPermissions = new HttpRequest();
         reqPermissions.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + queryPermissions);
         reqPermissions.setMethod('GET');
@@ -38,31 +38,41 @@ public with sharing class NewUserAccessProvisioningManager {
             Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(resPermissions.getBody());
             List<Object> records = (List<Object>) queryResponse.get('records');
             List<String> permissionSetIds = new List<String>();
+            List<String> permissionSetGroupIds = new List<String>();
+
             for (Object record : records) {
-                Map<String, Object> psRecord = (Map<String, Object>) record;
-                permissionSetIds.add((String) psRecord.get('PermissionSetId'));
+                Map<String, Object> assignmentRecord = (Map<String, Object>) record;
+                if (assignmentRecord.containsKey('PermissionSetId')) {
+                    permissionSetIds.add((String) assignmentRecord.get('PermissionSetId'));
+                }
+                if (assignmentRecord.containsKey('PermissionSetGroupId')) {
+                    permissionSetGroupIds.add((String) assignmentRecord.get('PermissionSetGroupId'));
+                }
             }
+
             accessDetails.put('PermissionSetIds', String.join(permissionSetIds, ','));
+            accessDetails.put('PermissionSetGroupIds', String.join(permissionSetGroupIds, ','));
         }
 
-        // Step 4: Retrieve Permission Set Groups
-        /*String queryPSG = EncodingUtil.urlEncode('SELECT PermissionSetGroupId FROM PermissionSetGroupAssignment WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
-        HttpRequest reqPSG = new HttpRequest();
-        reqPSG.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + queryPSG);
-        reqPSG.setMethod('GET');
+        // Step 4: Retrieve Permission Set Licenses
+        String queryLicenses = EncodingUtil.urlEncode('SELECT PermissionSetLicenseId FROM PermissionSetLicenseAssign WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
+        HttpRequest reqLicenses = new HttpRequest();
+        reqLicenses.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + queryLicenses);
+        reqLicenses.setMethod('GET');
 
-        HttpResponse resPSG = http.send(reqPSG);
-        if (resPSG.getStatusCode() == 200) {
-            System.debug('resPSG.getBody():::'+resPSG.getBody());
-            Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(resPSG.getBody());
+        HttpResponse resLicenses = http.send(reqLicenses);
+        if (resLicenses.getStatusCode() == 200) {
+            Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(resLicenses.getBody());
             List<Object> records = (List<Object>) queryResponse.get('records');
-            List<String> psgIds = new List<String>();
+            List<String> licenseIds = new List<String>();
+
             for (Object record : records) {
-                Map<String, Object> psgRecord = (Map<String, Object>) record;
-                psgIds.add((String) psgRecord.get('PermissionSetGroupId'));
+                Map<String, Object> licenseRecord = (Map<String, Object>) record;
+                licenseIds.add((String) licenseRecord.get('PermissionSetLicenseId'));
             }
-            accessDetails.put('PermissionSetGroupIds', String.join(psgIds, ','));
-        }*/
+
+            accessDetails.put('PermissionSetLicenseIds', String.join(licenseIds, ','));
+        }
 
         return accessDetails;
     }
@@ -106,54 +116,132 @@ public with sharing class NewUserAccessProvisioningManager {
     }
 
     // Assigns Permission Sets to a User
-    public static void assignPermissionSets(String namedCredentialName, String userId, List<String> permissionSetIds) {
-        Http http = new Http();
+    public static void assignPermissionsBulk(String namedCredentialName, String userId, List<String> permissionSetIds, List<String> permissionSetGroupIds) {
+        try {
+            Http http = new Http();
+            Integer batchSize = 10; // Reduce batch size to prevent timeouts
 
-        for (String psId : permissionSetIds) {
-            Map<String, Object> data = new Map<String, Object>{
-                    'AssigneeId' => userId,
-                    'PermissionSetId' => psId
-            };
+            // Combine Permission Set and Permission Set Group IDs into a single list
+            List<Map<String, Object>> combinedAssignments = new List<Map<String, Object>>();
 
-            HttpRequest req = new HttpRequest();
-            req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/sobjects/PermissionSetAssignment/');
-            req.setMethod('POST');
-            req.setHeader('Content-Type', 'application/json');
-            req.setBody(JSON.serialize(data));
-
-            HttpResponse res = http.send(req);
-            if (res.getStatusCode() != 201) {
-                System.debug('Failed to assign permission set ' + psId + '. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+            for (String psId : permissionSetIds) {
+                combinedAssignments.add(new Map<String, Object>{
+                        'AssigneeId' => userId,
+                        'PermissionSetId' => psId
+                });
             }
+
+            for (String psgId : permissionSetGroupIds) {
+                combinedAssignments.add(new Map<String, Object>{
+                        'AssigneeId' => userId,
+                        'PermissionSetGroupId' => psgId
+                });
+            }
+
+            Integer totalAssignments = combinedAssignments.size();
+
+            // Process in smaller batches
+            for (Integer batchStartIndex = 0; batchStartIndex < totalAssignments; batchStartIndex += batchSize) {
+                List<Map<String, Object>> currentBatch = getBatch(combinedAssignments, batchStartIndex, batchSize);
+
+                List<Map<String, Object>> compositeRequests = new List<Map<String, Object>>();
+                Integer referenceIdCounter = 1;
+
+                for (Map<String, Object> assignment : currentBatch) {
+                    compositeRequests.add(new Map<String, Object>{
+                            'method' => 'POST',
+                            'url' => '/services/data/v56.0/sobjects/PermissionSetAssignment/',
+                            'referenceId' => 'Assignment' + referenceIdCounter++,
+                            'body' => assignment
+                    });
+                }
+
+                Map<String, Object> compositeBody = new Map<String, Object>{
+                        'compositeRequest' => compositeRequests
+                };
+
+                HttpRequest req = new HttpRequest();
+                req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/composite/');
+                req.setMethod('POST');
+                req.setHeader('Content-Type', 'application/json');
+                req.setBody(JSON.serialize(compositeBody));
+                req.setTimeout(60000); // Increase timeout to 60 seconds
+
+                HttpResponse res = http.send(req);
+
+                // Check the response for errors
+                if (res.getStatusCode() != 200) {
+                    throw new UserStoryException('Failed to assign permissions. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+                }
+            }
+
+            System.debug('Permissions assigned successfully in batches.');
+
+        } catch (Exception e) {
+            System.debug('Error assigning permissions in bulk: ' + e.getMessage());
+            throw new UserStoryException('Error while assigning permissions in bulk: ' + e.getMessage());
         }
     }
 
-    // Assigns Permission Set Groups to a User
-    public static void assignPermissionSetGroups(String namedCredentialName, String userId, List<String> permissionSetGroupIds) {
+    private static List<Map<String, Object>> getBatch(List<Map<String, Object>> combinedAssignments, Integer startIndex, Integer batchSize) {
+        List<Map<String, Object>> batch = new List<Map<String, Object>>();
+
+        for (Integer i = startIndex; i < Math.min(startIndex + batchSize, combinedAssignments.size()); i++) {
+            batch.add(combinedAssignments[i]);
+        }
+
+        return batch;
+    }
+
+    public static void assignPermissionSetLicenses(String namedCredentialName, String userId, List<String> licenseIds) {
+        if (licenseIds.isEmpty()) return;
+
         Http http = new Http();
+        List<Map<String, Object>> assignments = new List<Map<String, Object>>();
 
-        for (String psgId : permissionSetGroupIds) {
-            Map<String, Object> data = new Map<String, Object>{
+        for (String licenseId : licenseIds) {
+            assignments.add(new Map<String, Object>{
                     'AssigneeId' => userId,
-                    'PermissionSetGroupId' => psgId
-            };
+                    'PermissionSetLicenseId' => licenseId
+            });
+        }
 
-            HttpRequest req = new HttpRequest();
-            req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/sobjects/PermissionSetGroupAssignment/');
-            req.setMethod('POST');
-            req.setHeader('Content-Type', 'application/json');
-            req.setBody(JSON.serialize(data));
+        // Use Composite API to assign all licenses in bulk
+        Map<String, Object> compositeRequest = new Map<String, Object>{
+                'compositeRequest' => new List<Map<String, Object>>()
+        };
 
-            HttpResponse res = http.send(req);
-            if (res.getStatusCode() != 201) {
-                System.debug('Failed to assign permission set group ' + psgId + '. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
-            }
+        Integer referenceIdCounter = 1;
+        List<Map<String, Object>> compositeRequests = (List<Map<String, Object>>) compositeRequest.get('compositeRequest');
+        for (Map<String, Object> assignment : assignments) {
+            compositeRequests.add(new Map<String, Object>{
+                    'method' => 'POST',
+                    'url' => '/services/data/v56.0/sobjects/PermissionSetLicenseAssign/',
+                    'referenceId' => 'License' + referenceIdCounter++,
+                    'body' => assignment
+            });
+        }
+        compositeRequest.put('compositeRequest', compositeRequests);
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/composite/');
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/json');
+        req.setBody(JSON.serialize(compositeRequest));
+
+        HttpResponse res = http.send(req);
+
+        if (res.getStatusCode() != 200) {
+            throw new UserStoryException('Failed to assign Permission Set Licenses. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
         }
     }
+
+
 
     // Main method to create and provision access for the new user
     @InvocableMethod(label='New User Access' description='Creates a new User from an Existing User')
     public static void provisionAccessForNEwUser(List<Id> accessRecordIds) {
+        System.debug('accessRecordIds size @@@@@@@@@@@@@@@@@@'+accessRecordIds + '###########' +accessRecordIds.size());
         List<ACC_Environment_Access__c> accList = new List<ACC_Environment_Access__c>([SELECT Environment_Name__r.name,
                 First_Name__c, Last_Name__c, ATT_Email__c, Replicate_UserName__c
         FROM ACC_Environment_Access__c WHERE ID IN : accessRecordIds]);
@@ -173,11 +261,18 @@ public with sharing class NewUserAccessProvisioningManager {
 
         // Step 3: Assign Permission Sets to the new user
         List<String> permissionSetIds = accessDetails.get('PermissionSetIds') != null ? accessDetails.get('PermissionSetIds').split(',') : new List<String>();
-        assignPermissionSets(namedCredentialName, newUserId, permissionSetIds);
+        List<String> permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
+        Set<String> PSGIdsSet = new Set<String>(permissionSetGroupIds);
+        PSGIdsSet.remove('');
+        permissionSetGroupIds = new List<String>();
+        permissionSetGroupIds.addAll(PSGIdsSet);
+        List<String> permissionSetLicenseIds = accessDetails.get('PermissionSetLicenseIds') != null ? accessDetails.get('PermissionSetLicenseIds').split(',') : new List<String>();
+        assignPermissionSetLicenses(namedCredentialName, newUserId, permissionSetLicenseIds);
+        assignPermissionsBulk(namedCredentialName, newUserId, permissionSetIds, permissionSetGroupIds);
 
         // Step 4: Assign Permission Set Groups to the new user
-        List<String> permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
-        assignPermissionSetGroups(namedCredentialName, newUserId, permissionSetGroupIds);
+        //List<String> permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
+        //assignPermissionSetGroups(namedCredentialName, newUserId, permissionSetGroupIds);
         System.debug('permissionSetGroupIds::'+permissionSetGroupIds);
         try {
             ACC_Environment_Access__c accessRecord = [SELECT Id, Prior_Profile__c, Prior_PS_Assignment__c, Prior_PSG_Assigments__c
@@ -186,6 +281,7 @@ public with sharing class NewUserAccessProvisioningManager {
             accessRecord.Prior_Profile__c = accessDetails.get('ProfileId');
             accessRecord.Prior_PS_Assignment__c = String.join(permissionSetIds, ',');
             accessRecord.Prior_PSG_Assigments__c = String.join(permissionSetGroupIds, ',');
+            accessRecord.Prior_PSLicense_Assignment_Ids__c = String.join(PermissionSetLicenseIds, ',');
             accessRecord.Access_Delivered__c = true;
             accessRecord.Access_Provisioning_Complete__c = true;
             accessRecord.Executed_by_Devops__c = true;
