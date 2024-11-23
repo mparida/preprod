@@ -240,11 +240,19 @@ public with sharing class NewUserAccessProvisioningManager {
 
     // Main method to create and provision access for the new user
     @InvocableMethod(label='New User Access' description='Creates a new User from an Existing User')
-    public static void provisionAccessForNEwUser(List<Id> accessRecordIds) {
+    public static void provisionAccessForNEwUser(List<String> accessRecordIds) {
+        String ids = accessRecordIds.get(0);
+        System.debug('PRINT VAR IDs :'+ids);
+        String[] VarIds;
+        if(ids != null && ids.contains(',')){
+            VarIds = ids.split(',');
+        }else{
+            VarIds[0] = ids;
+        }
         System.debug('accessRecordIds size @@@@@@@@@@@@@@@@@@'+accessRecordIds + '###########' +accessRecordIds.size());
         List<ACC_Environment_Access__c> accList = new List<ACC_Environment_Access__c>([SELECT Environment_Name__r.name,
                 First_Name__c, Last_Name__c, ATT_Email__c, Replicate_UserName__c
-        FROM ACC_Environment_Access__c WHERE ID IN : accessRecordIds]);
+        FROM ACC_Environment_Access__c WHERE ID IN : VarIds]);
         if(accList.size() > 0){
             for (ACC_Environment_Access__c access : accList) {
                 provisionAccess(access.Id, access.Environment_Name__r.name, access.Replicate_UserName__c, access.First_Name__c, access.Last_Name__c, access.ATT_Email__c);
