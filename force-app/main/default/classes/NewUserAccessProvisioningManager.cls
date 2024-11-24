@@ -5,6 +5,88 @@
 public with sharing class NewUserAccessProvisioningManager {
     // Retrieves Profile, Permission Sets, and Permission Set Groups for Replicate_UserName__c
     private static String newUserName;
+    // Main method to create and provision access for the new user
+    @InvocableMethod(label='New User Access' description='Creates a new User from an Existing User')
+    public static void provisionAccessForNEwUser(List<String> accessRecordIds) {
+        String ids = accessRecordIds.get(0);
+        System.debug('PRINT VAR IDs :'+ids);
+        String[] VarIds;
+        if(ids != null && ids.contains(',')){
+            VarIds = ids.split(',');
+        }else{
+            VarIds = new String[1];
+            VarIds[0] = ids;
+        }
+        System.debug('accessRecordIds size @@@@@@@@@@@@@@@@@@'+accessRecordIds + '###########' +accessRecordIds.size());
+        List<ACC_Environment_Access__c> accList = new List<ACC_Environment_Access__c>([SELECT Environment_Name__r.name,
+                First_Name__c, Last_Name__c, ATT_Email__c, Replicate_UserName__c
+        FROM ACC_Environment_Access__c WHERE ID IN : VarIds]);
+        if(accList.size() > 0){
+            for (ACC_Environment_Access__c access : accList) {
+                provisionAccess(access.Id, access.Environment_Name__r.name, access.Replicate_UserName__c, access.First_Name__c, access.Last_Name__c, access.ATT_Email__c);
+            }
+        }
+
+    }
+    @future(callout=true)
+    public static void provisionAccess(Id accessRecordId, String namedCredentialName, String replicateUserName, String firstName, String lastName, String attEmail) {
+        // Step 1: Get existing user access details
+        Map<String, String> accessDetails = getUserAccessDetails(namedCredentialName, replicateUserName);
+        List<String> permissionSetIds;
+        List<String> permissionSetGroupIds;
+        List<String> permissionSetLicenseIds;
+        String newUserId;
+        Boolean hasError = false;
+        try{
+            // Step 2: Create a new user with specified details
+            newUserId = createNewUser(namedCredentialName, firstName, lastName, attEmail, namedCredentialName, accessDetails.get('ProfileId'), accessRecordId);
+            // Step 3: Assign Permission Sets to the new user
+            permissionSetIds = accessDetails.get('PermissionSetIds') != null ? accessDetails.get('PermissionSetIds').split(',') : new List<String>();
+            permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
+            Set<String> PSGIdsSet = new Set<String>(permissionSetGroupIds);
+            PSGIdsSet.remove('');
+            permissionSetGroupIds = new List<String>();
+            permissionSetGroupIds.addAll(PSGIdsSet);
+            permissionSetLicenseIds = accessDetails.get('PermissionSetLicenseIds') != null ? accessDetails.get('PermissionSetLicenseIds').split(',') : new List<String>();
+            assignPermissionSetLicenses(namedCredentialName, newUserId, permissionSetLicenseIds);
+            assignPermissionsBulk(namedCredentialName, newUserId, permissionSetIds, permissionSetGroupIds);
+
+            // Step 4: Assign Permission Set Groups to the new user
+            System.debug('permissionSetGroupIds::'+permissionSetGroupIds);
+        }catch (Exception e){
+            hasError = true;
+            System.debug('Exception while provisioning User : '+e.getStackTraceString());
+            if(e instanceof  UserAccessException){
+                ACC_Environment_Access__c access = new ACC_Environment_Access__c(Id = accessRecordId, hasError__c = true, Call_Out_Errors__c = 'Access Provisioning Error', Error__c = e.toString());
+                update access;
+            }
+        }
+        if(!hasError) {
+            try {
+                ACC_Environment_Access__c accessRecord = [
+                        SELECT Id, Prior_Profile__c, Prior_PS_Assignment__c, Prior_PSG_Assigments__c
+                        FROM ACC_Environment_Access__c
+                        WHERE Id = :accessRecordId
+                        LIMIT 1
+                ];
+
+                accessRecord.Prior_Profile__c = accessDetails.get('ProfileId');
+                accessRecord.Prior_PS_Assignment__c = String.join(permissionSetIds, ',');
+                accessRecord.Prior_PSG_Assigments__c = String.join(permissionSetGroupIds, ',');
+                accessRecord.Prior_PSLicense_Assignment_Ids__c = String.join(PermissionSetLicenseIds, ',');
+                accessRecord.Access_Delivered__c = true;
+                accessRecord.Access_Provisioning_Complete__c = true;
+                accessRecord.Executed_by_Devops__c = true;
+                accessRecord.ATT_UID__c = newUserName;
+                accessRecord.User_Id__c = newUserId;
+                update accessRecord;
+            } catch (Exception e) {
+                System.debug('Error updating access record: ' + e.getMessage());
+                throw new UserAccessException('Failed to update the access record with new user details.');
+            }
+        }
+    }
+
     public static Map<String, String> getUserAccessDetails(String namedCredentialName, String replicateUserName) {
         Map<String, String> accessDetails = new Map<String, String>();
 
@@ -78,7 +160,7 @@ public with sharing class NewUserAccessProvisioningManager {
     }
 
     // Creates a new user with the provided details
-    public static String createNewUser(String namedCredentialName, String firstName, String lastName, String attEmail, String environment, String profileId) {
+    public static String createNewUser(String namedCredentialName, String firstName, String lastName, String attEmail, String environment, String profileId, Id accessRecordId) {
         newUserName = attEmail + '.' + environment;
         // Default values for required fields
         String defaultTimeZoneSidKey = 'America/Los_Angeles'; // Adjust based on your org's preferences
@@ -111,11 +193,12 @@ public with sharing class NewUserAccessProvisioningManager {
             Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             return (String) response.get('id');  // New User ID
         } else {
-            throw new UserStoryException('Failed to create new user. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+            System.debug('Error while creating the New User....'+accessRecordId);
+            throw new UserAccessException(String.valueOf(res.getStatusCode()) , res.getBody());
         }
     }
 
-    // Assigns Permission Sets to a User
+    // Assigns Permission Sets and PSGs to a User
     public static void assignPermissionsBulk(String namedCredentialName, String userId, List<String> permissionSetIds, List<String> permissionSetGroupIds) {
         try {
             Http http = new Http();
@@ -183,16 +266,17 @@ public with sharing class NewUserAccessProvisioningManager {
         }
     }
 
+    //Prepares the batch for Composite Call
     private static List<Map<String, Object>> getBatch(List<Map<String, Object>> combinedAssignments, Integer startIndex, Integer batchSize) {
         List<Map<String, Object>> batch = new List<Map<String, Object>>();
 
         for (Integer i = startIndex; i < Math.min(startIndex + batchSize, combinedAssignments.size()); i++) {
             batch.add(combinedAssignments[i]);
         }
-
         return batch;
     }
 
+    //Assigns PS License to User
     public static void assignPermissionSetLicenses(String namedCredentialName, String userId, List<String> licenseIds) {
         if (licenseIds.isEmpty()) return;
 
@@ -233,72 +317,6 @@ public with sharing class NewUserAccessProvisioningManager {
 
         if (res.getStatusCode() != 200) {
             throw new UserStoryException('Failed to assign Permission Set Licenses. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
-        }
-    }
-
-
-
-    // Main method to create and provision access for the new user
-    @InvocableMethod(label='New User Access' description='Creates a new User from an Existing User')
-    public static void provisionAccessForNEwUser(List<String> accessRecordIds) {
-        String ids = accessRecordIds.get(0);
-        System.debug('PRINT VAR IDs :'+ids);
-        String[] VarIds;
-        if(ids != null && ids.contains(',')){
-            VarIds = ids.split(',');
-        }else{
-            VarIds[0] = ids;
-        }
-        System.debug('accessRecordIds size @@@@@@@@@@@@@@@@@@'+accessRecordIds + '###########' +accessRecordIds.size());
-        List<ACC_Environment_Access__c> accList = new List<ACC_Environment_Access__c>([SELECT Environment_Name__r.name,
-                First_Name__c, Last_Name__c, ATT_Email__c, Replicate_UserName__c
-        FROM ACC_Environment_Access__c WHERE ID IN : VarIds]);
-        if(accList.size() > 0){
-            for (ACC_Environment_Access__c access : accList) {
-                provisionAccess(access.Id, access.Environment_Name__r.name, access.Replicate_UserName__c, access.First_Name__c, access.Last_Name__c, access.ATT_Email__c);
-            }
-        }
-
-    }
-    public static void provisionAccess(Id accessRecordId, String namedCredentialName, String replicateUserName, String firstName, String lastName, String attEmail) {
-        // Step 1: Get existing user access details
-        Map<String, String> accessDetails = getUserAccessDetails(namedCredentialName, replicateUserName);
-
-        // Step 2: Create a new user with specified details
-        String newUserId = createNewUser(namedCredentialName, firstName, lastName, attEmail, namedCredentialName, accessDetails.get('ProfileId'));
-
-        // Step 3: Assign Permission Sets to the new user
-        List<String> permissionSetIds = accessDetails.get('PermissionSetIds') != null ? accessDetails.get('PermissionSetIds').split(',') : new List<String>();
-        List<String> permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
-        Set<String> PSGIdsSet = new Set<String>(permissionSetGroupIds);
-        PSGIdsSet.remove('');
-        permissionSetGroupIds = new List<String>();
-        permissionSetGroupIds.addAll(PSGIdsSet);
-        List<String> permissionSetLicenseIds = accessDetails.get('PermissionSetLicenseIds') != null ? accessDetails.get('PermissionSetLicenseIds').split(',') : new List<String>();
-        assignPermissionSetLicenses(namedCredentialName, newUserId, permissionSetLicenseIds);
-        assignPermissionsBulk(namedCredentialName, newUserId, permissionSetIds, permissionSetGroupIds);
-
-        // Step 4: Assign Permission Set Groups to the new user
-        //List<String> permissionSetGroupIds = accessDetails.get('PermissionSetGroupIds') != null ? accessDetails.get('PermissionSetGroupIds').split(',') : new List<String>();
-        //assignPermissionSetGroups(namedCredentialName, newUserId, permissionSetGroupIds);
-        System.debug('permissionSetGroupIds::'+permissionSetGroupIds);
-        try {
-            ACC_Environment_Access__c accessRecord = [SELECT Id, Prior_Profile__c, Prior_PS_Assignment__c, Prior_PSG_Assigments__c
-            FROM ACC_Environment_Access__c WHERE Id = :accessRecordId LIMIT 1];
-
-            accessRecord.Prior_Profile__c = accessDetails.get('ProfileId');
-            accessRecord.Prior_PS_Assignment__c = String.join(permissionSetIds, ',');
-            accessRecord.Prior_PSG_Assigments__c = String.join(permissionSetGroupIds, ',');
-            accessRecord.Prior_PSLicense_Assignment_Ids__c = String.join(PermissionSetLicenseIds, ',');
-            accessRecord.Access_Delivered__c = true;
-            accessRecord.Access_Provisioning_Complete__c = true;
-            accessRecord.Executed_by_Devops__c = true;
-            accessRecord.ATT_UID__c = newUserName;
-            accessRecord.User_Id__c = newUserId;
-            update accessRecord;
-        } catch (Exception e) {
-            System.debug('Error updating access record: ' + e.getMessage());
-            throw new UserStoryException('Failed to update the access record with new user details.');
         }
     }
 
