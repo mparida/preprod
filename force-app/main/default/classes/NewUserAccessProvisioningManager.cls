@@ -73,7 +73,7 @@ public with sharing class NewUserAccessProvisioningManager {
                 accessRecord.Prior_Profile__c = accessDetails.get('ProfileId');
                 accessRecord.Prior_PS_Assignment__c = String.join(permissionSetIds, ',');
                 accessRecord.Prior_PSG_Assigments__c = String.join(permissionSetGroupIds, ',');
-                accessRecord.Prior_PSLicense_Assignment_Ids__c = String.join(PermissionSetLicenseIds, ',');
+                accessRecord.Prior_PSLicense_Assignment_Ids__c = String.join(permissionSetLicenseIds, ',');
                 accessRecord.Access_Delivered__c = true;
                 accessRecord.Access_Provisioning_Complete__c = true;
                 accessRecord.Executed_by_Devops__c = true;
