@@ -48,11 +48,12 @@ public with sharing class NewUserAccessProvisioningManager {
             permissionSetGroupIds = new List<String>();
             permissionSetGroupIds.addAll(PSGIdsSet);
             permissionSetLicenseIds = accessDetails.get('PermissionSetLicenseIds') != null ? accessDetails.get('PermissionSetLicenseIds').split(',') : new List<String>();
+            System.debug('Assigning PS Lic ');
             assignPermissionSetLicenses(namedCredentialName, newUserId, permissionSetLicenseIds);
+            System.debug('Assigning PS');
             assignPermissionsBulk(namedCredentialName, newUserId, permissionSetIds, permissionSetGroupIds);
-
-            // Step 4: Assign Permission Set Groups to the new user
-            System.debug('permissionSetGroupIds::'+permissionSetGroupIds);
+            System.debug('PW RESET');
+            sendPasswordResetEmail(namedCredentialName,newUserId);
         }catch (Exception e){
             hasError = true;
             System.debug('Exception while provisioning User : '+e.getStackTraceString());
@@ -188,12 +189,13 @@ public with sharing class NewUserAccessProvisioningManager {
 
         Http http = new Http();
         HttpResponse res = http.send(req);
-
+        String userId;
         if (res.getStatusCode() == 201) {
             Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-            return (String) response.get('id');  // New User ID
+            userId = (String) response.get('id');// New User ID
+            return userId;
         } else {
-            System.debug('Error while creating the New User....'+accessRecordId);
+            System.debug('Error while creating the New User....'+accessRecordId+'----'+res.getBody());
             throw new UserAccessException(String.valueOf(res.getStatusCode()) , res.getBody());
         }
     }
@@ -346,6 +348,32 @@ public with sharing class NewUserAccessProvisioningManager {
         } catch (Exception e) {
             System.debug('Error retrieving user by Federation Identifier: ' + e.getStackTraceString());
             throw new UserStoryException('Exception While getting User Details ');
+        }
+    }
+
+    public static void sendPasswordResetEmail(String namedCredentialName, String userId) {
+        try {
+            // Prepare the HTTP DELETE request
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/sobjects/User/' + userId + '/password');
+            req.setMethod('DELETE'); // DELETE method triggers the password reset email
+            req.setHeader('Content-Type', 'application/json');
+
+            // Send the request
+            Http http = new Http();
+            HttpResponse res = http.send(req);
+
+            // Handle the response
+            if (res.getStatusCode() == 204 || res.getStatusCode() == 201 || res.getStatusCode() == 200) {
+                System.debug('Password reset email triggered successfully for user: ' + userId);
+            } else {
+                throw new UserStoryException(
+                        'Failed to trigger password reset email. Status Code: ' + res.getStatusCode() + ', Response: ' + res.getBody()
+                );
+            }
+        } catch (Exception e) {
+            System.debug('Error while triggering password reset email: ' + e.getMessage());
+            throw new UserStoryException('Error while triggering password reset email: ' + e.getMessage());
         }
     }
 }
