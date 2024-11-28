@@ -3,6 +3,10 @@
  */
 
 public with sharing class NewUserAccessProvisioningManager {
+    static Map<String, String> profileMapping = new Map<String, String>{
+            'Retail RSC Rep' => 'RSC-REP',
+            'Retail SM' => 'RSC-MGR'
+    };
     // Retrieves Profile, Permission Sets, and Permission Set Groups for Replicate_UserName__c
     private static String newUserName;
     // Main method to create and provision access for the new user
@@ -54,6 +58,10 @@ public with sharing class NewUserAccessProvisioningManager {
             assignPermissionsBulk(namedCredentialName, newUserId, permissionSetIds, permissionSetGroupIds);
             System.debug('PW RESET');
             sendPasswordResetEmail(namedCredentialName,newUserId);
+            System.debug('Employee for Retail User');
+            if(profileMapping.containsKey(accessDetails.get('ProfileName'))){
+                createEmployeeRecordInTargetOrg(namedCredentialName, attEmail, newUserId, accessDetails.get('ProfileName'), firstName, lastName);
+            }
         }catch (Exception e){
             hasError = true;
             System.debug('Exception while provisioning User : '+e.getStackTraceString());
@@ -92,14 +100,15 @@ public with sharing class NewUserAccessProvisioningManager {
         Map<String, String> accessDetails = new Map<String, String>();
 
         // Step 1: Retrieve User ID
+        System.debug(namedCredentialName+'A---B'+replicateUserName);
         String userId = getUserByFederationIdentifier(namedCredentialName, replicateUserName);
         if (userId == null) {
             throw new UserStoryException('User not found with the given Federation Identifier.');
         }
 
-        // Step 2: Retrieve Profile ID
+        // Step 2: Retrieve Profile ID and Name
         HttpRequest reqProfile = new HttpRequest();
-        reqProfile.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/sobjects/User/' + userId);
+        reqProfile.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/sobjects/User/' + userId + '?fields=ProfileId,Profile.Name');
         reqProfile.setMethod('GET');
 
         Http http = new Http();
@@ -108,6 +117,10 @@ public with sharing class NewUserAccessProvisioningManager {
         if (resProfile.getStatusCode() == 200) {
             Map<String, Object> userResponse = (Map<String, Object>) JSON.deserializeUntyped(resProfile.getBody());
             accessDetails.put('ProfileId', (String) userResponse.get('ProfileId'));
+            if (userResponse.containsKey('Profile')) {
+                Map<String, Object> profileDetails = (Map<String, Object>) userResponse.get('Profile');
+                accessDetails.put('ProfileName', (String) profileDetails.get('Name'));
+            }
         }
 
         // Step 3: Retrieve Permission Sets and Permission Set Groups
@@ -156,6 +169,7 @@ public with sharing class NewUserAccessProvisioningManager {
 
             accessDetails.put('PermissionSetLicenseIds', String.join(licenseIds, ','));
         }
+        System.debug('Profile is : 'accessDetails.get('ProfileName'));
 
         return accessDetails;
     }
@@ -328,7 +342,7 @@ public with sharing class NewUserAccessProvisioningManager {
             String query = 'SELECT Id FROM User WHERE Username = \'' + federationId + '\'';
             String encodedQuery = EncodingUtil.urlEncode(query, 'UTF-8');
             String endpoint = 'callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + encodedQuery;
-
+            System.debug('endpoint:'+endpoint);
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
             req.setMethod('GET');
@@ -364,7 +378,7 @@ public with sharing class NewUserAccessProvisioningManager {
             HttpResponse res = http.send(req);
 
             // Handle the response
-            if (res.getStatusCode() == 204 || res.getStatusCode() == 201 || res.getStatusCode() == 200) {
+            if (res.getStatusCode() == 200 || res.getStatusCode() == 201) {
                 System.debug('Password reset email triggered successfully for user: ' + userId);
             } else {
                 throw new UserStoryException(
@@ -376,4 +390,52 @@ public with sharing class NewUserAccessProvisioningManager {
             throw new UserStoryException('Error while triggering password reset email: ' + e.getMessage());
         }
     }
+
+    public static void createEmployeeRecordInTargetOrg(
+            String namedCredentialName,
+            String email,
+            String userId,
+            String profileName,
+            String firstName,
+            String lastName
+    ) {
+        try {
+
+            // Determine the SFProfileId__c based on Profile Name
+            String sfProfileId = profileMapping.containsKey(profileName) ? profileMapping.get(profileName) : null;
+
+            // Prepare the Employee__c record data
+            Map<String, Object> employeeData = new Map<String, Object>{
+                    'Email__c' => email,
+                    'User__c' => userId,
+                    'SFProfileId__c' => sfProfileId,
+                    'FirstName__c' => firstName,
+                    'LastName__c' => lastName,
+                    'Name' => firstName + ' ' + lastName
+            };
+
+            // Create the HTTP request
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/sobjects/Employee__c/');
+            req.setMethod('POST');
+            req.setHeader('Content-Type', 'application/json');
+            req.setBody(JSON.serialize(employeeData));
+
+            // Send the HTTP request
+            Http http = new Http();
+            HttpResponse res = http.send(req);
+
+            // Handle the response
+            if (res.getStatusCode() == 201) {
+                System.debug('Employee record created successfully in the target org.');
+            } else {
+                System.debug('Failed to create Employee record in the target org. Status Code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+                throw new UserStoryException('Failed to create Employee record in the target org. Status Code: ' + res.getStatusCode());
+            }
+        } catch (Exception e) {
+            System.debug('Error while creating Employee record in target org: ' + e.getMessage());
+            throw new UserStoryException('Error while creating Employee record in target org: ' + e.getMessage());
+        }
+    }
+
 }
