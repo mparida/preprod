@@ -1,16 +1,16 @@
 public class TargetOrgAccessManager {
 
     // Retrieves user ID by Federation Identifier in the target org
-    public static String getUserByFederationIdentifier(String namedCredentialName, String federationId) {
+    public static Map<String, String> getUserByFederationIdentifier(String namedCredentialName, String federationId) {
         try {
-            String query = 'SELECT Id FROM User WHERE Username = \'' + federationId + '\'';
+            String query = 'SELECT Id, Email FROM User WHERE Username = \'' + federationId + '\'';
             String encodedQuery = EncodingUtil.urlEncode(query, 'UTF-8');
             String endpoint = 'callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + encodedQuery;
-            
+
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
             req.setMethod('GET');
-            
+
             Http http = new Http();
             HttpResponse res = http.send(req);
 
@@ -19,16 +19,20 @@ public class TargetOrgAccessManager {
                 List<Object> records = (List<Object>) queryResponse.get('records');
                 if (!records.isEmpty()) {
                     Map<String, Object> userRecord = (Map<String, Object>) records[0];
-                    return (String) userRecord.get('Id');
+                    Map<String, String> result = new Map<String, String>();
+                    result.put('Id', (String) userRecord.get('Id'));
+                    result.put('Email', (String) userRecord.get('Email'));
+                    return result;
                 }
             }
             return null;
         } catch (Exception e) {
             System.debug('Error retrieving user by Federation Identifier: ' + e.getStackTraceString());
-            throw new UserStoryException('Exception While getting USer Details ');
+            throw new UserStoryException('Exception while retrieving User Details: ' + e.getMessage());
         }
     }
-    
+
+
     public static HttpResponse getUserByFederationIdentifier1(String namedCredentialName, String federationId) {
         try {
             String query = 'SELECT Id FROM User WHERE Username = \'' + federationId + '\'';

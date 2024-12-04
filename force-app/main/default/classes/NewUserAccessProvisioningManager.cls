@@ -169,14 +169,14 @@ public with sharing class NewUserAccessProvisioningManager {
 
             accessDetails.put('PermissionSetLicenseIds', String.join(licenseIds, ','));
         }
-        System.debug('Profile is : 'accessDetails.get('ProfileName'));
+        System.debug('Profile is : '+accessDetails.get('ProfileName'));
 
         return accessDetails;
     }
 
     // Creates a new user with the provided details
     public static String createNewUser(String namedCredentialName, String firstName, String lastName, String attEmail, String environment, String profileId, Id accessRecordId) {
-        newUserName = attEmail + '.' + environment;
+        newUserName = attEmail + '.' + environment+RandomTextGenerator.generateRandomText(3);
         // Default values for required fields
         String defaultTimeZoneSidKey = 'America/Los_Angeles'; // Adjust based on your org's preferences
         String defaultLocaleSidKey = 'en_US'; // Adjust based on your org's preferences

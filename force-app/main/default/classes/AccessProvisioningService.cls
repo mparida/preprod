@@ -19,12 +19,13 @@ public with sharing class AccessProvisioningService {
     
             String namedCredentialName = accessRecord.Environment_Name__r.name;
             System.debug(namedCredentialName+ '---'+accessRecord.ATT_UID__c);
-            String userId = TargetOrgAccessManager.getUserByFederationIdentifier(namedCredentialName, accessRecord.ATT_UID__c);
-            if (userId == null) {
+            Map<String, String> userDetails = TargetOrgAccessManager.getUserByFederationIdentifier(namedCredentialName, accessRecord.ATT_UID__c);
+            if (userDetails == null) {
                 System.debug('Error: User with Federation Identifier not found in target org.');
                 return;
             }
-    
+            String userId = userDetails.get('Id');
+            String userEmail = userDetails.get('Email');
             String profileId = TargetOrgAccessManager.getProfileIdByName(namedCredentialName, accessRecord.Profile_Access__c);
             if (profileId == null) {
                 System.debug('Error: Profile with specified name not found in target org.');
@@ -46,7 +47,7 @@ public with sharing class AccessProvisioningService {
             DateTime futureDateTime = days < 1.0 ? now.addHours (Integer.valueOf(days*24)): now.addDays(Integer.valueOf(accessRecord.Access_Given_For__c) );
             accessRecord.End_Time__c  = futureDateTime;
             accessRecord.End_Time__c = DateTime.now().addMinutes(1);
-            
+            accessRecord.ATT_Email__c = userEmail;
             update accessRecord;
        /* } catch (Exception e) {
             System.debug('Exception message: ' + e.getMessage());
