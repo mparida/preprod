@@ -21,21 +21,30 @@ public with sharing class bwcCopadoUSController {
             Map<String,Id> userNameMap = new Map<String,Id>();
             set<String> sprintSet = new Set<String>();
             Map<String,Id> sprintMap = new Map<String,Id>();
+            String sprintName = '';
             
             if(sprintId == '')
             {
                 sprintId = iTrackUSList[0].fields.sprint?.id;
+                sprintName = iTrackUSList[0].fields.sprint?.name;
             }
             System.debug('sprintId::'+sprintId);
+            System.debug('sprintId::'+sprintName);
             copado__Sprint__c sprint;
-            if(sprintId != null){
-                sprint = [SELECT id,Itrack_Sprint__c, Name FROM copado__Sprint__c WHERE Itrack_Sprint__c = :sprintId limit 1];
+            if(!String.isEmpty(sprintId) && !String.isEmpty(sprintName)){
+                sprint = new copado__Sprint__c();
+                sprint.Itrack_Sprint__c = sprintId;
+                sprint.Name = sprintName;
+                sprint.Active__c = true;
+                upsert sprint;
             }
-             
-			
+
+            if(sprintId != null){
+                List<copado__Sprint__c> sprintList = new List<copado__Sprint__c>([SELECT id,Itrack_Sprint__c, Name FROM copado__Sprint__c WHERE Itrack_Sprint__c = :sprintId limit 1]);
+
+            }
             for(BWC_Copado_US.issue selectedUS: iTrackUSList)
             {
-                //sprintSet.add(selectedUS.fields.sprint.name);
                 fedIdentifierSet.add(selectedUS.assigneeUID); 
                 if(selectedUS.fields.customfield_10970 != null)
                 	epicSet.add(selectedUS.fields.customfield_10970);
@@ -45,15 +54,8 @@ public with sharing class bwcCopadoUSController {
                 	teamSet.add(selectedUS.fields.customfield_16473.value);  
             }
             
-            /*List<copado__Sprint__c> sprintList = [SELECT id,Itrack_Sprint__c, Name FROM copado__Sprint__c WHERE Name = :sprintSet];
-            for(copado__Sprint__c spr : sprintList){
-                sprintMap.put(spr.Name,spr.id);
-            }*/
-            
             releaseMap = getReleaseMap(releaseSet);
-            
             epicMap = getEpicMap(epicSet);
-            
             teamMap = getTeamMap(teamSet);
                         
             for(User u:[SELECT Id, FederationIdentifier FROM User WHERE FederationIdentifier IN :fedIdentifierSet ])
@@ -65,7 +67,6 @@ public with sharing class bwcCopadoUSController {
                 copado__User_Story__c copadoUS = new copado__User_Story__c();
                 copadoUS.Is_Created_from_Itrack_Utility__c = true;
                 copadoUS.Itrack_UST_Version__c = 1;
-                //copadoUS.Release_Type__c = 'Monthly';
                 copadoUS.copado__Project__c = System.Label.ACC_Project_Id;
                 copadoUS.iTrack_US__c = selectedUS.key;
                 copadoUS.Shadow_ITrack_US__c = selectedUS.key;
@@ -74,14 +75,14 @@ public with sharing class bwcCopadoUSController {
                 if(copadoUS.copado__Developer__c != null){
                     copadoUS.OwnerId = copadoUS.copado__Developer__c;
                 }
-                //copadoUS.copado__Sprint__c = sprintMap.get(selectedUS.fields.sprint.name);
                 copadoUS.copado__Epic__c = epicMap.get(selectedUS.fields.customfield_10970);
                 copadoUS.copado__Sprint__c = sprint!=null?sprint.id:null;
                 if(selectedUS.fixVersionName != null){
                     copadoUS.copado__Release__c = releaseMap.get(selectedUS.fixVersionName);
                 }
                 	
-                copadoUS.copado__Team__c = teamMap.get(selectedUS.fields.customfield_16473.value); 
+                copadoUS.copado__Team__c = teamMap.get(selectedUS.fields.customfield_16473.value);
+                copadoUS.Itrack_Key_Length__c = selectedUS.key.length();
                 cusList.add(copadoUS);    
             }
             UPSERT cusList iTrack_US__c;
@@ -89,6 +90,7 @@ public with sharing class bwcCopadoUSController {
             return [SELECT Id,iTrack_US__c,Name FROM copado__User_Story__c WHERE ID IN :cusList];
                         
         } catch (Exception e) {
+            System.debug('Exception in creating story ::' + e.getMessage());
             System.debug('Stack trace: ' + e.getStackTraceString());   
             throw new AuraHandledException(e.getMessage());
         }

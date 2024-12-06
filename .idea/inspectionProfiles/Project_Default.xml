@@ -4,6 +4,7 @@
     <inspection_tool class="InconsistentSalesforceApiVersion" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredFilePaths">
         <list>
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
         </list>
       </option>

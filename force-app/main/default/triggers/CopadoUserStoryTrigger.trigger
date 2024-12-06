@@ -8,27 +8,23 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after in
     }
     List<String> itrackList = new List<String>();
     if(trigger.isBefore && trigger.isInsert){
+        List<copado__User_Story__c> clonedList = new List<copado__User_Story__c>();
         for(copado__User_Story__c ust : trigger.new){
-            if(!String.isBlank(ust.iTrack_US__c) && !ust.Is_Created_from_Itrack_Utility__c){
-                itrackList.add(ust.iTrack_US__c);
-            }
+            if(ust.getCloneSourceId() != null)
+                clonedList.add(ust);
         }
-        if(!itrackList.isEmpty()){//When a new UST is created after rolling out this, this wont be executed if created from Utility
-            System.debug('itrackList:::::'+itrackList);
-            CopadoUserStoryTriggerHandler.performItrackUSTVersioning(itrackList, Trigger.new);
-        }
+        CopadoUserStoryTriggerHandler.performUSTVersioning(clonedList);
     }
 
     List<String> usetList = new List<String>();
     if(trigger.isAfter && trigger.isInsert){
+        List<copado__User_Story__c> clonedList = new List<copado__User_Story__c>();
         for(copado__User_Story__c ust : trigger.new){
-            if(!ust.Is_Created_from_Itrack_Utility__c && !String.isBlank(ust.Shadow_ITrack_US__c)){
-                usetList.add(ust.Shadow_ITrack_US__c);
-            }
+            if(ust.getCloneSourceId() != null)
+                clonedList.add(ust);
         }
+        CopadoUserStoryTriggerHandler.assignParent(clonedList);
+
     }
 
-    if(usetList.size() > 0){
-        CopadoUserStoryTriggerHandler.createUserStoryRelationship(usetList, Trigger.newMap);
-    }
 }
