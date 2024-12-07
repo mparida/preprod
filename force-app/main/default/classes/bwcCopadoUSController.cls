@@ -82,7 +82,6 @@ public with sharing class bwcCopadoUSController {
                 }
                 	
                 copadoUS.copado__Team__c = teamMap.get(selectedUS.fields.customfield_16473.value);
-                copadoUS.Itrack_Key_Length__c = selectedUS.key.length();
                 cusList.add(copadoUS);    
             }
             UPSERT cusList iTrack_US__c;
