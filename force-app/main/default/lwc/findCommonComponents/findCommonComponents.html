@@ -1,23 +1,23 @@
 <template>
     <lightning-card title="Find Common Components" icon-name="custom:custom14">
         <div class="slds-p-around_medium">
-            <!-- Release 1 Lookup -->
-            <lightning-record-edit-form object-api-name="copado__Release__c">
-                <lightning-input-field
-                        field-name="Name"
-                        label="Release 1"
-                        onchange={handleRelease1Change}>
-                </lightning-input-field>
-            </lightning-record-edit-form>
+            <!-- Combobox for Release 1 -->
+            <lightning-combobox
+                    label="Release 1"
+                    placeholder="Search and select Release 1"
+                    options={releaseOptions}
+                    value={release1}
+                    onchange={handleRelease1Change}>
+            </lightning-combobox>
 
-            <!-- Release 2 Lookup -->
-            <lightning-record-edit-form object-api-name="copado__Release__c" >
-                <lightning-input-field
-                        field-name="Name"
-                        label="Release 2"
-                        onchange={handleRelease2Change}>
-                </lightning-input-field>
-            </lightning-record-edit-form>
+            <!-- Combobox for Release 2 -->
+            <lightning-combobox
+                    label="Release 2"
+                    placeholder="Search and select Release 2"
+                    options={releaseOptions}
+                    value={release2}
+                    onchange={handleRelease2Change}>
+            </lightning-combobox>
         </div>
         <div class="slds-p-around_medium">
             <!-- Button to Find Common Components -->

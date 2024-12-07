@@ -3,15 +3,14 @@
  */
 
 public with sharing class CommonComponentsController {
-    @AuraEnabled
-    public static List<copado__Release__c> searchReleases(String searchTerm) {
-        // Search for releases with a name matching the search term
+    @AuraEnabled(cacheable=true)
+    public static List<copado__Release__c> getReleases() {
+        // Query all releases and return the Name and Id for lookup functionality
         return [
                 SELECT Id, Name
                 FROM copado__Release__c
-                WHERE Name LIKE :('%' + searchTerm + '%')
                 ORDER BY Name ASC
-                LIMIT 50
+                LIMIT 100
         ];
     }
     @AuraEnabled

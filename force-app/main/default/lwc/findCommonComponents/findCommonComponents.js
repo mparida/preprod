@@ -1,34 +1,31 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
+import getReleases from '@salesforce/apex/CommonComponentsController.getReleases';
 import findCommonComponents from '@salesforce/apex/CommonComponentsController.findCommonComponents';
-import { createRecord } from 'lightning/uiRecordApi';
 
 export default class FindCommonComponents extends LightningElement {
+    @track releaseOptions = [];
     @track release1 = '';
     @track release2 = '';
     @track downloadUrl;
-    @track temporaryRecordId;
 
-    connectedCallback() {
-        this.createTemporaryRecord();
-    }
-
-    async createTemporaryRecord() {
-        const fields = {}; // No fields needed for a temporary record
-        const objectApiName = 'copado__Release__c'; // Temporary context object
-        try {
-            const result = await createRecord({ apiName: objectApiName, fields });
-            this.temporaryRecordId = result.id; // Store the temporary record ID
-        } catch (error) {
-            console.error('Error creating temporary record:', error);
+    @wire(getReleases)
+    wiredReleases({ error, data }) {
+        if (data) {
+            this.releaseOptions = data.map(release => ({
+                label: release.Name,
+                value: release.Id
+            }));
+        } else if (error) {
+            console.error('Error fetching releases:', error);
         }
     }
 
     handleRelease1Change(event) {
-        this.release1 = event.target.value; // Capture the selected Release 1 ID
+        this.release1 = event.target.value;
     }
 
     handleRelease2Change(event) {
-        this.release2 = event.target.value; // Capture the selected Release 2 ID
+        this.release2 = event.target.value;
     }
 
     async handleFindCommonComponents() {
