@@ -1,0 +1,48 @@
+<template>
+    <div class="slds-combobox_container">
+        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open" role="combobox">
+            <div class="slds-combobox__form-element" role="none">
+                <lightning-input
+                        type="text"
+                        placeholder={placeholder}
+                        value={searchTerm}
+                        onchange={handleSearchChange}
+                        class="slds-input"
+                ></lightning-input>
+            </div>
+            <template if:true={isSearching}>
+                <div class="slds-text-align_center">Searching...</div>
+            </template>
+            <div class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid">
+                <ul class="slds-listbox slds-listbox_vertical" role="listbox">
+                    <template if:true={options}>
+                        <template for:each={options} for:item="option">
+                            <li
+                                    key={option.value}
+                                    role="presentation"
+                                    class="slds-listbox__item"
+                                    data-value={option.value}
+                                    onclick={handleOptionClick}
+                            >
+                                <span class="slds-media slds-media_small slds-media_center">
+                                    <span class="slds-media__body">
+                                        <span class="slds-truncate" title={option.label}>{option.label}</span>
+                                    </span>
+                                </span>
+                            </li>
+                        </template>
+                    </template>
+                    <template if:false={options}>
+                        <li class="slds-listbox__item" role="presentation">
+                            <span class="slds-media slds-media_small slds-media_center">
+                                <span class="slds-media__body">
+                                    <span class="slds-truncate" title="No results found">No results found</span>
+                                </span>
+                            </span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </div>
+</template>

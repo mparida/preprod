@@ -1,41 +1,33 @@
 <template>
     <lightning-card title="Find Common Components" icon-name="custom:custom14">
         <div class="slds-p-around_medium">
-            <!-- Combobox for Release 1 -->
-            <lightning-combobox
-                    label="Release 1"
-                    placeholder="Search and select Release 1"
-                    options={releaseOptions}
-                    value={release1}
-                    onchange={handleRelease1Change}>
-            </lightning-combobox>
+            <!-- Custom Lookup for Release 1 -->
+            <c-custom-lookup
+                    placeholder="Search Release 1"
+                    fetch-data={fetchReleases}
+                    onselection={handleRelease1Selection}
+            ></c-custom-lookup>
 
-            <!-- Combobox for Environment 1 -->
-            <lightning-combobox
-                    label="Environment 1"
-                    placeholder="Search and select Environment 1"
-                    options={environmentOptions}
-                    value={environment1}
-                    onchange={handleEnvironment1Change}>
-            </lightning-combobox>
+            <!-- Custom Lookup for Environment 1 -->
+            <c-custom-lookup
+                    placeholder="Search Environment 1"
+                    fetch-data={fetchEnvironments}
+                    onselection={handleEnvironment1Selection}
+            ></c-custom-lookup>
 
-            <!-- Combobox for Release 2 -->
-            <lightning-combobox
-                    label="Release 2"
-                    placeholder="Search and select Release 2"
-                    options={releaseOptions}
-                    value={release2}
-                    onchange={handleRelease2Change}>
-            </lightning-combobox>
+            <!-- Custom Lookup for Release 2 -->
+            <c-custom-lookup
+                    placeholder="Search Release 2"
+                    fetch-data={fetchReleases}
+                    onselection={handleRelease2Selection}
+            ></c-custom-lookup>
 
-            <!-- Combobox for Environment 2 -->
-            <lightning-combobox
-                    label="Environment 2"
-                    placeholder="Search and select Environment 2"
-                    options={environmentOptions}
-                    value={environment2}
-                    onchange={handleEnvironment2Change}>
-            </lightning-combobox>
+            <!-- Custom Lookup for Environment 2 -->
+            <c-custom-lookup
+                    placeholder="Search Environment 2"
+                    fetch-data={fetchEnvironments}
+                    onselection={handleEnvironment2Selection}
+            ></c-custom-lookup>
         </div>
         <div class="slds-p-around_medium">
             <!-- Button to Find Common Components -->

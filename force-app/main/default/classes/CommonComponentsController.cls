@@ -22,6 +22,27 @@ public with sharing class CommonComponentsController {
                 LIMIT 100
         ];
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<copado__Release__c> searchReleases(String searchTerm) {
+        return [
+                SELECT Id, Name
+                FROM copado__Release__c
+                WHERE Name LIKE :('%' + searchTerm + '%')
+                LIMIT 50
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<copado__Environment__c> searchEnvironments(String searchTerm) {
+        return [
+                SELECT Id, Name
+                FROM copado__Environment__c
+                WHERE Name LIKE :('%' + searchTerm + '%')
+                LIMIT 50
+        ];
+    }
+
     @AuraEnabled
     public static String findCommonComponents(String release1, String release2, String environment1, String environment2) {
         System.debug(release1+'--'+release2+'--'+environment1+'--'+environment2);
@@ -43,12 +64,10 @@ public with sharing class CommonComponentsController {
                         copado__User_Story__r.Name,
                         copado__User_Story__r.copado__Is_Bundle__c
                 FROM copado__User_Story_Metadata__c
-                WHERE copado__User_Story__r.copado__Release__r.Name = :release1
-                AND copado__User_Story__r.copado__Environment__r.Name = :environment1
+                WHERE copado__User_Story__r.copado__Release__r.Id = :release1
+                AND copado__User_Story__r.copado__Environment__r.Id = :environment1
                 AND copado__User_Story__r.copado__Is_Bundle__c = false
         ];
-
-        System.debug('query1Results sixe:'+query1Results.size());
 
         List<copado__User_Story_Metadata__c> query2Results = [
                 SELECT Name, copado__Metadata_API_Name__c, copado__Type__c,
@@ -59,19 +78,16 @@ public with sharing class CommonComponentsController {
                         copado__User_Story__r.Name,
                         copado__User_Story__r.copado__Is_Bundle__c
                 FROM copado__User_Story_Metadata__c
-                WHERE copado__User_Story__r.copado__Release__r.Name = :release2
-                AND copado__User_Story__r.copado__Environment__r.Name = :environment2
+                WHERE copado__User_Story__r.copado__Release__r.Id = :release2
+                AND copado__User_Story__r.copado__Environment__r.Id = :environment2
                 AND copado__User_Story__r.copado__Is_Bundle__c = false
         ];
-
-        System.debug('query2Results sixe:'+query2Results.size());
 
         // Identify common components
         Set<String> keysInFirstResult = new Set<String>();
         for (copado__User_Story_Metadata__c record : query1Results) {
             keysInFirstResult.add(record.copado__Type__c + '.' + record.copado__Metadata_API_Name__c);
         }
-        System.debug('keysInFirstResult size::'+keysInFirstResult.size());
         Set<String> commonKeys = new Set<String>();
         for (copado__User_Story_Metadata__c record : query2Results) {
             String compositeKey = record.copado__Type__c + '.' + record.copado__Metadata_API_Name__c;
@@ -79,7 +95,6 @@ public with sharing class CommonComponentsController {
                 commonKeys.add(compositeKey);
             }
         }
-        System.debug('commonKeys size::'+commonKeys.size());
         // Generate CSV content
         List<String> csvLines = new List<String>();
         csvLines.add('copado__Metadata_API_Name__c,copado__Type__c,Developer Name,Release,Team,Environment,User Story,isBundle');
