@@ -44,6 +44,13 @@ export default class FindCommonComponents extends LightningElement {
     }
 
     downloadCsv() {
-        window.open(this.downloadUrl, '_blank');
+        console.log(this.downloadUrl);
+        const link = document.createElement('a'); // Create a link element
+        link.href = this.downloadUrl; // Set the download URL
+        link.target = '_self'; // Ensure it behaves as a download and not as a tab navigation
+        link.download = 'CommonComponentsReport.csv'; // Suggested file name
+        document.body.appendChild(link); // Append the link to the DOM
+        link.click(); // Programmatically click the link to trigger the download
+        document.body.removeChild(link); // Clean up the DOM
     }
 }

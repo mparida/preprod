@@ -100,7 +100,7 @@ public with sharing class CommonComponentsController {
         cdl.ShareType = 'V';
         insert cdl;
 
-        return contentVersion.ContentDocumentId;
+        return cdl.ContentDocumentId;
     }
 
     private static String formatCsvLine(copado__User_Story_Metadata__c record) {
