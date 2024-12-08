@@ -10,6 +10,15 @@
                     onchange={handleRelease1Change}>
             </lightning-combobox>
 
+            <!-- Combobox for Environment 1 -->
+            <lightning-combobox
+                    label="Environment 1"
+                    placeholder="Search and select Environment 1"
+                    options={environmentOptions}
+                    value={environment1}
+                    onchange={handleEnvironment1Change}>
+            </lightning-combobox>
+
             <!-- Combobox for Release 2 -->
             <lightning-combobox
                     label="Release 2"
@@ -17,6 +26,15 @@
                     options={releaseOptions}
                     value={release2}
                     onchange={handleRelease2Change}>
+            </lightning-combobox>
+
+            <!-- Combobox for Environment 2 -->
+            <lightning-combobox
+                    label="Environment 2"
+                    placeholder="Search and select Environment 2"
+                    options={environmentOptions}
+                    value={environment2}
+                    onchange={handleEnvironment2Change}>
             </lightning-combobox>
         </div>
         <div class="slds-p-around_medium">

@@ -1,11 +1,15 @@
 import { LightningElement, track, wire } from 'lwc';
 import getReleases from '@salesforce/apex/CommonComponentsController.getReleases';
+import getEnvironments from '@salesforce/apex/CommonComponentsController.getEnvironments';
 import findCommonComponents from '@salesforce/apex/CommonComponentsController.findCommonComponents';
 
 export default class FindCommonComponents extends LightningElement {
     @track releaseOptions = [];
+    @track environmentOptions = [];
     @track release1 = '';
     @track release2 = '';
+    @track environment1 = '';
+    @track environment2 = '';
     @track downloadUrl;
 
     @wire(getReleases)
@@ -13,10 +17,22 @@ export default class FindCommonComponents extends LightningElement {
         if (data) {
             this.releaseOptions = data.map(release => ({
                 label: release.Name,
-                value: release.Id
+                value: release.Name
             }));
         } else if (error) {
             console.error('Error fetching releases:', error);
+        }
+    }
+
+    @wire(getEnvironments)
+    wiredEnvironments({ error, data }) {
+        if (data) {
+            this.environmentOptions = data.map(env => ({
+                label: env.Name,
+                value: env.Name
+            }));
+        } else if (error) {
+            console.error('Error fetching environments:', error);
         }
     }
 
@@ -28,13 +44,26 @@ export default class FindCommonComponents extends LightningElement {
         this.release2 = event.target.value;
     }
 
+    handleEnvironment1Change(event) {
+        this.environment1 = event.target.value;
+    }
+
+    handleEnvironment2Change(event) {
+        this.environment2 = event.target.value;
+    }
+
     async handleFindCommonComponents() {
-        if (!this.release1 || !this.release2) {
-            return alert('Please select both Release 1 and Release 2');
+        if (!this.release1 || !this.release2 || !this.environment1 || !this.environment2) {
+            return alert('Please select both Releases and Environments.');
         }
 
         try {
-            const csvFileId = await findCommonComponents({ release1: this.release1, release2: this.release2 });
+            const csvFileId = await findCommonComponents({
+                release1: this.release1,
+                release2: this.release2,
+                environment1: this.environment1,
+                environment2: this.environment2
+            });
             this.downloadUrl = `/sfc/servlet.shepherd/document/download/${csvFileId}`;
             alert('Common components CSV has been generated and attached to the latest modified Account!');
         } catch (error) {
