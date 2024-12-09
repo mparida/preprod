@@ -60,8 +60,13 @@ export default class FindCommonComponents extends LightningElement {
                 environment1: this.environment1,
                 environment2: this.environment2,
             });
-            this.downloadUrl = `/sfc/servlet.shepherd/document/download/${csvFileId}`;
-            alert('Common components CSV has been generated and attached to the latest modified Account!');
+            if (csvFileId === 'NO_COMMON_COMPONENTS') {
+                this.downloadUrl = null;
+                alert('No common components found.');
+            } else {
+                this.downloadUrl = `/sfc/servlet.shepherd/document/download/${csvFileId}`;
+                alert('Common components CSV has been generated!');
+            }
         } catch (error) {
             console.error('Error finding common components:', error);
             alert('An error occurred. Please try again.');

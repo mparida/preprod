@@ -76,6 +76,10 @@ public with sharing class CommonComponentsController {
                 commonKeys.add(compositeKey);
             }
         }
+        // If no common components, return a specific message
+        if (commonKeys.isEmpty()) {
+            return 'NO_COMMON_COMPONENTS';
+        }
         // Generate CSV content
         List<String> csvLines = new List<String>();
         csvLines.add('copado__Metadata_API_Name__c,copado__Type__c,Developer Name,Release,Team,Environment,User Story,isBundle');
@@ -98,8 +102,8 @@ public with sharing class CommonComponentsController {
 
         // Attach CSV to the latest modified Account
         ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'CommonComponentsReport';
-        contentVersion.PathOnClient = 'CommonComponentsReport.csv';
+        contentVersion.Title = 'CommonComponentsReport_'+release1+' and '+release2+'_'+System.now();
+        contentVersion.PathOnClient = contentVersion.Title+'.csv';
         contentVersion.VersionData = Blob.valueOf(csvContent);
         contentVersion.IsMajorVersion = true;
         insert contentVersion;
