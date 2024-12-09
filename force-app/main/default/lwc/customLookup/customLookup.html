@@ -6,14 +6,13 @@
                         type="text"
                         placeholder={placeholder}
                         value={searchTerm}
-                        onchange={handleSearchChange}
-                        class="slds-input"
-                ></lightning-input>
+                        onchange={handleSearchChange}>
+                </lightning-input>
             </div>
             <template if:true={isSearching}>
                 <div class="slds-text-align_center">Searching...</div>
             </template>
-            <div class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid">
+            <div>
                 <ul class="slds-listbox slds-listbox_vertical" role="listbox">
                     <template if:true={options}>
                         <template for:each={options} for:item="option">

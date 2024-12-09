@@ -3,25 +3,6 @@
  */
 
 public with sharing class CommonComponentsController {
-    @AuraEnabled(cacheable=true)
-    public static List<copado__Release__c> getReleases() {
-        // Query all releases and return the Name and Id for lookup functionality
-        return [
-                SELECT Id, Name
-                FROM copado__Release__c
-                ORDER BY Name ASC
-                LIMIT 100
-        ];
-    }
-    @AuraEnabled(cacheable=true)
-    public static List<copado__Environment__c> getEnvironments() {
-        return [
-                SELECT Id, Name
-                FROM copado__Environment__c
-                ORDER BY Name ASC
-                LIMIT 100
-        ];
-    }
 
     @AuraEnabled(cacheable=true)
     public static List<copado__Release__c> searchReleases(String searchTerm) {

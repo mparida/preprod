@@ -1,41 +1,58 @@
 <template>
-    <lightning-card title="Find Common Components" icon-name="custom:custom14">
+    <lightning-card title="Find Common Components" icon-name="standard:disclosure_and_compliance">
         <div class="slds-p-around_medium">
-            <!-- Custom Lookup for Release 1 -->
-            <c-custom-lookup
-                    placeholder="Search Release 1"
-                    fetch-data={fetchReleases}
-                    onselection={handleRelease1Selection}
-            ></c-custom-lookup>
+            <!-- Release 1 -->
+            <div class="slds-form-element">
+                <!--<label class="slds-form-element__label slds-m-bottom_xx-small" for="release1-lookup">Release 1</label>-->
+                <c-custom-lookup
+                        id="release1-lookup"
+                        placeholder="Search Release 1"
+                        fetch-data={fetchReleases}
+                        onselection={handleRelease1Selection}
+                ></c-custom-lookup>
+            </div>
 
-            <!-- Custom Lookup for Environment 1 -->
-            <c-custom-lookup
-                    placeholder="Search Environment 1"
-                    fetch-data={fetchEnvironments}
-                    onselection={handleEnvironment1Selection}
-            ></c-custom-lookup>
+            <!-- Environment 1 -->
+            <div class="slds-form-element">
 
-            <!-- Custom Lookup for Release 2 -->
-            <c-custom-lookup
-                    placeholder="Search Release 2"
-                    fetch-data={fetchReleases}
-                    onselection={handleRelease2Selection}
-            ></c-custom-lookup>
+                <c-custom-lookup
+                        id="environment1-lookup"
+                        placeholder="Search Environment 1"
+                        fetch-data={fetchEnvironments}
+                        onselection={handleEnvironment1Selection}
+                ></c-custom-lookup>
+            </div>
 
-            <!-- Custom Lookup for Environment 2 -->
-            <c-custom-lookup
-                    placeholder="Search Environment 2"
-                    fetch-data={fetchEnvironments}
-                    onselection={handleEnvironment2Selection}
-            ></c-custom-lookup>
+            <!-- Release 2 -->
+            <div class="slds-form-element">
+
+                <c-custom-lookup
+                        id="release2-lookup"
+                        placeholder="Search Release 2"
+                        fetch-data={fetchReleases}
+                        onselection={handleRelease2Selection}
+                ></c-custom-lookup>
+            </div>
+
+            <!-- Environment 2 -->
+            <div class="slds-form-element">
+
+                <c-custom-lookup
+                        id="environment2-lookup"
+                        placeholder="Search Environment 2"
+                        fetch-data={fetchEnvironments}
+                        onselection={handleEnvironment2Selection}
+                ></c-custom-lookup>
+            </div>
         </div>
+
         <div class="slds-p-around_medium">
             <!-- Button to Find Common Components -->
             <lightning-button
                     label="Find Common Components"
                     onclick={handleFindCommonComponents}
-                    class="slds-m-top_medium">
-            </lightning-button>
+                    class="slds-m-top_medium"
+            ></lightning-button>
         </div>
         <template if:true={downloadUrl}>
             <div class="slds-p-around_medium">
@@ -44,8 +61,8 @@
                         label="Download CSV"
                         variant="success"
                         onclick={downloadCsv}
-                        class="slds-m-top_medium">
-                </lightning-button>
+                        class="slds-m-top_medium"
+                ></lightning-button>
             </div>
         </template>
     </lightning-card>

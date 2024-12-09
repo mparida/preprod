@@ -1,11 +1,20 @@
-/**
- * Created by mp1863 on 08/12/24.
- */
 .slds-combobox__form-element {
     position: relative;
 }
+
 .slds-dropdown {
     position: absolute;
     top: 100%;
     z-index: 9000;
+    max-height: 250px;
+    overflow-y: auto;
 }
+
+.slds-listbox__option {
+    cursor: pointer;
+}
+
+.slds-listbox__option:hover {
+    background-color: #f4f6f9;
+}
+

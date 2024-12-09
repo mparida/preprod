@@ -1,0 +1,4 @@
+.slds-form-element__label.slds-no-flex {
+    display: block;
+    margin-bottom: 0.25rem; /* Adjust as needed */
+}
