@@ -25,7 +25,7 @@ public with sharing class CommonComponentsController {
     }
 
     @AuraEnabled
-    public static String findCommonComponents(String release1, String release2, String environment1, String environment2) {
+    public static Map<String, String> findCommonComponents(String release1, String release2, String environment1, String environment2) {
         System.debug(release1+'--'+release2+'--'+environment1+'--'+environment2);
         // Get the latest modified Account
         Account latestAccount = [
@@ -63,7 +63,14 @@ public with sharing class CommonComponentsController {
                 AND copado__User_Story__r.copado__Environment__r.Id = :environment2
                 AND copado__User_Story__r.copado__Is_Bundle__c = false
         ];
-
+        String r1Name;
+        String r2Name;
+        if(query1Results!=null && query1Results.size() > 0){
+            r1Name = query1Results[0].copado__User_Story__r.copado__Release__r.Name;
+        }
+        if(query2Results!=null && query2Results.size() > 0){
+            r2Name = query2Results[0].copado__User_Story__r.copado__Release__r.Name;
+        }
         // Identify common components
         Set<String> keysInFirstResult = new Set<String>();
         for (copado__User_Story_Metadata__c record : query1Results) {
@@ -78,7 +85,7 @@ public with sharing class CommonComponentsController {
         }
         // If no common components, return a specific message
         if (commonKeys.isEmpty()) {
-            return 'NO_COMMON_COMPONENTS';
+            return new Map<String, String>{'status' => 'NO_COMMON_COMPONENTS'};
         }
         // Generate CSV content
         List<String> csvLines = new List<String>();
@@ -99,11 +106,12 @@ public with sharing class CommonComponentsController {
         }
 
         String csvContent = String.join(csvLines, '\n');
+        String fileName = 'CommonComponentsReport_' + r1Name + '_and_' + r2Name + '_' + System.now() + '.csv';
 
         // Attach CSV to the latest modified Account
         ContentVersion contentVersion = new ContentVersion();
-        contentVersion.Title = 'CommonComponentsReport_'+release1+' and '+release2+'_'+System.now();
-        contentVersion.PathOnClient = contentVersion.Title+'.csv';
+        contentVersion.Title = 'CommonComponentsReport_'+r1Name+' and '+r2Name+'_'+System.now();
+        contentVersion.PathOnClient = fileName;
         contentVersion.VersionData = Blob.valueOf(csvContent);
         contentVersion.IsMajorVersion = true;
         insert contentVersion;
@@ -118,13 +126,17 @@ public with sharing class CommonComponentsController {
         cdl.ShareType = 'V';
         insert cdl;
 
-        return cdl.ContentDocumentId;
+        return new Map<String, String>{
+                'status' => 'SUCCESS',
+                'contentDocumentId' => cdl.ContentDocumentId,
+                'fileName' => fileName
+        };
     }
 
     private static String formatCsvLine(copado__User_Story_Metadata__c record) {
         String name = record.copado__Metadata_API_Name__c;
         String type = record.copado__Type__c;
-        String developer = record.copado__User_Story__r.copado__Developer__r != null ? record.copado__User_Story__r.copado__Developer__r.Name : 'N/A';
+        String developer = record.copado__User_Story__r.copado__Developer__r != null ? '"' + record.copado__User_Story__r.copado__Developer__r.Name + '"' : '"N/A"';
         String release = record.copado__User_Story__r.copado__Release__r != null ? record.copado__User_Story__r.copado__Release__r.Name : 'N/A';
         String team = record.copado__User_Story__r.Development_Team__c != null ? record.copado__User_Story__r.Development_Team__c : 'N/A';
         String environment = record.copado__User_Story__r.copado__Environment__r != null ? record.copado__User_Story__r.copado__Environment__r.Name : 'N/A';

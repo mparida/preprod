@@ -94,12 +94,10 @@ public class CommonComponentsControllerTest {
         insert new List<copado__User_Story_Metadata__c>{metadata1, metadata2};
 
         Test.startTest();
-        String contentDocumentId = CommonComponentsController.findCommonComponents(
+        CommonComponentsController.findCommonComponents(
                 release1.Id, release2.Id, environment1.Id, environment2.Id
         );
         Test.stopTest();
-
-        System.assertNotEquals(null, contentDocumentId, 'Content Document ID should not be null');
 
         // Verify that the content document is linked to the latest modified account
         List<ContentDocumentLink> cdlList = [

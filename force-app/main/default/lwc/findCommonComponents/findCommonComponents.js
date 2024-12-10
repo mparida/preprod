@@ -9,6 +9,7 @@ export default class FindCommonComponents extends LightningElement {
     @track environment1 = '';
     @track environment2 = '';
     @track downloadUrl;
+    @track fileName = '';
 
     fetchReleases = async (searchTerm) => {
         try {
@@ -54,17 +55,18 @@ export default class FindCommonComponents extends LightningElement {
         }
 
         try {
-            const csvFileId = await findCommonComponents({
+            const result = await findCommonComponents({
                 release1: this.release1,
                 release2: this.release2,
                 environment1: this.environment1,
                 environment2: this.environment2,
             });
-            if (csvFileId === 'NO_COMMON_COMPONENTS') {
+            if (result.status === 'NO_COMMON_COMPONENTS') {
                 this.downloadUrl = null;
                 alert('No common components found.');
             } else {
-                this.downloadUrl = `/sfc/servlet.shepherd/document/download/${csvFileId}`;
+                this.downloadUrl = `/sfc/servlet.shepherd/document/download/${result.contentDocumentId}`;
+                this.fileName = result.fileName; // Store the file name
                 alert('Common components CSV has been generated!');
             }
         } catch (error) {
@@ -81,7 +83,7 @@ export default class FindCommonComponents extends LightningElement {
             const link = document.createElement('a'); // Create a link element
             link.href = this.downloadUrl; // Set the download URL
             link.target = '_self'; // Ensure it behaves as a download and not as a tab navigation
-            link.download = 'CommonComponentsReport.csv'; // Suggested file name
+            link.download = this.fileName ; // Store the file name; // Suggested file name
             document.body.appendChild(link); // Append the link to the DOM
             link.click(); // Programmatically click the link to trigger the download
             document.body.removeChild(link); // Clean up the DOM
