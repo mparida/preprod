@@ -6,6 +6,7 @@
         <list>
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManagerTest.cls-meta.xml" />
         </list>
       </option>
     </inspection_tool>
