@@ -33,7 +33,7 @@ public with sharing class NewUserAccessProvisioningManager {
 
     }
     @future(callout=true)
-    public static void provisionAccess(Id accessRecordId, String namedCredentialName, String replicateUserName, String firstName, String lastName, String attEmail) {
+    public static void provisionAccess(Id accessRecordId, String namedCredentialName, String replicateUserName, String firstName, String lastName, String attEmail){
         // Step 1: Get existing user access details
         Map<String, String> accessDetails = getUserAccessDetails(namedCredentialName, replicateUserName);
         List<String> permissionSetIds;
@@ -103,7 +103,7 @@ public with sharing class NewUserAccessProvisioningManager {
         System.debug(namedCredentialName+'A---B'+replicateUserName);
         String userId = getUserByFederationIdentifier(namedCredentialName, replicateUserName);
         if (userId == null) {
-            throw new UserStoryException('User not found with the given Federation Identifier.');
+            throw new UserAccessException('User not found with the given Federation Identifier.');
         }
 
         // Step 2: Retrieve Profile ID and Name
@@ -270,7 +270,7 @@ public with sharing class NewUserAccessProvisioningManager {
 
                 // Check the response for errors
                 if (res.getStatusCode() != 200) {
-                    throw new UserStoryException('Failed to assign permissions. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+                    throw new UserAccessException('Failed to assign permissions. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
                 }
             }
 
@@ -278,7 +278,7 @@ public with sharing class NewUserAccessProvisioningManager {
 
         } catch (Exception e) {
             System.debug('Error assigning permissions in bulk: ' + e.getMessage());
-            throw new UserStoryException('Error while assigning permissions in bulk: ' + e.getMessage());
+            throw new UserAccessException('Error while assigning permissions in bulk: ' + e.getMessage());
         }
     }
 
@@ -332,7 +332,7 @@ public with sharing class NewUserAccessProvisioningManager {
         HttpResponse res = http.send(req);
 
         if (res.getStatusCode() != 200) {
-            throw new UserStoryException('Failed to assign Permission Set Licenses. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+            throw new UserAccessException('Failed to assign Permission Set Licenses. Status code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
         }
     }
 
@@ -361,7 +361,7 @@ public with sharing class NewUserAccessProvisioningManager {
             return null;
         } catch (Exception e) {
             System.debug('Error retrieving user by Federation Identifier: ' + e.getStackTraceString());
-            throw new UserStoryException('Exception While getting User Details ');
+            throw new UserAccessException('Exception While getting User Details ');
         }
     }
 
@@ -381,13 +381,13 @@ public with sharing class NewUserAccessProvisioningManager {
             if (res.getStatusCode() == 200 || res.getStatusCode() == 201) {
                 System.debug('Password reset email triggered successfully for user: ' + userId);
             } else {
-                throw new UserStoryException(
+                throw new UserAccessException(
                         'Failed to trigger password reset email. Status Code: ' + res.getStatusCode() + ', Response: ' + res.getBody()
                 );
             }
         } catch (Exception e) {
             System.debug('Error while triggering password reset email: ' + e.getMessage());
-            throw new UserStoryException('Error while triggering password reset email: ' + e.getMessage());
+            throw new UserAccessException('Error while triggering password reset email: ' + e.getMessage());
         }
     }
 
@@ -430,11 +430,11 @@ public with sharing class NewUserAccessProvisioningManager {
                 System.debug('Employee record created successfully in the target org.');
             } else {
                 System.debug('Failed to create Employee record in the target org. Status Code: ' + res.getStatusCode() + ', Response: ' + res.getBody());
-                throw new UserStoryException('Failed to create Employee record in the target org. Status Code: ' + res.getStatusCode());
+                throw new UserAccessException('Failed to create Employee record in the target org. Status Code: ' + res.getStatusCode());
             }
         } catch (Exception e) {
             System.debug('Error while creating Employee record in target org: ' + e.getMessage());
-            throw new UserStoryException('Error while creating Employee record in target org: ' + e.getMessage());
+            throw new UserAccessException('Error while creating Employee record in target org: ' + e.getMessage());
         }
     }
 

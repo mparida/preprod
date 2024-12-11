@@ -64,6 +64,14 @@ public with sharing class AccessRequestController {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Profile is required.'));
             isValid = false;
         }
+        if (String.isBlank(accessRequest.ATT_Email__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Email is required.'));
+            isValid = false;
+        }
+        if (!String.isBlank(accessRequest.ATT_Email__c) && !accessRequest.ATT_Email__c.toLowerCase().endsWith('@att.com')) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Only at&t email addresses are allowed.'));
+            isValid = false;
+        }
         return isValid;
     }
 
@@ -84,6 +92,10 @@ public with sharing class AccessRequestController {
         }
         if (String.isBlank(accessRequest.ATT_Email__c)) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Email is required.'));
+            isValid = false;
+        }
+        if (!String.isBlank(accessRequest.ATT_Email__c) && !accessRequest.ATT_Email__c.toLowerCase().endsWith('@att.com')) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Only at&t email addresses are allowed.'));
             isValid = false;
         }
         if (String.isBlank(accessRequest.Replicate_UserName__c)) {

@@ -26,7 +26,7 @@ public class AccessRemovalService {
         }catch(Exception e){
             System.debug('Exception message: ' + e.getMessage());
             System.debug('Exception thrown while reverting User access: ' + e.getStackTraceString());
-            throw new UserStoryException('Exception while reverting the user access for the user');
+            throw new UserAccessException('Exception while reverting the user access for the user');
         }
     }
 }

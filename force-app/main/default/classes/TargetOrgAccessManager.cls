@@ -28,7 +28,7 @@ public class TargetOrgAccessManager {
             return null;
         } catch (Exception e) {
             System.debug('Error retrieving user by Federation Identifier: ' + e.getStackTraceString());
-            throw new UserStoryException('Exception while retrieving User Details: ' + e.getMessage());
+            throw new UserAccessException('Exception while retrieving User Details: ' + e.getMessage());
         }
     }
 

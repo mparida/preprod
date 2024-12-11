@@ -89,6 +89,10 @@
                 <apex:inputText value="{!accessRequest.ATT_UID__c}" id="userName" styleClass="text-input" required="true"/>
             </div>
             <div class="form-group">
+                <label for="userName">Email</label>
+                <apex:inputText value="{!accessRequest.ATT_Email__c}" id="email" styleClass="text-input" required="true"/>
+            </div>
+            <div class="form-group">
                 <label for="profile">Profile</label>
                 <apex:inputField value="{!accessRequest.Profile_Access__c}" id="profile" required="true"/>
             </div>
