@@ -99,9 +99,37 @@ public with sharing class BWC_Copado_US {
         public Team customfield_16473{get;set;}
         @AuraEnabled
         public SprintDetail sprint{get;set;}
+        @AuraEnabled
+        public SprintDetail [] closedSprints{get;set;}
+        @AuraEnabled
+        public String customfield_10693{get;set;}//Story points
+        @AuraEnabled
+        public String [] customfield_16424 { get; set; }//cdex Env Logged
+        @AuraEnabled
+        public Severity customfield_10552{get;set;}//cdex severity
+        @AuraEnabled
+        public Phase customfield_16474{get;set;}//cdex Phase found In
 	}
 
+    public class Severity{
+        @AuraEnabled
+        public String value{get;set;}
+    }
+    public class Phase{
+        @AuraEnabled
+        public String value{get;set;}
+    }
+
     public class SprintDetail{
+        @AuraEnabled
+        public String id{get;set;}
+        @AuraEnabled
+        public String name{get;set;}
+        @AuraEnabled
+        public String state{get;set;}
+    }
+
+    public class CloseSprint{
         @AuraEnabled
         public String id{get;set;}
         @AuraEnabled

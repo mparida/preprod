@@ -25,23 +25,23 @@ public with sharing class bwcCopadoUSController {
             
             if(sprintId == '')
             {
-                sprintId = iTrackUSList[0].fields.sprint?.id;
-                sprintName = iTrackUSList[0].fields.sprint?.name;
+                sprintId = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.id : iTrackUSList[0].fields.closedSprints[0]?.id;
+                sprintName = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.name : iTrackUSList[0].fields.closedSprints[0]?.name;
             }
             System.debug('sprintId::'+sprintId);
             System.debug('sprintId::'+sprintName);
             copado__Sprint__c sprint;
-            if(!String.isEmpty(sprintId) && !String.isEmpty(sprintName)){
+            List<copado__Sprint__c> sprintList = new List<copado__Sprint__c>();
+            if(!String.isBlank(sprintId)){
+                sprintList  = new List<copado__Sprint__c>([SELECT Id,Itrack_Sprint__c, Name FROM copado__Sprint__c WHERE Itrack_Sprint__c = :sprintId limit 1]);
+            }
+            if(sprintList.size() == 0){
                 sprint = new copado__Sprint__c();
                 sprint.Itrack_Sprint__c = sprintId;
                 sprint.Name = sprintName;
-                sprint.Active__c = true;
                 upsert sprint;
-            }
-
-            if(sprintId != null){
-                List<copado__Sprint__c> sprintList = new List<copado__Sprint__c>([SELECT id,Itrack_Sprint__c, Name FROM copado__Sprint__c WHERE Itrack_Sprint__c = :sprintId limit 1]);
-
+            }else{
+                sprint = sprintList[0];
             }
             for(BWC_Copado_US.issue selectedUS: iTrackUSList)
             {
@@ -62,7 +62,7 @@ public with sharing class bwcCopadoUSController {
             {
                 userNameMap.put(u.FederationIdentifier,u.Id);
             }
-            
+
             for(BWC_Copado_US.issue selectedUS: iTrackUSList){
                 copado__User_Story__c copadoUS = new copado__User_Story__c();
                 copadoUS.Is_Created_from_Itrack_Utility__c = true;
@@ -75,6 +75,9 @@ public with sharing class bwcCopadoUSController {
                 if(copadoUS.copado__Developer__c != null){
                     copadoUS.OwnerId = copadoUS.copado__Developer__c;
                 }
+                if(!String.isBlank(selectedUS.fields.customfield_10693)){
+                    copadoUS.copado__Story_Points_Other__c = Decimal.valueOf(selectedUS.fields.customfield_10693);
+                }
                 copadoUS.copado__Epic__c = epicMap.get(selectedUS.fields.customfield_10970);
                 copadoUS.copado__Sprint__c = sprint!=null?sprint.id:null;
                 if(selectedUS.fixVersionName != null){
@@ -82,11 +85,19 @@ public with sharing class bwcCopadoUSController {
                 }
                 	
                 copadoUS.copado__Team__c = teamMap.get(selectedUS.fields.customfield_16473.value);
+                /*CDEX Parameters*/
+                if(!String.isBlank(selectedUS.key) && selectedUS.key.startsWithIgnoreCase('CDEX')){
+                    Id RecordTypeId = Schema.SObjectType.copado__User_Story__c.getRecordTypeInfosByName().get('Bug').getRecordTypeId();
+                    copadoUS.RecordTypeId = RecordTypeId;
+                    copadoUS.Phase_Found_In__c = selectedUS.fields.customfield_16474!=null ? selectedUS.fields.customfield_16474.value : null;
+                    copadoUS.CDEX_Severity__c = selectedUS.fields.customfield_10552 != null ? selectedUS.fields.customfield_10552.value : null;
+                    copadoUS.CDEX_Environment_Logged__c = selectedUS.fields.customfield_16424 != null ? selectedUS.fields.customfield_16424[0] : null;
+                }
                 cusList.add(copadoUS);    
             }
-            UPSERT cusList iTrack_US__c;
+            upsert cusList iTrack_US__c;
             
-            return [SELECT Id,iTrack_US__c,Name FROM copado__User_Story__c WHERE ID IN :cusList];
+            return [SELECT Id,iTrack_US__c,Name FROM copado__User_Story__c WHERE Id IN :cusList];
                         
         } catch (Exception e) {
             System.debug('Exception in creating story ::' + e.getMessage());

@@ -5,6 +5,7 @@
       <option name="ignoredFilePaths">
         <list>
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US_Callout.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManagerTest.cls-meta.xml" />
         </list>
