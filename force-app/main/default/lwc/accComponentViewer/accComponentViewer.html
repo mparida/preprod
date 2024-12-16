@@ -1,103 +1,115 @@
 <template>
-    <lightning-card title="ACC Component Viewer" icon-name="custom:custom14">
+    <lightning-card title="ACC Components Viewer" icon-name="standard:related_list">
         <div class="slds-grid slds-wrap slds-p-around_medium">
-            <!-- Multi-lookup for Release -->
+            <!-- Row 1 -->
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
-                <lightning-input
-                        type="text"
-                        id="releaseInput"
-                        placeholder="Search Release"
-                        value={releaseSearchTerm}
-                        label="Release"
-                        onchange={handleReleaseSearch}
-                ></lightning-input>
-                <template if:true={releaseOptions}>
-                    <div >
-                        <ul class="slds-listbox slds-listbox_vertical" role="listbox">
-                            <template for:each={releaseOptions} for:item="release">
-                                <li
-                                        key={release.Id}
-                                        class="slds-listbox__item"
-                                        onclick={handleReleaseSelection}
-                                        data-id={release.Id}
-                                        data-name={release.Name}
-                                >
-                                    <div class="slds-media slds-listbox__option slds-listbox__option_entity">
-                                        <span class="slds-media__body">
-                                            <span class="slds-truncate">{release.Name}</span>
-                                        </span>
-                                    </div>
-                                </li>
-                            </template>
-                        </ul>
-                    </div>
-                </template>
-                <template for:each={selectedReleases} for:item="release">
-                    <lightning-pill
-                            key={release.Id}
-                            label={release.Name}
-                            onremove={removeRelease}
-                            data-id={release.Id}
-                    ></lightning-pill>
-                </template>
+                <c-custom-multi-lookup
+                        label-name="Releases"
+                        object-api-name="copado__Release__c"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:approval"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                <c-custom-multi-lookup
+                        label-name="Epics"
+                        object-api-name="copado__Epic__c"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:all"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
             </div>
 
-            <!-- Multi-lookup for Environment -->
+            <!-- Row 2 -->
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
-                <lightning-input
-                        type="text"
-                        id="environmentInput"
-                        placeholder="Search Environment"
-                        value={environmentSearchTerm}
-                        label="Environment"
-                        onchange={handleEnvironmentSearch}
-                ></lightning-input>
-                <template if:true={environmentOptions}>
-                    <div >
-                        <ul class="slds-listbox slds-listbox_vertical" role="listbox">
-                            <template for:each={environmentOptions} for:item="environment">
-                                <li
-                                        key={environment.Id}
-                                        class="slds-listbox__item"
-                                        onclick={handleEnvironmentSelection}
-                                        data-id={environment.Id}
-                                        data-name={environment.Name}
-                                >
-                                    <div class="slds-media slds-listbox__option slds-listbox__option_entity">
-                                        <span class="slds-media__body">
-                                            <span class="slds-truncate">{environment.Name}</span>
-                                        </span>
-                                    </div>
-                                </li>
-                            </template>
-                        </ul>
-                    </div>
-                </template>
-                <template for:each={selectedEnvironments} for:item="environment">
-                    <lightning-pill
-                            key={environment.Id}
-                            label={environment.Name}
-                            onremove={removeEnvironment}
-                            data-id={environment.Id}
-                    ></lightning-pill>
-                </template>
+                <c-custom-multi-lookup
+                        label-name="User Stories"
+                        object-api-name="copado__User_Story__c"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:log_a_call"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                <c-custom-multi-lookup
+                        label-name="Components"
+                        object-api-name="copado__User_Story_Metadata__c"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:custom"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                <c-custom-multi-lookup
+                        label-name="Developers"
+                        object-api-name="User"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:user"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                <c-custom-multi-lookup
+                        label-name="Teams"
+                        object-api-name="copado__Team__c"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:team_member"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="slds-col slds-size_1-of-2 slds-p-around_small">
+                <c-custom-multi-lookup
+                        label-name="Environments"
+                        object-api-name="copado__Environment__c"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:location"
+                        onretrieve={handleFilterSelection}
+                        onremove={handleFilterSelection}>
+                </c-custom-multi-lookup>
             </div>
         </div>
-        <div class="slds-p-around_medium">
-            <lightning-button
-                    label="Search"
-                    onclick={handleSearch}
-                    class="slds-m-top_medium"
-            ></lightning-button>
+
+        <!-- Search Button -->
+        <div class="slds-p-around_medium slds-text-align_center">
+            <lightning-button label="Search" variant="brand" onclick={handleSearch}></lightning-button>
         </div>
-        <div class="slds-p-around_medium">
-            <template if:true={results}>
-                <lightning-datatable
-                        key-field="id"
-                        data={results}
-                        columns={columns}
-                ></lightning-datatable>
-            </template>
-        </div>
+
+        <!-- Results Tabs -->
+        <template if:true={components.length}>
+            <lightning-tabset>
+                <lightning-tab label="Components">
+                    <lightning-datatable
+                            key-field="id"
+                            data={components}
+                            columns={componentColumns}>
+                    </lightning-datatable>
+                </lightning-tab>
+                <lightning-tab label="Azure Branches">
+                    <lightning-datatable
+                            key-field="id"
+                            data={azureBranches}
+                            columns={azureBranchColumns}>
+                    </lightning-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </template>
     </lightning-card>
 </template>
