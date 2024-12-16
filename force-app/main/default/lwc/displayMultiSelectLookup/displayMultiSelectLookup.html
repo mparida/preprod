@@ -1,0 +1,33 @@
+<!--
+ - Created by mp1863 on 16/12/24.
+ -->
+
+<!-- Display Multi Select Lookup -->
+<template>
+    <div class="c-container">
+        <lightning-card>
+            <h3 slot="title">
+                <lightning-icon icon-name="utility:connected_apps" size="small"></lightning-icon>
+                Lightning Web Component - Multi-Select Lookup Component
+            </h3>
+            <p class="slds-p-horizontal_small">
+                <c-custom-multi-lookup
+                        label-name="Search Contact"
+                        object-api-name= "Contact"
+                        field-api-names="Id,Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:contact"
+                        onretrieve={selectItemEventHandler}
+                        onremove={deleteItemEventHandler}>
+                </c-custom-multi-lookup>
+            </p><br><br>
+            <template if:true={isItemExists}>
+                <h3 class="slds-p-horizontal_small">
+                    Message from Parent Component <br/>
+                    You have chosen: {selectedItemsToDisplay}
+                </h3>
+
+            </template>
+        </lightning-card>
+    </div>
+</template>
