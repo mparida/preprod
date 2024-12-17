@@ -138,4 +138,98 @@ export default class AccComponentsViewer extends LightningElement {
         }
     }
 
+    exportComponentsToCSV() {
+        const keys = [
+            'copado__Metadata_API_Name__c',
+            'copado__Type__c',
+            'copado__User_Story__r.name',
+            'Commit_by_developer__c',
+            'copado__User_Story__r.copado__Epic__r.name',
+            'copado__User_Story__r.copado__Team__r.Name'
+        ];
+        const csvData = this.convertToCSV(this.filteredComponents, keys);
+        console.log('Generated CSV Data:', csvData);
+        if (csvData) {
+            this.downloadCSV(csvData, 'Components.csv');
+        } else {
+            alert('No data to export.');
+        }
+    }
+    // Convert JSON to CSV format
+    convertToCSV(data, keys) {
+        console.log('Data to convert:', data);
+        console.log('Keys:', keys);
+        if (!data || !data.length) {
+            return '';
+        }
+
+        const header = keys.join(',');
+        const rows = data.map(row =>
+            keys.map(key => {
+                const value = key.split('.').reduce((o, k) => (o || {})[k], row) || '';
+                return `"${value}"`;
+            }).join(',')
+        );
+        console.log('Generated CSV Rows:', rows);
+        const csv = `${header}\n${rows.join('\n')}`;
+        console.log('Final CSV Content:', csv);
+        return csv;
+    }
+    // Create and download CSV file
+    /*downloadCSV(csvData, fileName) {
+        console.log('CSV Data in downloadCSV:', csvData);
+        console.log('File Name:', fileName);
+        if (!csvData) {
+            alert('No data to export');
+            return;
+        }
+        try {
+            console.log('CSV Data Content:', csvData);
+            const blob = new Blob([csvData], { type: 'text/csv' }); // Fix MIME type
+            console.log('Blob created:', blob);
+
+            const url = window.URL.createObjectURL(blob);
+            console.log('Generated URL:', url);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+
+            document.body.appendChild(link);
+            link.click(); // Trigger download
+            console.log('Download triggered.');
+
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error in downloadCSV:', error);
+            alert('An error occurred while exporting the CSV file.');
+        }
+    }*/
+
+    downloadCSV(csvData, fileName) {
+        console.log('CSV Data in downloadCSV:', csvData);
+        console.log('File Name:', fileName);
+        if (csvData) {
+            // Create a data URI for the CSV content
+            const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
+
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = csvContent;
+            link.download = fileName;
+
+            // Append link to the DOM and trigger a click
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up by removing the temporary link
+            document.body.removeChild(link);
+
+            console.log('CSV file download triggered successfully.');
+        } else {
+            console.error('No CSV data to download.');
+        }
+    }
+
 }

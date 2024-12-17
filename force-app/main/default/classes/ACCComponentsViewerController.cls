@@ -15,7 +15,7 @@ public with sharing class ACCComponentsViewerController {
         String componentQuery = 'SELECT copado__Metadata_API_Name__c, copado__Type__c, copado__User_Story__r.name, ' +
                 'Commit_by_Developer__c, copado__User_Story__r.copado__Epic__r.name, ' +
                 'copado__User_Story__r.copado__Team__r.name ' +
-                'FROM copado__User_Story_Metadata__c WHERE Id != NULL';
+                'FROM copado__User_Story_Metadata__c WHERE Id != NULL AND copado__User_Story__r.copado__Is_Bundle__c = FALSE ';
         if (!releaseIds.isEmpty()) {
             componentQuery += ' AND copado__User_Story__r.copado__Release__c IN :releaseIds';
         }

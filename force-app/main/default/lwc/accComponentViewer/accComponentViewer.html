@@ -111,6 +111,7 @@
                                 label="Filter Components"
                                 onchange={handleComponentSearch}>
                         </lightning-input>
+                        <lightning-button label="Export to CSV" onclick={exportComponentsToCSV} variant="neutral"></lightning-button>
                     </div>
                     <lightning-datatable
                             key-field="id"
@@ -128,6 +129,7 @@
                                 label="Filter Azure Branches"
                                 onchange={handleAzureBranchSearch}>
                         </lightning-input>
+                        <lightning-button label="Export to CSV" onclick={exportAzureBranchesToCSV} variant="neutral"></lightning-button>
                     </div>
                     <lightning-datatable
                             key-field="id"
