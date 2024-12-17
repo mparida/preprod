@@ -45,8 +45,8 @@
                         data-filter-key="componentIds"
                         label-name="Components"
                         object-api-name="copado__User_Story_Metadata__c"
-                        field-api-names="Id,Name"
-                        filter-field-api-name="Name"
+                        field-api-names="Id,Name,copado__Metadata_API_Name__c"
+                        filter-field-api-name="copado__Metadata_API_Name__c"
                         icon-name="custom:custom55"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
@@ -98,7 +98,10 @@
         <div class="slds-p-around_medium slds-text-align_center">
             <lightning-button label="Search" variant="brand" onclick={handleSearch}></lightning-button>
         </div>
-
+        <!-- Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
         <!-- Results Tabs -->
         <template if:true={components.length}>
             <lightning-tabset>

@@ -16,6 +16,7 @@ export default class AccComponentsViewer extends LightningElement {
     @track noResultsFound = false;
     @track filteredComponents = [];
     @track filteredAzureBranches = [];
+    @track isLoading = false; // Spinner flag
 
     @track componentColumns = [
         { label: 'Component Name', fieldName: 'Metadata Name', type: 'text' },
@@ -69,6 +70,7 @@ export default class AccComponentsViewer extends LightningElement {
 
     async handleSearch() {
         console.log('Final Filter State:', JSON.stringify(this.filters));
+        this.isLoading = true;
         try {
             const results = await fetchFilteredRecords({ filters: this.filters });
             console.log('Search Results:', results);
@@ -109,6 +111,8 @@ export default class AccComponentsViewer extends LightningElement {
             } else {
                 alert('An error occurred while fetching data. Please try again.');
             }
+        }finally {
+            this.isLoading = false; // Stop spinner
         }
     }
     handleComponentSearch(event) {

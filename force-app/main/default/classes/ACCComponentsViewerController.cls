@@ -32,7 +32,7 @@ public with sharing class ACCComponentsViewerController {
             componentQuery += ' AND Commit_by_Developer__c IN :developerIds';
         }
         if (!teamIds.isEmpty()) {
-            componentQuery += ' AND copado__User_Story__r.Development_Team__c IN :teamIds';
+            componentQuery += ' AND copado__User_Story__r.copado__Team__c IN :teamIds';
         }
         if (!environmentIds.isEmpty()) {
             componentQuery += ' AND copado__User_Story__r.copado__Environment__c IN :environmentIds';
@@ -75,7 +75,7 @@ public with sharing class ACCComponentsViewerController {
             azureQuery += ' AND copado__Developer__c IN :developerIds';
         }
         if (!teamIds.isEmpty()) {
-            azureQuery += ' AND Development_Team__c IN :teamIds';
+            azureQuery += ' AND copado__Team__c IN :teamIds';
         }
         if (!environmentIds.isEmpty()) {
             azureQuery += ' AND copado__Environment__c IN :environmentIds';
