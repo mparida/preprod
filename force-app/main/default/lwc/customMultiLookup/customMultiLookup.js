@@ -125,8 +125,11 @@ export default class LwcMultiSelectLookup extends LightningElement {
 
         //now add newly selected items to the globalSelectedItems
         this.globalSelectedItems.push(...this.selectedItems);
-        const arrItems = this.globalSelectedItems;
+        console.log('Updated Global Selected Items:', this.globalSelectedItems);
 
+        //const arrItems = this.globalSelectedItems;
+        const arrItems = [...this.globalSelectedItems];
+        console.log('Array Items:', arrItems);
         //store current selection as previousSelectionItems
         this.previousSelectedItems = this.selectedItems;
         this.initializeValues();
@@ -135,6 +138,7 @@ export default class LwcMultiSelectLookup extends LightningElement {
         const evtCustomEvent = new CustomEvent('retrieve', {
             detail: {arrItems}
         });
+        console.log('Dispatched Items:', arrItems);
         this.dispatchEvent(evtCustomEvent);
     }
 

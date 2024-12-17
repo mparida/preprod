@@ -1,25 +1,27 @@
 <template>
-    <lightning-card title="ACC Components Viewer" icon-name="standard:related_list">
+    <lightning-card title="ACC Components Viewer" icon-name="custom:custom55">
         <div class="slds-grid slds-wrap slds-p-around_medium">
             <!-- Row 1 -->
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="releaseIds"
                         label-name="Releases"
                         object-api-name="copado__Release__c"
                         field-api-names="Id,Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:approval"
+                        icon-name="custom:custom42"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
                 </c-custom-multi-lookup>
             </div>
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="epicIds"
                         label-name="Epics"
                         object-api-name="copado__Epic__c"
                         field-api-names="Id,Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:all"
+                        icon-name="custom:custom83"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
                 </c-custom-multi-lookup>
@@ -28,22 +30,24 @@
             <!-- Row 2 -->
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="userStoryIds"
                         label-name="User Stories"
                         object-api-name="copado__User_Story__c"
                         field-api-names="Id,Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:log_a_call"
+                        icon-name="custom:custom55"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
                 </c-custom-multi-lookup>
             </div>
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="componentIds"
                         label-name="Components"
                         object-api-name="copado__User_Story_Metadata__c"
                         field-api-names="Id,Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:custom"
+                        icon-name="custom:custom55"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
                 </c-custom-multi-lookup>
@@ -52,6 +56,7 @@
             <!-- Row 3 -->
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="developerIds"
                         label-name="Developers"
                         object-api-name="User"
                         field-api-names="Id,Name"
@@ -63,11 +68,12 @@
             </div>
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="teamIds"
                         label-name="Teams"
                         object-api-name="copado__Team__c"
                         field-api-names="Id,Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:team_member"
+                        icon-name="custom:custom15"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
                 </c-custom-multi-lookup>
@@ -76,11 +82,12 @@
             <!-- Row 4 -->
             <div class="slds-col slds-size_1-of-2 slds-p-around_small">
                 <c-custom-multi-lookup
+                        data-filter-key="environmentIds"
                         label-name="Environments"
                         object-api-name="copado__Environment__c"
                         field-api-names="Id,Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:location"
+                        icon-name="custom:custom68"
                         onretrieve={handleFilterSelection}
                         onremove={handleFilterSelection}>
                 </c-custom-multi-lookup>

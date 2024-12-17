@@ -14,48 +14,75 @@ export default class AccComponentsViewer extends LightningElement {
     @track components = [];
     @track azureBranches = [];
     @track noResultsFound = false;
+
     @track componentColumns = [
         { label: 'Component Name', fieldName: 'copado__Metadata_API_Name__c', type: 'text' },
         { label: 'Component Type', fieldName: 'copado__Type__c', type: 'text' },
-        { label: 'User Story', fieldName: 'copado__User_Story__c', type: 'text' },
+        { label: 'User Story', fieldName: 'copado__User_Story__r.name', type: 'text' },
         { label: 'Developer', fieldName: 'Commit_by_developer__c', type: 'text' },
-        { label: 'Epic', fieldName: 'copado__User_Story__r.copado__Epic__c', type: 'text' },
-        { label: 'Team', fieldName: 'copado__User_Story__r.copado__Team__c', type: 'text' }
+        { label: 'Epic', fieldName: 'copado__User_Story__r.copado__Epic__r.name', type: 'text' },
+        { label: 'Team', fieldName: 'copado__User_Story__r.copado__Team__r.Name', type: 'text' }
     ];
     @track azureBranchColumns = [
         { label: 'User Story', fieldName: 'Name', type: 'text' },
-        { label: 'Feature Branch', fieldName: 'copado__View_in_Git__c', type: 'url' },
+        { label: 'Feature Branch', fieldName: 'featureBranchUrl', type: 'url',
+            typeAttributes: { target: '_blank', label: { fieldName: 'featureBranchLabel' } }
+        },
         { label: 'Current Org', fieldName: 'copado__Environment__c', type: 'text' },
-        { label: 'Promotion Name', fieldName: 'copado__Promoted_User_Stories__r.Name', type: 'text' }
+        { label: 'Promotion Name', fieldName: 'copado__Promotion__r.Name', type: 'text' },
+        { label: 'Source Env', fieldName: 'SourceEnv', type: 'text' },
+        { label: 'Destination Env', fieldName: 'DestinationEnv', type: 'text' },
+        { label: 'Promotion Branch', fieldName: 'PromotionBranch', type: 'url', typeAttributes: { target: '_blank' } }
     ];
 
     handleFilterSelection(event) {
-        const { objectApiName, arrItems } = event.detail;
-        const filterKey = `${objectApiName}Ids`;
-        this.filters[filterKey] = arrItems.map((item) => item.value);
+        const { arrItems } = event.detail;
+        const filterKey = event.target.dataset.filterKey;
+
+        console.log('Event Detail:', event.detail); // Verify what is coming in the event
+        console.log('Filter Key:', filterKey); // Verify the filter key
+
+        if (filterKey) {
+            this.filters[filterKey] = arrItems ? arrItems.map((item) => item.value) : [];
+            console.log(`Updated filters for ${filterKey}:`, this.filters[filterKey]);
+        }
     }
 
-    async handleSearch() {
-        try {
-            const filters = {
-                releases: this.selectedReleases.map((item) => item.value),
-                epics: this.selectedEpics.map((item) => item.value),
-                userStories: this.selectedUserStories.map((item) => item.value),
-                components: this.selectedComponents.map((item) => item.value),
-                developers: this.selectedDevelopers.map((item) => item.value),
-                teams: this.selectedTeams.map((item) => item.value),
-                environments: this.selectedEnvironments.map((item) => item.value),
-            };
 
-            const results = await searchComponents({ filters });
+    async handleSearch() {
+        console.log('Final Filter State:', JSON.stringify(this.filters));
+        try {
+            const results = await fetchFilteredRecords({ filters: this.filters });
             console.log('Search Results:', results);
 
-            // Update UI with search results
-            this.components = results.components || [];
-            this.azureData = results.azure || [];
+            // Check for components
+            if (results.components && results.components.length > 0) {
+                this.components = results.components;
+                this.noResultsFound = false;
+            } else {
+                this.components = [];
+                this.noResultsFound = true;
+            }
+
+            // Check for Azure branches
+            if (results.azureBranches && results.azureBranches.length > 0) {
+                this.azureBranches = results.azureBranches;
+                this.noResultsFound = false;
+            } else {
+                this.azureBranches = [];
+                this.noResultsFound = true;
+            }
+
+            console.log('Components:', this.components);
+            console.log('Azure Branches:', this.azureBranches);
         } catch (error) {
-            console.error('Error fetching data:', error);
-            alert('An error occurred while fetching the data. Please try again.');
+            console.error('Error fetching data:', JSON.stringify(error));
+            console.error('Error Details:', error.body.message);
+            if (error.body && error.body.message.includes('Too many query rows: 50001')) {
+                alert('Too many records found. Please refine your search criteria to narrow the results.');
+            } else {
+                alert('An error occurred while fetching data. Please try again.');
+            }
         }
     }
 
