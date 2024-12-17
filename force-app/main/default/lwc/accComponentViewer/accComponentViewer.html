@@ -102,17 +102,36 @@
         <!-- Results Tabs -->
         <template if:true={components.length}>
             <lightning-tabset>
+                <!-- Components Tab -->
                 <lightning-tab label="Components">
+                    <div class="slds-p-around_small">
+                        <lightning-input
+                                type="search"
+                                placeholder="Search Components"
+                                label="Filter Components"
+                                onchange={handleComponentSearch}>
+                        </lightning-input>
+                    </div>
                     <lightning-datatable
                             key-field="id"
-                            data={components}
+                            data={filteredComponents}
                             columns={componentColumns}>
                     </lightning-datatable>
                 </lightning-tab>
+
+                <!-- Azure Branches Tab -->
                 <lightning-tab label="Azure Branches">
+                    <div class="slds-p-around_small">
+                        <lightning-input
+                                type="search"
+                                placeholder="Search Azure Branches"
+                                label="Filter Azure Branches"
+                                onchange={handleAzureBranchSearch}>
+                        </lightning-input>
+                    </div>
                     <lightning-datatable
                             key-field="id"
-                            data={azureBranches}
+                            data={filteredAzureBranches}
                             columns={azureBranchColumns}>
                     </lightning-datatable>
                 </lightning-tab>

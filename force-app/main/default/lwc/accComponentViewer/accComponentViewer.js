@@ -14,6 +14,8 @@ export default class AccComponentsViewer extends LightningElement {
     @track components = [];
     @track azureBranches = [];
     @track noResultsFound = false;
+    @track filteredComponents = [];
+    @track filteredAzureBranches = [];
 
     @track componentColumns = [
         { label: 'Component Name', fieldName: 'copado__Metadata_API_Name__c', type: 'text' },
@@ -88,7 +90,9 @@ export default class AccComponentsViewer extends LightningElement {
             } else {
                 this.azureBranches = [];
             }
-
+            // Initialize filtered data to full data
+            this.filteredComponents = [...this.components];
+            this.filteredAzureBranches = [...this.azureBranches];
             // Determine noResultsFound
             this.noResultsFound = this.components.length === 0 && this.azureBranches.length === 0;
 
@@ -107,6 +111,31 @@ export default class AccComponentsViewer extends LightningElement {
             }
         }
     }
+    handleComponentSearch(event) {
+        const searchKey = event.target.value.toLowerCase();
+        if (searchKey) {
+            this.filteredComponents = this.components.filter(item =>
+                Object.values(item).some(value =>
+                    value && value.toString().toLowerCase().includes(searchKey)
+                )
+            );
+        } else {
+            this.filteredComponents = [...this.components]; // Reset to full data
+        }
+    }
 
+    // Quick search for Azure Branches
+    handleAzureBranchSearch(event) {
+        const searchKey = event.target.value.toLowerCase();
+        if (searchKey) {
+            this.filteredAzureBranches = this.azureBranches.filter(item =>
+                Object.values(item).some(value =>
+                    value && value.toString().toLowerCase().includes(searchKey)
+                )
+            );
+        } else {
+            this.filteredAzureBranches = [...this.azureBranches]; // Reset to full data
+        }
+    }
 
 }
