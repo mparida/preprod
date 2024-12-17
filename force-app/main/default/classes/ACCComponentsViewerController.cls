@@ -56,9 +56,9 @@ public with sharing class ACCComponentsViewerController {
         results.put('components', componentsListMap);
         // *********************************Azure Results**********************************************************************************
         String azureQuery = 'SELECT copado__Environment__r.Name, copado__View_in_Git__c, Name, ' +
-                '(SELECT copado__Promotion__r.copado__Source_Environment__c, ' +
+                '(SELECT copado__Promotion__r.Source_Env__c, ' +
                 'copado__Promotion__r.name, ' +
-                'copado__Promotion__r.copado__Destination_Environment__c, ' +
+                'copado__Promotion__r.Destination_Env__c, ' +
                 'copado__Promotion__r.copado__View_in_Git__c ' +
                 'FROM copado__Promoted_User_Stories__r WHERE copado__Promotion__r.copado__Status__c = \'Completed\')' +
                 'FROM copado__User_Story__c WHERE Id != NULL';
@@ -91,7 +91,7 @@ public with sharing class ACCComponentsViewerController {
                     'copado__Environment__c' => azure.copado__Environment__r != null ? azure.copado__Environment__r.Name : 'N/A'
             };
             rowData.put('featureBranchUrl', azure.copado__View_in_Git__c != null ?
-                    azure.copado__View_in_Git__c : null);
+                    System.Label.AzureUrl+'feature/'+azure.Name: null);
             rowData.put('featureBranchLabel', azure.copado__View_in_Git__c != null ?
                     'feature/' + azure.Name : 'N/A');
 
@@ -99,9 +99,12 @@ public with sharing class ACCComponentsViewerController {
                 for (copado__Promoted_User_Story__c promotedUserStory : azure.copado__Promoted_User_Stories__r) {
                     if (promotedUserStory.copado__Promotion__r != null) {
                         rowData.put('copado__Promotion__r.Name', promotedUserStory.copado__Promotion__r.Name);
-                        rowData.put('SourceEnv', promotedUserStory.copado__Promotion__r.copado__Source_Environment__c);
-                        rowData.put('DestinationEnv', promotedUserStory.copado__Promotion__r.copado__Destination_Environment__c);
-                        rowData.put('PromotionBranch', promotedUserStory.copado__Promotion__r.copado__View_in_Git__c);
+                        rowData.put('SourceEnv', promotedUserStory.copado__Promotion__r.Source_Env__c);
+                        rowData.put('DestinationEnv', promotedUserStory.copado__Promotion__r.Destination_Env__c);
+                        rowData.put('PromotionBranchUrl', promotedUserStory.copado__Promotion__r.copado__View_in_Git__c != null ?
+                                System.Label.AzureUrl+'promotion/'+promotedUserStory.copado__Promotion__r.Name: null);
+                        rowData.put('PromotionBranchLabel', promotedUserStory.copado__Promotion__r.copado__View_in_Git__c != null ?
+                                'promotion/' + promotedUserStory.copado__Promotion__r.Name : 'N/A');
                     }
                 }
             }

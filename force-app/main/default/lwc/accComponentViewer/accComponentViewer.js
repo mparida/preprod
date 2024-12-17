@@ -25,14 +25,30 @@ export default class AccComponentsViewer extends LightningElement {
     ];
     @track azureBranchColumns = [
         { label: 'User Story', fieldName: 'Name', type: 'text' },
-        { label: 'Feature Branch', fieldName: 'featureBranchUrl', type: 'url',
-            typeAttributes: { target: '_blank', label: { fieldName: 'featureBranchLabel' } }
+        {
+            label: 'Feature Branch',
+            fieldName: 'featureBranchUrl',
+            type: 'url',
+            typeAttributes: {
+                target: '_blank',
+                label: { fieldName: 'featureBranchLabel' },
+                tooltip: null  // Prevents URL from showing in hover
+            }
         },
         { label: 'Current Org', fieldName: 'copado__Environment__c', type: 'text' },
         { label: 'Promotion Name', fieldName: 'copado__Promotion__r.Name', type: 'text' },
         { label: 'Source Env', fieldName: 'SourceEnv', type: 'text' },
         { label: 'Destination Env', fieldName: 'DestinationEnv', type: 'text' },
-        { label: 'Promotion Branch', fieldName: 'PromotionBranch', type: 'url', typeAttributes: { target: '_blank' } }
+        {
+            label: 'Promotion Branch',
+            fieldName: 'PromotionBranchUrl',
+            type: 'url',
+            typeAttributes: {
+                target: '_blank',
+                label: { fieldName: 'PromotionBranchLabel' },
+                tooltip: null // Prevent hover tooltip
+            }
+        }
     ];
 
     handleFilterSelection(event) {
@@ -55,29 +71,35 @@ export default class AccComponentsViewer extends LightningElement {
             const results = await fetchFilteredRecords({ filters: this.filters });
             console.log('Search Results:', results);
 
-            // Check for components
+            // Process Components
             if (results.components && results.components.length > 0) {
                 this.components = results.components;
-                this.noResultsFound = false;
             } else {
                 this.components = [];
-                this.noResultsFound = true;
             }
 
-            // Check for Azure branches
+            // Process Azure Branches and Format Promotion Branch URLs
             if (results.azureBranches && results.azureBranches.length > 0) {
-                this.azureBranches = results.azureBranches;
-                this.noResultsFound = false;
+                this.azureBranches = results.azureBranches.map(row => ({
+                    ...row,
+                    featureBranchUrl: row.featureBranchUrl,
+                    featureBranchLabel: row.featureBranchLabel
+                }));
             } else {
                 this.azureBranches = [];
-                this.noResultsFound = true;
             }
 
-            console.log('Components:', this.components);
-            console.log('Azure Branches:', this.azureBranches);
+            // Determine noResultsFound
+            this.noResultsFound = this.components.length === 0 && this.azureBranches.length === 0;
+
+            // Logs for Debugging
+            console.log('Processed Components:', this.components);
+            console.log('Processed Azure Branches:', this.azureBranches);
         } catch (error) {
             console.error('Error fetching data:', JSON.stringify(error));
-            console.error('Error Details:', error.body.message);
+            console.error('Error Details:', error.body?.message || error.message);
+
+            // Handle specific error cases (e.g., Too Many Rows)
             if (error.body && error.body.message.includes('Too many query rows: 50001')) {
                 alert('Too many records found. Please refine your search criteria to narrow the results.');
             } else {
@@ -85,5 +107,6 @@ export default class AccComponentsViewer extends LightningElement {
             }
         }
     }
+
 
 }
