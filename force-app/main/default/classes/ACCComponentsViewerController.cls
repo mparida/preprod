@@ -44,12 +44,12 @@ public with sharing class ACCComponentsViewerController {
         List<Map<String, String>> componentsListMap = new List<Map<String, String>>();
         for (copado__User_Story_Metadata__c component : componentResults) {
             Map<String, String> rowData = new Map<String, String>{
-                    'copado__Metadata_API_Name__c' => component.copado__Metadata_API_Name__c,
-                    'copado__Type__c' => component.copado__Type__c,
-                    'copado__User_Story__r.name' => component.copado__User_Story__r != null ? component.copado__User_Story__r.Name : 'N/A',
-                    'Commit_by_developer__c' => component.Commit_by_developer__c,
-                    'copado__User_Story__r.copado__Epic__r.name' => component.copado__User_Story__r != null && component.copado__User_Story__r.copado__Epic__r != null ? component.copado__User_Story__r.copado__Epic__r.Name : 'N/A',
-                    'copado__User_Story__r.copado__Team__r.Name' => component.copado__User_Story__r != null ? component.copado__User_Story__r.copado__Team__r.Name : 'N/A'
+                    'Metadata Name' => component.copado__Metadata_API_Name__c,
+                    'Metadata Type' => component.copado__Type__c,
+                    'User Story' => component.copado__User_Story__r != null ? component.copado__User_Story__r.Name : 'N/A',
+                    'Developer' => component.Commit_by_developer__c,
+                    'Epic' => component.copado__User_Story__r != null && component.copado__User_Story__r.copado__Epic__r != null ? component.copado__User_Story__r.copado__Epic__r.Name : 'N/A',
+                    'Team' => component.copado__User_Story__r != null ? component.copado__User_Story__r.copado__Team__r.Name : 'N/A'
             };
             componentsListMap.add(rowData);
         }
@@ -98,7 +98,7 @@ public with sharing class ACCComponentsViewerController {
             if (azure.copado__Promoted_User_Stories__r != null) {
                 for (copado__Promoted_User_Story__c promotedUserStory : azure.copado__Promoted_User_Stories__r) {
                     if (promotedUserStory.copado__Promotion__r != null) {
-                        rowData.put('copado__Promotion__r.Name', promotedUserStory.copado__Promotion__r.Name);
+                        rowData.put('Promotion Name', promotedUserStory.copado__Promotion__r.Name);
                         rowData.put('SourceEnv', promotedUserStory.copado__Promotion__r.Source_Env__c);
                         rowData.put('DestinationEnv', promotedUserStory.copado__Promotion__r.Destination_Env__c);
                         rowData.put('PromotionBranchUrl', promotedUserStory.copado__Promotion__r.copado__View_in_Git__c != null ?

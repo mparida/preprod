@@ -18,12 +18,12 @@ export default class AccComponentsViewer extends LightningElement {
     @track filteredAzureBranches = [];
 
     @track componentColumns = [
-        { label: 'Component Name', fieldName: 'copado__Metadata_API_Name__c', type: 'text' },
-        { label: 'Component Type', fieldName: 'copado__Type__c', type: 'text' },
-        { label: 'User Story', fieldName: 'copado__User_Story__r.name', type: 'text' },
-        { label: 'Developer', fieldName: 'Commit_by_developer__c', type: 'text' },
-        { label: 'Epic', fieldName: 'copado__User_Story__r.copado__Epic__r.name', type: 'text' },
-        { label: 'Team', fieldName: 'copado__User_Story__r.copado__Team__r.Name', type: 'text' }
+        { label: 'Component Name', fieldName: 'Metadata Name', type: 'text' },
+        { label: 'Component Type', fieldName: 'Metadata Type', type: 'text' },
+        { label: 'User Story', fieldName: 'User Story', type: 'text' },
+        { label: 'Developer', fieldName: 'Developer', type: 'text' },
+        { label: 'Epic', fieldName: 'Epic', type: 'text' },
+        { label: 'Team', fieldName: 'Team', type: 'text' }
     ];
     @track azureBranchColumns = [
         { label: 'User Story', fieldName: 'Name', type: 'text' },
@@ -38,7 +38,7 @@ export default class AccComponentsViewer extends LightningElement {
             }
         },
         { label: 'Current Org', fieldName: 'copado__Environment__c', type: 'text' },
-        { label: 'Promotion Name', fieldName: 'copado__Promotion__r.Name', type: 'text' },
+        { label: 'Promotion Name', fieldName: 'Promotion Name', type: 'text' },
         { label: 'Source Env', fieldName: 'SourceEnv', type: 'text' },
         { label: 'Destination Env', fieldName: 'DestinationEnv', type: 'text' },
         {
@@ -140,17 +140,35 @@ export default class AccComponentsViewer extends LightningElement {
 
     exportComponentsToCSV() {
         const keys = [
-            'copado__Metadata_API_Name__c',
-            'copado__Type__c',
-            'copado__User_Story__r.name',
-            'Commit_by_developer__c',
-            'copado__User_Story__r.copado__Epic__r.name',
-            'copado__User_Story__r.copado__Team__r.Name'
+            'Metadata Name',
+            'Metadata Type',
+            'User Story',
+            'Developer',
+            'Epic',
+            'Team'
         ];
         const csvData = this.convertToCSV(this.filteredComponents, keys);
         console.log('Generated CSV Data:', csvData);
         if (csvData) {
             this.downloadCSV(csvData, 'Components.csv');
+        } else {
+            alert('No data to export.');
+        }
+    }
+    exportAzureBranchesToCSV() {
+        const keys =  [
+            'Name',
+            'featureBranchLabel',
+            'copado__Environment__c',
+            'Promotion Name',
+            'SourceEnv',
+            'DestinationEnv',
+            'PromotionBranchLabel'
+        ];
+        const csvData = this.convertToCSV(this.filteredAzureBranches, keys);
+        console.log('Generated CSV Data:', csvData);
+        if (csvData) {
+            this.downloadCSV(csvData, 'Azure_Branches.csv');
         } else {
             alert('No data to export.');
         }
@@ -176,37 +194,6 @@ export default class AccComponentsViewer extends LightningElement {
         return csv;
     }
     // Create and download CSV file
-    /*downloadCSV(csvData, fileName) {
-        console.log('CSV Data in downloadCSV:', csvData);
-        console.log('File Name:', fileName);
-        if (!csvData) {
-            alert('No data to export');
-            return;
-        }
-        try {
-            console.log('CSV Data Content:', csvData);
-            const blob = new Blob([csvData], { type: 'text/csv' }); // Fix MIME type
-            console.log('Blob created:', blob);
-
-            const url = window.URL.createObjectURL(blob);
-            console.log('Generated URL:', url);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-
-            document.body.appendChild(link);
-            link.click(); // Trigger download
-            console.log('Download triggered.');
-
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error in downloadCSV:', error);
-            alert('An error occurred while exporting the CSV file.');
-        }
-    }*/
-
     downloadCSV(csvData, fileName) {
         console.log('CSV Data in downloadCSV:', csvData);
         console.log('File Name:', fileName);
