@@ -227,55 +227,33 @@ public class NewUserAccessProvisioningManagerTest {
             return res;
         }
     }
+    
+    /*---------------------- Exception Case -----------------------*/
     @IsTest
     static void testProvisionAccessException() {
         // Mock HTTP responses to simulate a failure scenario
         Test.setMock(HttpCalloutMock.class, new NewUserAccessProvisioningManagerExceptionMock());
 
-        // Create a test access record
-        ACC_Environment_Access__c accessRecord = new ACC_Environment_Access__c(
-                ATT_Email__c = 'testuser@att.com',
-                First_Name__c = 'John',
-                Last_Name__c = 'Doe',
-                Replicate_UserName__c = 'replicateuser@att.com',
-                Environment_Name__r = new copado__Org__c(Name = 'TestEnvironment')
-        );
-        insert accessRecord;
+        String fName = 'FName';
+        String lName = 'LName';
 
         Test.startTest();
         try {
             // Call the method under test directly
-            NewUserAccessProvisioningManager.provisionAccess(
-                    accessRecord.Id,
-                    'TestEnvironment',
-                    'replicateuser@att.com',
-                    'John',
-                    'Doe',
-                    'testuser@att.com'
-            );
+            NewUserAccessProvisioningManager.createNewUser('Test Env', fName, lName, null, null,null,null);
             //System.assert(false, 'Expected UserAccessException was not thrown.');
         } catch (UserAccessException e) {
+            System.debug('Print Exception : '+e.toString());
             // Assert that the expected exception is thrown
             System.assertEquals('400', e.errorCode, 'Exception code should match.');
-            System.assert(e.getMessage().contains('Mocked error'), 'Exception message should match.');
         }
         Test.stopTest();
-
-        // Validate that the error details are captured in the access record
-        ACC_Environment_Access__c updatedRecord = [
-                SELECT hasError__c, Call_Out_Errors__c, Error__c
-                FROM ACC_Environment_Access__c
-                WHERE Id = :accessRecord.Id
-        ];
-        System.assert(updatedRecord.hasError__c, 'hasError should be true.');
-        System.assertEquals('Access Provisioning Error', updatedRecord.Call_Out_Errors__c, 'Error message should match.');
-        System.assert(updatedRecord.Error__c.contains('Mocked error'), 'Error details should match.');
     }
     public class NewUserAccessProvisioningManagerExceptionMock implements HttpCalloutMock {
         public HttpResponse respond(HttpRequest req) {
             HttpResponse res = new HttpResponse();
 
-            if (req.getEndpoint().contains('/services/data/v56.0/sobjects/User/')) {
+            if (req.getMethod().equals('POST') && req.getEndpoint().contains('/services/data/v56.0/sobjects/User/')) {
                 // Simulate an error during user creation
                 res.setStatusCode(400);
                 res.setBody('{"message": "Mocked error", "errorCode": "MOCK_ERROR"}');

@@ -19,32 +19,51 @@ public with sharing class MultiSelectLookupController {
         List<String> fieldList = fieldAPINames.split(',');
 
         //check if Id is already been passed
-        if(!fieldList.contains('Id')){
-            fieldList.add('Id');
-            strQueryField = String.join(fieldList, ',');
-        }else {
-            strQueryField = fieldAPINames;
+        if(!objectName.equalsIgnoreCase('copado__User_Story_Metadata__c')) {
+            if (!fieldList.contains('Id')) {
+                fieldList.add('Id');
+                strQueryField = String.join(fieldList, ',');
+            } else {
+                strQueryField = fieldAPINames;
+            }
+        }
+        String strQuery;
+        if(!objectName.equalsIgnoreCase('copado__User_Story_Metadata__c')) {
+            strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField)
+                    + ' FROM '
+                    + String.escapeSingleQuotes(objectName)
+                    + ' WHERE ' + filterFieldAPIName + '  LIKE \'' + str + '%\''
+                    + ' ORDER BY ' + filterFieldAPIName
+                    + ' LIMIT 50';
+        }else{
+            strQuery = 'SELECT copado__Metadata_API_Name__c FROM copado__User_Story_Metadata__c WHERE '
+                    + filterFieldAPIName +  ' LIKE \'' + str + '%\''
+                    + 'GROUP BY copado__Metadata_API_Name__c';
         }
 
-        String strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField)
-                + ' FROM '
-                + String.escapeSingleQuotes(objectName)
-                + ' WHERE ' + filterFieldAPIName + '  LIKE \'' + str + '%\''
-                + ' ORDER BY ' + filterFieldAPIName
-                + ' LIMIT 50';
 
         System.debug('strQuery=' + strQuery);
 
-        List<SObject> lstResult = database.query(strQuery);
-        //create list of records that can be easily be parsable at js controller.
-        for(String strField:fieldList){
-            for(SObject sobj:lstResult){
-                if(strField != 'Id'){
-                    SObjectQueryResult result = new SObjectQueryResult();
-                    result.recordId = (String) sobj.get('Id');
-                    result.recordName = (String) sobj.get(strField);
-                    lstReturnResult.add(result);
+        if(!objectName.equalsIgnoreCase('copado__User_Story_Metadata__c')) {
+            List<SObject> lstResult = database.query(strQuery);
+            //create list of records that can be easily be parsable at js controller.
+            for (String strField : fieldList) {
+                for (SObject sobj : lstResult) {
+                    if (strField != 'Id') {
+                        SObjectQueryResult result = new SObjectQueryResult();
+                        result.recordId = (String) sobj.get('Id');
+                        result.recordName = (String) sobj.get(strField);
+                        lstReturnResult.add(result);
+                    }
                 }
+            }
+        }else{
+            AggregateResult[] groupedResults = database.query(strQuery);
+            for (AggregateResult ar : groupedResults)  {
+                SObjectQueryResult result = new SObjectQueryResult();
+                result.recordId = (String) ar.get('copado__Metadata_API_Name__c');
+                result.recordName = (String) ar.get('copado__Metadata_API_Name__c');
+                lstReturnResult.add(result);
             }
         }
         return lstReturnResult;
