@@ -51,6 +51,7 @@ export default class LwcMultiSelectLookup extends LightningElement {
                             /*since previously choosen items to be retained, so create value array for checkbox group.
                                 This value will be directly assigned as checkbox value & will be displayed as checked.
                             */
+                            console.log('Items--'+this.items);
                             this.globalSelectedItems.map(element =>{
                                 if(element.value == resElement.recordId){
                                     this.value.push(element.value);

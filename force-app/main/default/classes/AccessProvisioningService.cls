@@ -43,18 +43,23 @@ public with sharing class AccessProvisioningService {
 
         String priorProfileId =  priorInfo.get('ProfileId') != null ? (String)priorInfo.get('ProfileId') : '';
         String priorPermissionSets = (String) priorInfo.get('PermissionSetIds');
+        String priorPermissionSetGroup = (String) priorInfo.get('PermissionSetGroupIds');
+        String priorPermissionSetLicenses = (String) priorInfo.get('PermissionSetLicenseIds');
         if(!Test.isRunningTest()){
-            TargetOrgAccessManager.setUserProfileAndPermissions(namedCredentialName, userId, profileId, priorPermissionSets);
+            //TargetOrgAccessManager.setUserProfileAndPermissions(namedCredentialName, userId, profileId, priorPermissionSets);
+            TargetOrgAccessManager.changeProfile(namedCredentialName, userId, profileId);
         }
         accessRecord.User_Id__c = userId;
         accessRecord.Prior_Profile__c = priorProfileId;
         accessRecord.Prior_PS_Assignment__c = priorPermissionSets;
+        accessRecord.Prior_PSG_Assigments__c = priorPermissionSetGroup;
+        accessRecord.Prior_PSLicense_Assignment_Ids__c = priorPermissionSetLicenses;
         accessRecord.Access_Delivered__c = true;
         Decimal days = Decimal.valueOf(accessRecord.Access_Given_For__c);
         DateTime now = DateTime.now();
         DateTime futureDateTime = days < 1.0 ? now.addHours (Integer.valueOf(days*24)): now.addDays(Integer.valueOf(accessRecord.Access_Given_For__c) );
         accessRecord.End_Time__c  = futureDateTime;
-        accessRecord.End_Time__c = DateTime.now().addMinutes(1);
+        //accessRecord.End_Time__c = DateTime.now().addMinutes(1);
         accessRecord.ATT_Email__c = userEmail;
         if(!Test.isRunningTest()){
             update accessRecord;

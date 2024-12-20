@@ -24,7 +24,8 @@ export default class AccComponentsViewer extends LightningElement {
         { label: 'User Story', fieldName: 'User Story', type: 'text' },
         { label: 'Developer', fieldName: 'Developer', type: 'text' },
         { label: 'Epic', fieldName: 'Epic', type: 'text' },
-        { label: 'Team', fieldName: 'Team', type: 'text' }
+        { label: 'Team', fieldName: 'Team', type: 'text' },
+        { label: 'Environment', fieldName: 'Environment', type: 'text' }
     ];
     @track azureBranchColumns = [
         { label: 'User Story', fieldName: 'Name', type: 'text' },

@@ -145,7 +145,6 @@ public with sharing class NewUserAccessProvisioningManager {
                     permissionSetGroupIds.add((String) assignmentRecord.get('PermissionSetGroupId'));
                 }
             }
-
             accessDetails.put('PermissionSetIds', String.join(permissionSetIds, ','));
             accessDetails.put('PermissionSetGroupIds', String.join(permissionSetGroupIds, ','));
         }

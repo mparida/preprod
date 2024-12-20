@@ -32,11 +32,7 @@ public class AccessProvisioningServiceTest {
                 Access_Delivered__c, End_Time__c
         FROM ACC_Environment_Access__c
         WHERE Id = :accessRecord.Id];
-        /*System.assertNotEquals(null, updatedAccessRecord.User_Id__c, 'User_Id__c should be populated.');
-        System.assertNotEquals(null, updatedAccessRecord.Prior_Profile__c, 'Prior_Profile__c should be populated.');
-        System.assertNotEquals(null, updatedAccessRecord.Prior_PS_Assignment__c, 'Prior_PS_Assignment__c should be populated.');
-        System.assert(updatedAccessRecord.Access_Delivered__c, 'Access_Delivered__c should be true.');
-        System.assert(updatedAccessRecord.End_Time__c > DateTime.now(), 'End_Time__c should be set to a future date.');*/
+
     }
 
     @IsTest
@@ -54,10 +50,6 @@ public class AccessProvisioningServiceTest {
                 Access_Delivered__c, End_Time__c
         FROM ACC_Environment_Access__c
         WHERE Id = :accessRecord.Id];
-        /*System.assertNotEquals(null, updatedAccessRecord.User_Id__c, 'User_Id__c should be populated.');
-        System.assertNotEquals(null, updatedAccessRecord.Prior_Profile__c, 'Prior_Profile__c should be populated.');
-        System.assertNotEquals(null, updatedAccessRecord.Prior_PS_Assignment__c, 'Prior_PS_Assignment__c should be populated.');
-        System.assert(updatedAccessRecord.Access_Delivered__c, 'Access_Delivered__c should be true.');
-        System.assert(updatedAccessRecord.End_Time__c > DateTime.now(), 'End_Time__c should be set to a future date.');*/
+
     }
 }

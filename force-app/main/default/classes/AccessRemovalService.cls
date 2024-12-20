@@ -15,11 +15,11 @@ public class AccessRemovalService {
     public static void revertAccessForUser(String accessRecordId) {
         ACC_Environment_Access__c accessRecord;
         try{
-            accessRecord = [SELECT User_Id__c, Prior_Profile__c, Prior_PS_Assignment__c , Environment_Name__r.name, Access_Provisioning_Complete__c 
+            accessRecord = [SELECT User_Id__c, Prior_Profile__c, Prior_PS_Assignment__c ,Prior_PSG_Assigments__c,Prior_PSLicense_Assignment_Ids__c, Environment_Name__r.name, Access_Provisioning_Complete__c
                                                       FROM ACC_Environment_Access__c WHERE Id = :accessRecordId];
     
             String namedCredentialName = accessRecord.Environment_Name__r.name;
-            TargetOrgAccessManager.setUserProfileAndPermissions(namedCredentialName, accessRecord.User_Id__c, accessRecord.Prior_Profile__c,accessRecord.Prior_PS_Assignment__c );
+            TargetOrgAccessManager.setUserProfileAndPermissions(namedCredentialName, accessRecord.User_Id__c, accessRecord.Prior_Profile__c,accessRecord.Prior_PS_Assignment__c, accessRecord.Prior_PSG_Assigments__c, accessRecord.Prior_PSLicense_Assignment_Ids__c);
             accessRecord.Access_Provisioning_Complete__c = true;
             update accessRecord;
             //Approval.LockResult lockResult = Approval.lock(accessRecord);

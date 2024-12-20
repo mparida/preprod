@@ -13,7 +13,7 @@ public with sharing class ACCComponentsViewerController {
         System.debug('releaseIds>>'+releaseIds);
         // Component Results
         String componentQuery = 'SELECT copado__Metadata_API_Name__c, copado__Type__c, copado__User_Story__r.name, ' +
-                'Commit_by_Developer__c, copado__User_Story__r.copado__Epic__r.name, ' +
+                'Commit_by_Developer__c, copado__User_Story__r.copado__Epic__r.Itrack_Epic__c, copado__User_Story__r.copado__Environment__r.Name, ' +
                 'copado__User_Story__r.copado__Team__r.name ' +
                 'FROM copado__User_Story_Metadata__c WHERE Id != NULL AND copado__User_Story__r.copado__Is_Bundle__c = FALSE ';
         if (!releaseIds.isEmpty()) {
@@ -26,7 +26,7 @@ public with sharing class ACCComponentsViewerController {
             componentQuery += ' AND copado__User_Story__c IN :userStoryIds';
         }
         if (!componentIds.isEmpty()) {
-            componentQuery += ' AND Id IN :componentIds';
+            componentQuery += ' AND copado__Metadata_API_Name__c IN :componentIds';
         }
         if (!developerIds.isEmpty()) {
             componentQuery += ' AND Commit_by_Developer__c IN :developerIds';
@@ -48,8 +48,9 @@ public with sharing class ACCComponentsViewerController {
                     'Metadata Type' => component.copado__Type__c,
                     'User Story' => component.copado__User_Story__r != null ? component.copado__User_Story__r.Name : 'N/A',
                     'Developer' => component.Commit_by_developer__c,
-                    'Epic' => component.copado__User_Story__r != null && component.copado__User_Story__r.copado__Epic__r != null ? component.copado__User_Story__r.copado__Epic__r.Name : 'N/A',
-                    'Team' => component.copado__User_Story__r != null ? component.copado__User_Story__r.copado__Team__r.Name : 'N/A'
+                    'Epic' => component.copado__User_Story__r != null && component.copado__User_Story__r.copado__Epic__r != null ? component.copado__User_Story__r.copado__Epic__r.Itrack_Epic__c : 'N/A',
+                    'Team' => component.copado__User_Story__r != null ? component.copado__User_Story__r.copado__Team__r.Name : 'N/A',
+                    'Environment' => component.copado__User_Story__r.copado__Environment__r != null ? component.copado__User_Story__r.copado__Environment__r.Name : 'N/A'
             };
             componentsListMap.add(rowData);
         }
