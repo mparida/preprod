@@ -105,7 +105,7 @@ public class TargetOrgAccessManager {
 
             // Retrieve current Permission Set Assignments
             HttpRequest reqPermissions = new HttpRequest();
-            String queryPermissions = EncodingUtil.urlEncode('SELECT PermissionSetId FROM PermissionSetAssignment WHERE PermissionSet.Profile.Name = null AND AssigneeId = \'' + userId + '\'', 'UTF-8');
+            String queryPermissions = EncodingUtil.urlEncode('SELECT PermissionSetId, PermissionSetGroupId FROM PermissionSetAssignment WHERE PermissionSet.Profile.Name = null AND AssigneeId = \'' + userId + '\'', 'UTF-8');
             reqPermissions.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + queryPermissions);
             reqPermissions.setMethod('GET');
             
@@ -115,11 +115,37 @@ public class TargetOrgAccessManager {
                 Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(resPermissions.getBody());
                 List<Object> records = (List<Object>) queryResponse.get('records');
                 List<String> permissionSetIds = new List<String>();
+                List<String> permissionSetGroupIds = new List<String>();
                 for (Object record : records) {
                     Map<String, Object> psRecord = (Map<String, Object>) record;
-                    permissionSetIds.add((String) psRecord.get('PermissionSetId'));
+                    if (psRecord.containsKey('PermissionSetId')) {
+                        permissionSetIds.add((String) psRecord.get('PermissionSetId')``);
+                    }
+                    if (psRecord.containsKey('PermissionSetGroupId') && psRecord.get('PermissionSetGroupId') != null) {
+                        permissionSetGroupIds.add((String) psRecord.get('PermissionSetGroupId'));
+                    }
                 }
                 userInfo.put('PermissionSetIds', String.join(permissionSetIds, ','));
+                userInfo.put('PermissionSetGroupIds', String.join(permissionSetGroupIds, ','));
+            }
+
+            String queryLicenses = EncodingUtil.urlEncode('SELECT PermissionSetLicenseId FROM PermissionSetLicenseAssign WHERE AssigneeId = \'' + userId + '\'', 'UTF-8');
+            HttpRequest reqLicenses = new HttpRequest();
+            reqLicenses.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + queryLicenses);
+            reqLicenses.setMethod('GET');
+
+            HttpResponse resLicenses = http.send(reqLicenses);
+            if (resLicenses.getStatusCode() == 200) {
+                Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(resLicenses.getBody());
+                List<Object> records = (List<Object>) queryResponse.get('records');
+                List<String> licenseIds = new List<String>();
+
+                for (Object record : records) {
+                    Map<String, Object> licenseRecord = (Map<String, Object>) record;
+                    licenseIds.add((String) licenseRecord.get('PermissionSetLicenseId'));
+                }
+
+                userInfo.put('PermissionSetLicenseIds', String.join(licenseIds, ','));
             }
         } catch (Exception e) {
             System.debug('Error retrieving user profile and permissions: ' + e.getMessage());

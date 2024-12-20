@@ -43,12 +43,16 @@ public with sharing class AccessProvisioningService {
 
         String priorProfileId =  priorInfo.get('ProfileId') != null ? (String)priorInfo.get('ProfileId') : '';
         String priorPermissionSets = (String) priorInfo.get('PermissionSetIds');
+        String priorPermissionSetGroup = (String) priorInfo.get('PermissionSetGroupIds');
+        String priorPermissionSetLicenses = (String) priorInfo.get('PermissionSetLicenseIds');
         if(!Test.isRunningTest()){
             TargetOrgAccessManager.setUserProfileAndPermissions(namedCredentialName, userId, profileId, priorPermissionSets);
         }
         accessRecord.User_Id__c = userId;
         accessRecord.Prior_Profile__c = priorProfileId;
         accessRecord.Prior_PS_Assignment__c = priorPermissionSets;
+        accessRecord.Prior_PSG_Assigments__c = priorPermissionSetGroup;
+        accessRecord.Prior_PSLicense_Assignment_Ids__c = priorPermissionSetLicenses;
         accessRecord.Access_Delivered__c = true;
         Decimal days = Decimal.valueOf(accessRecord.Access_Given_For__c);
         DateTime now = DateTime.now();
