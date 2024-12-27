@@ -13,8 +13,8 @@ public with sharing class ACCComponentsViewerController {
         System.debug('releaseIds>>'+releaseIds);
         // Component Results
         String componentQuery = 'SELECT copado__Metadata_API_Name__c, copado__Type__c, copado__User_Story__r.name, ' +
-                'Commit_by_Developer__c, copado__User_Story__r.copado__Epic__r.Itrack_Epic__c, copado__User_Story__r.copado__Environment__r.Name, ' +
-                'copado__User_Story__r.copado__Team__r.name ' +
+                'copado__User_Story__r.copado__Developer__r.Name, copado__User_Story__r.copado__Epic__r.Itrack_Epic__c, copado__User_Story__r.copado__Environment__r.Name, ' +
+                'copado__User_Story__r.copado__Team__r.name , copado__User_Story__r.copado__Release__r.Name ' +
                 'FROM copado__User_Story_Metadata__c WHERE Id != NULL AND copado__User_Story__r.copado__Is_Bundle__c = FALSE ';
         if (!releaseIds.isEmpty()) {
             componentQuery += ' AND copado__User_Story__r.copado__Release__c IN :releaseIds';
@@ -29,7 +29,7 @@ public with sharing class ACCComponentsViewerController {
             componentQuery += ' AND copado__Metadata_API_Name__c IN :componentIds';
         }
         if (!developerIds.isEmpty()) {
-            componentQuery += ' AND Commit_by_Developer__c IN :developerIds';
+            componentQuery += ' AND copado__User_Story__r.copado__Developer__c IN :developerIds';
         }
         if (!teamIds.isEmpty()) {
             componentQuery += ' AND copado__User_Story__r.copado__Team__c IN :teamIds';
@@ -47,16 +47,17 @@ public with sharing class ACCComponentsViewerController {
                     'Metadata Name' => component.copado__Metadata_API_Name__c,
                     'Metadata Type' => component.copado__Type__c,
                     'User Story' => component.copado__User_Story__r != null ? component.copado__User_Story__r.Name : 'N/A',
-                    'Developer' => component.Commit_by_developer__c,
+                    'Developer' => component.copado__User_Story__r.copado__Developer__r.Name,
                     'Epic' => component.copado__User_Story__r != null && component.copado__User_Story__r.copado__Epic__r != null ? component.copado__User_Story__r.copado__Epic__r.Itrack_Epic__c : 'N/A',
                     'Team' => component.copado__User_Story__r != null ? component.copado__User_Story__r.copado__Team__r.Name : 'N/A',
-                    'Environment' => component.copado__User_Story__r.copado__Environment__r != null ? component.copado__User_Story__r.copado__Environment__r.Name : 'N/A'
+                    'Environment' => component.copado__User_Story__r.copado__Environment__r != null ? component.copado__User_Story__r.copado__Environment__r.Name : 'N/A',
+                    'Release' => component.copado__User_Story__r.copado__Release__r != null ? component.copado__User_Story__r.copado__Release__r.Name : 'N/A'
             };
             componentsListMap.add(rowData);
         }
         results.put('components', componentsListMap);
         // *********************************Azure Results**********************************************************************************
-        String azureQuery = 'SELECT copado__Environment__r.Name, copado__View_in_Git__c, Name, ' +
+        /*String azureQuery = 'SELECT copado__Environment__r.Name, copado__View_in_Git__c, Name, ' +
                 '(SELECT copado__Promotion__r.Source_Env__c, ' +
                 'copado__Promotion__r.name, ' +
                 'copado__Promotion__r.Destination_Env__c, ' +
@@ -111,7 +112,7 @@ public with sharing class ACCComponentsViewerController {
             }
             azuresListMap.add(rowData);
         }
-        results.put('azureBranches', azuresListMap);
+        results.put('azureBranches', azuresListMap);*/
 
         return results;
     }

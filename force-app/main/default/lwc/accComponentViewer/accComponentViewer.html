@@ -119,12 +119,14 @@
                     <lightning-datatable
                             key-field="id"
                             data={filteredComponents}
-                            columns={componentColumns}>
+                            columns={componentColumns}
+                            hide-checkbox-column="true">
+
                     </lightning-datatable>
                 </lightning-tab>
 
                 <!-- Azure Branches Tab -->
-                <lightning-tab label="Azure Branches">
+               <!-- <lightning-tab label="Azure Branches">
                     <div class="slds-p-around_small">
                         <lightning-input
                                 type="search"
@@ -139,7 +141,7 @@
                             data={filteredAzureBranches}
                             columns={azureBranchColumns}>
                     </lightning-datatable>
-                </lightning-tab>
+                </lightning-tab> -->
             </lightning-tabset>
         </template>
     </lightning-card>

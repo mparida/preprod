@@ -25,7 +25,8 @@ export default class AccComponentsViewer extends LightningElement {
         { label: 'Developer', fieldName: 'Developer', type: 'text' },
         { label: 'Epic', fieldName: 'Epic', type: 'text' },
         { label: 'Team', fieldName: 'Team', type: 'text' },
-        { label: 'Environment', fieldName: 'Environment', type: 'text' }
+        { label: 'Environment', fieldName: 'Environment', type: 'text' },
+        { label: 'Release', fieldName: 'Release', type: 'text' }
     ];
     @track azureBranchColumns = [
         { label: 'User Story', fieldName: 'Name', type: 'text' },
@@ -150,7 +151,9 @@ export default class AccComponentsViewer extends LightningElement {
             'User Story',
             'Developer',
             'Epic',
-            'Team'
+            'Team',
+            'Environment',
+            'Release'
         ];
         const csvData = this.convertToCSV(this.filteredComponents, keys);
         console.log('Generated CSV Data:', csvData);
