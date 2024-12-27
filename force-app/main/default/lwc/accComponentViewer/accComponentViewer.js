@@ -117,7 +117,7 @@ export default class AccComponentsViewer extends LightningElement {
             this.isLoading = false; // Stop spinner
         }
     }
-    handleComponentSearch(event) {
+   /* handleComponentSearch(event) {
         const searchKey = event.target.value.toLowerCase();
         if (searchKey) {
             this.filteredComponents = this.components.filter(item =>
@@ -125,6 +125,24 @@ export default class AccComponentsViewer extends LightningElement {
                     value && value.toString().toLowerCase().includes(searchKey)
                 )
             );
+        } else {
+            this.filteredComponents = [...this.components]; // Reset to full data
+        }
+    }*/
+
+    handleComponentSearch(event) {
+        const searchInput = event.target.value.toLowerCase();
+        const searchTerms = searchInput.split(',').map(term => term.trim()); // Split by comma and trim spaces
+
+        if (searchInput) {
+            this.filteredComponents = this.components.filter(item => {
+                // Check if all search terms match any column value
+                return searchTerms.every(term =>
+                    Object.values(item).some(value =>
+                        value && value.toString().toLowerCase().includes(term)
+                    )
+                );
+            });
         } else {
             this.filteredComponents = [...this.components]; // Reset to full data
         }
