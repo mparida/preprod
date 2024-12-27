@@ -14,8 +14,8 @@ public class MultiSelectLookupControllerTest {
         Profile developerProfile = [SELECT Id FROM Profile WHERE Name = 'Developer' LIMIT 1];
 
         // Create two test users with the Developer profile
-        User peerReviewer = createTestUser('peer.reviewer@test.com', developerProfile.Id);
-        User prApprover = createTestUser('pr.approver@test.com', developerProfile.Id);
+        User peerReviewer = TestDataFactory.createTestUser('peer.reviewer@test.com', developerProfile.Id);
+        User prApprover = TestDataFactory.createTestUser('pr.approver@test.com', developerProfile.Id);
         insert peerReviewer;
         insert prApprover;
     }
@@ -68,20 +68,6 @@ public class MultiSelectLookupControllerTest {
         System.assertEquals(5, metadataResults.size(), 'Expected 5 metadata records in the result.');
 
         Test.stopTest();
-    }
-    private static User createTestUser(String email, Id profileId) {
-        return new User(
-                FirstName = 'Test',
-                LastName = 'User',
-                Email = email,
-                Username = email,
-                Alias = 'tuser',
-                TimeZoneSidKey = 'America/Los_Angeles',
-                LocaleSidKey = 'en_US',
-                EmailEncodingKey = 'UTF-8',
-                LanguageLocaleKey = 'en_US',
-                ProfileId = profileId
-        );
     }
     @isTest
     static void testInvalidObjectName() {

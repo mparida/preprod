@@ -7,30 +7,13 @@ private class UserStoryMetadataTriggerTest {
         Profile developerProfile = [SELECT Id FROM Profile WHERE Name = 'Developer' LIMIT 1];
 
         // Create two test users with the Developer profile
-        User peerReviewer = createTestUser('peer.reviewer@test.com', developerProfile.Id);
-        User prApprover = createTestUser('pr.approver@test.com', developerProfile.Id);
+        User peerReviewer = TestDataFactory.createTestUser('peer.reviewer@test.com', developerProfile.Id);
+        User prApprover = TestDataFactory.createTestUser('pr.approver@test.com', developerProfile.Id);
         insert peerReviewer;
         insert prApprover;
         System.debug('peerReviewer:::'+peerReviewer);
         System.debug('prApprover:::'+prApprover);
         // Create a sample User Story (parent object)
-
-
-    }
-
-    private static User createTestUser(String email, Id profileId) {
-        return new User(
-                FirstName = 'Test',
-                LastName = 'User',
-                Email = email,
-                Username = email,
-                Alias = 'tuser',
-                TimeZoneSidKey = 'America/Los_Angeles',
-                LocaleSidKey = 'en_US',
-                EmailEncodingKey = 'UTF-8',
-                LanguageLocaleKey = 'en_US',
-                ProfileId = profileId
-        );
     }
     @isTest
     static void testUserStoryMetadataTrigger_AllowedMetadata() {
