@@ -130,6 +130,7 @@ export default class AccComponentsViewer extends LightningElement {
         }
     }*/
 
+    /*THis function works, if you want to search from multiple values by comma separated
     handleComponentSearch(event) {
         const searchInput = event.target.value.toLowerCase();
         const searchTerms = searchInput.split(',').map(term => term.trim()); // Split by comma and trim spaces
@@ -146,7 +147,42 @@ export default class AccComponentsViewer extends LightningElement {
         } else {
             this.filteredComponents = [...this.components]; // Reset to full data
         }
+    }*/
+    //Any random search with results appending, search should be separated by comma
+    handleComponentSearch(event) {
+        const searchKey = event.target.value.toLowerCase();
+
+        // If the searchKey is empty, reset filteredComponents to full data
+        if (!searchKey.trim()) {
+            this.filteredComponents = [...this.components];
+            return;
+        }
+
+        // Split the searchKey into individual terms, handling commas and trimming spaces
+        const searchTerms = searchKey.split(',').map(term => term.trim()).filter(Boolean);
+
+        // Initialize a set to avoid duplicate rows
+        const resultSet = new Set();
+
+        // Append matching records for each search term
+        searchTerms.forEach(term => {
+            this.components.forEach(item => {
+                // Check if any value in the row matches the current term
+                const isMatch = Object.values(item).some(value =>
+                    value && value.toString().toLowerCase().includes(term)
+                );
+
+                // Add matching rows to the resultSet
+                if (isMatch) {
+                    resultSet.add(item);
+                }
+            });
+        });
+
+        // Update the filteredComponents with the unique results
+        this.filteredComponents = Array.from(resultSet);
     }
+
 
     // Quick search for Azure Branches
     handleAzureBranchSearch(event) {
