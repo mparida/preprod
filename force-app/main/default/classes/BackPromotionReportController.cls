@@ -3,9 +3,10 @@
  */
 
 global class BackPromotionReportController {
-    @InvocableMethod(label = 'Back promotion calculator')
-    public static List<copado__User_Story__c> getUSTListForBackDeploy(List<String> copadoEnvs){
+    @InvocableMethod(label = 'Back promotion calculator' description = 'This will return the list of eligible stories for bck promotion' category='User Story')
+    public static List<List<copado__User_Story__c>> getUSTListForBackDeploy(List<String> copadoEnvs){
         String environments = copadoEnvs.get(0);
+        System.debug('environments::'+environments);
         List<String> e = environments.split('#');
         /* ReportOrg#AdvanceOrg2#AdvanceOrg1#OldOrgSrc##true
         * for Example, I want to find back promotion report for 'SALESDEV'
@@ -16,30 +17,30 @@ global class BackPromotionReportController {
         * Assuming before SALESDEV was connected to DEVINT, we forward promoted UST from SCRUMQA to DEVINT, so it will have impact on calculation
         * So in this case the key will be : SALESDEV#RELEASEQA#DEVINT#ACCSCRUMQA#true*/
         String reportOrg = e.get(0);
-        String advOrg2 = e.get(1);
-        String advOrg1 = e.get(2);
-        String oldOrgSrc = e.get(3);
-        String flag = e.get(4);
+        String advOrg1 = e.get(1);
+        String oldOrgSrc = e.get(2);
+        String flag = e.get(3);
 
         copado__Promotion__c promo = [SELECT Id, CreatedDate FROM copado__Promotion__c WHERE Destination_Env__c =: reportOrg ORDER BY CreatedDate ASC LIMIT 1];
-        System.debug('SALESDEV OLD Promo : '+promo.CreatedDate);
+        //This is important as promotions deployed before this date will not appear
+        System.debug(reportOrg + ' First Promotion date : ' + promo.CreatedDate);
         Datetime calcDate = promo.CreatedDate;
-        //Check how many back promoted to target after "Environment" plugged to PL.
+        //Check how many PROMOTED (F & B) to target after "Environment" plugged to PL.
         List<copado__Promoted_User_Story__c> promotedUSTList = new List<copado__Promoted_User_Story__c>(
                 [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
-                WHERE copado__Promotion__r.Source_Env__c =: advOrg2
-                AND copado__Promotion__r.Destination_Env__c =: advOrg1
+                WHERE copado__Promotion__r.Destination_Env__c =: advOrg1
                 AND copado__Promotion__r.copado__Status__c = 'Completed'
                 AND copado__Promotion__r.CreatedDate >= : calcDate
                 AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
-                AND copado__Promotion__r.copado__Back_Promotion__c = TRUE
                 AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
         );
-        System.debug('Size of List in Advance Environment: '+promotedUSTList.size());
-        List<copado__Promoted_User_Story__c> promotedUSTListOldEnv;
+        System.debug('Size of List in Advance Environment: ' + advOrg1 + ' : '+promotedUSTList.size());
+        List<copado__Promoted_User_Story__c> promotedUSTListFromOldEnv;
+        /*There may be a temporary env connected before releasing the new env just to complete
+        promotions, this is also important, Lets say scrumqa to DEVINT*/
         if(flag == 'true'){
             copado__Promotion__c promo1 = [SELECT Id, CreatedDate FROM copado__Promotion__c WHERE Destination_Env__c = 'DEVINT' ORDER BY CreatedDate ASC LIMIT 1];
-            promotedUSTListOldEnv = new List<copado__Promoted_User_Story__c>(
+            promotedUSTListFromOldEnv = new List<copado__Promoted_User_Story__c>(
                     [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
                     WHERE copado__Promotion__r.Source_Env__c =: oldOrgSrc
                     AND copado__Promotion__r.Destination_Env__c =: advOrg1
@@ -49,15 +50,15 @@ global class BackPromotionReportController {
                     AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
             );
         }
-        if(promotedUSTListOldEnv != null){
-            System.debug('Size of List OLD Env / Forward Promo: '+promotedUSTListOldEnv.size());
+        if(promotedUSTListFromOldEnv != null){
+            System.debug('Size of List FROM OLD Env ' + oldOrgSrc + ' : ' + promotedUSTListFromOldEnv.size());
         }
         Set<String> USTListSet = new Set<String>();
         for(copado__Promoted_User_Story__c proUST : promotedUSTList){
             USTListSet.add(proUST.copado__User_Story__r.Name) ;
         }
-        if(promotedUSTListOldEnv != null && !promotedUSTListOldEnv.isEmpty()){
-            for(copado__Promoted_User_Story__c proUST : promotedUSTListOldEnv){
+        if(promotedUSTListFromOldEnv != null && !promotedUSTListFromOldEnv.isEmpty()){
+            for(copado__Promoted_User_Story__c proUST : promotedUSTListFromOldEnv){
                 USTListSet.add(proUST.copado__User_Story__r.Name) ;
             }
         }
@@ -79,7 +80,7 @@ global class BackPromotionReportController {
         for(copado__Promoted_User_Story__c proUST : promotedUSTListToAdvanceOrg1FromReportOrg){
             USTSetAdvanceOrg1Set.add(proUST.copado__User_Story__r.Name) ;
         }
-        System.debug('Size of List SALESDEV: '+USTSetAdvanceOrg1Set.size());
+        System.debug('Size of List Target Env. ' + reportOrg + ' : ' + USTSetAdvanceOrg1Set.size());
         String usName2 = '';
         for(String us : USTSetAdvanceOrg1Set){
             usName2+=us+',';
@@ -94,6 +95,10 @@ global class BackPromotionReportController {
         tempSet.removeAll(USTListSet);
         uniqueElements.addAll(tempSet);
 
-        return null;
+        List<List<copado__User_Story__c>> copadoStoriesListForBackPromotion = new List<List<copado__User_Story__c>>();
+        copadoStoriesListForBackPromotion.add([SELECT Id, Name, Developer_Name__c, copado__Team__r.Name, copado__Release__r.Name
+                                                FROM copado__User_Story__c
+                                                WHERE Name IN : uniqueElements]);
+        return copadoStoriesListForBackPromotion;
     }
 }
