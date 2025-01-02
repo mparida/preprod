@@ -9,8 +9,29 @@ public with sharing class CopadoUserStoryTriggerHandler {
                 clonedSourceIdMap.get(us.getCloneSourceId()).add(us);
             }
         }
+
+        //Validations - Dont allow if there is a Parent Story exists, Users will need to clone from actual parent/original Parent story
+        Set<Id> clonedSourceIdWithPrentSet = new Set<Id>();
+        for(copado__Team_Dependency__c dependency :
+            [SELECT Id, copado__Provider_User_Story__c, copado__Dependent_User_Story__c
+            FROM  copado__Team_Dependency__c
+            WHERE copado__Dependent_User_Story__c IN : clonedSourceIdMap.keySet()]){
+            if(dependency.copado__Provider_User_Story__c != null){
+                clonedSourceIdWithPrentSet.add(dependency.copado__Dependent_User_Story__c);
+            }
+        }
+
+        for(Id id : clonedSourceIdWithPrentSet){
+            if(clonedSourceIdMap.containsKey(id)){
+                for(copado__User_Story__c us : clonedSourceIdMap.get(id)){
+                    us.addError(System.Label.User_Story_Clone_Error);
+                }
+            }
+        }
+        //End Clone Validation
         Map<Id, String> idToITrackKeyMap = new Map<Id, String>();
-        for(copado__User_Story__c us: [SELECT Id, iTrack_US__c FROM copado__User_Story__c WHERE Id IN : clonedSourceIdMap.keySet()]){
+        for(copado__User_Story__c us:
+            [SELECT Id, iTrack_US__c FROM copado__User_Story__c WHERE Id IN : clonedSourceIdMap.keySet()]){
             if(!idToITrackKeyMap.containsKey(us.Id)){
                 idToITrackKeyMap.put(us.Id, us.iTrack_US__c);
             }
@@ -36,10 +57,12 @@ public with sharing class CopadoUserStoryTriggerHandler {
 
     public static void assignParent(List<copado__User_Story__c> clonedList){
         List<copado__Team_Dependency__c> listDep = new List<copado__Team_Dependency__c>();
+        Id RecordTypeId = Schema.SObjectType.copado__Team_Dependency__c.getRecordTypeInfosByName().get('User Story Dependency').getRecordTypeId();
         for(copado__User_Story__c us : clonedList){
             copado__Team_Dependency__c dependency = new copado__Team_Dependency__c();
             dependency.copado__Provider_User_Story__c = us.getCloneSourceId();
             dependency.copado__Dependent_User_Story__c = us.Id;
+            dependency.RecordTypeId = RecordTypeId;
             listDep.add(dependency);
         }
         if(listDep.size() > 0){

@@ -1,7 +1,4 @@
 trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after insert) {
-    if(!TriggerFlags.runOnce){
-        return;
-    }
     CustomTrigger__mdt trgMdt = CustomTrigger__mdt.getInstance('UserStoryTrigger');
     if(!trgMdt.On_off__c){
         return;
@@ -13,7 +10,9 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after in
             if(ust.getCloneSourceId() != null)
                 clonedList.add(ust);
         }
-        CopadoUserStoryTriggerHandler.performUSTVersioning(clonedList);
+        if(clonedList.size() > 0){
+            CopadoUserStoryTriggerHandler.performUSTVersioning(clonedList);
+        }
     }
 
     List<String> usetList = new List<String>();
@@ -23,6 +22,8 @@ trigger CopadoUserStoryTrigger on copado__User_Story__c (before insert, after in
             if(ust.getCloneSourceId() != null)
                 clonedList.add(ust);
         }
-        CopadoUserStoryTriggerHandler.assignParent(clonedList);
+        if(clonedList.size() > 0){
+            CopadoUserStoryTriggerHandler.assignParent(clonedList);
+        }
     }
 }

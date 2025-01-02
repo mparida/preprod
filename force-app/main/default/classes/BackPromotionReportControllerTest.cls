@@ -6,7 +6,7 @@
 public class BackPromotionReportControllerTest {
 
     @isTest
-    static void testUpdateApproverInJobStep() {
+    static void testGetUSTListForBackDeploy() {
         List<String> e = new List<String>();
         e.add(System.Label.TestOrgForBackPromo);
         List<List<copado__User_Story__c>> listUst = BackPromotionReportController.getUSTListForBackDeploy(e);

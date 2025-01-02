@@ -2,76 +2,138 @@
  * Created by mp1863 on 06/12/24.
  */
 
+/* Test class for CopadoUserStoryTrigger using built-in clone() method */
 @isTest
 public class CopadoUserStoryTriggerTest {
-    // Static variables to hold reusable IDs
-    static Id copadoOrgId;
-    static Id parentUserStoryId;
 
     @testSetup
-    static void setupData() {
+    static void setupTestData() {
+        // Create Developer profile for test users
+        Profile developerProfile = [SELECT Id FROM Profile WHERE Name = 'Developer' LIMIT 1];
+
+        // Create two test users with the Developer profile
+        User peerReviewer = TestDataFactory.createTestUser('peer.reviewer@test.com', developerProfile.Id);
+        User prApprover = TestDataFactory.createTestUser('pr.approver@test.com', developerProfile.Id);
+        insert peerReviewer;
+        insert prApprover;
+    }
+
+    @isTest
+    public static void testPerformUSTVersioningUsingClone() {
+        Test.startTest();
+
+        User peerReviewer = [SELECT Id, Name FROM USer WHERE email = 'peer.reviewer@test.com'];
+        User prApprover = [SELECT Id, Name FROM USer WHERE email = 'pr.approver@test.com'];
         // Create copado__Org__c record
         copado__Org__c copadoOrg = new copado__Org__c(
                 Name = 'Test Org'
         );
         insert copadoOrg;
-        copadoOrgId = copadoOrg.Id;
+        Id copadoOrgId = copadoOrg.Id;
 
-        // Create a parent User Story for cloning
-        copado__User_Story__c parentUserStory = new copado__User_Story__c(
+        // Create Parent User Story
+        copado__User_Story__c parentStory = new copado__User_Story__c(
                 copado__Org_Credential__c = copadoOrgId,
-                iTrack_US__c = 'ITrack123'
+                iTrack_US__c = 'PARENT-123',copado__Developer__c = peerReviewer.Id,
+                Peer_Reviewer__c = prApprover.Id
         );
-        insert parentUserStory;
-        parentUserStoryId = parentUserStory.Id;
+        insert parentStory;
+
+        // Clone the User Story
+        copado__User_Story__c clonedStory = parentStory.clone(false, true, false, false);
+        clonedStory.iTrack_US__c = 'CHILD-123';
+        insert clonedStory;
+
+        // Retrieve source ID of the clone
+        String sourceId = clonedStory.getCloneSourceId();
+        System.debug('Source ID: ' + sourceId);
+
+        // Validate Versioning Logic
+        clonedStory = [SELECT iTrack_US__c FROM copado__User_Story__c WHERE Id = :clonedStory.Id];
+        System.assert(clonedStory.iTrack_US__c.contains('_v'), 'Versioning should append _v# to the iTrack_US__c field.');
+
+        Test.stopTest();
     }
 
     @isTest
-    static void testPerformUSTVersioning() {
-        // Clone the parent User Story (mocking cloning behavior)
-        copado__User_Story__c clonedUserStory = new copado__User_Story__c(
-                copado__Org_Credential__c = copadoOrgId,
-                iTrack_US__c = null
-        );
-        insert clonedUserStory;
-
-        // Mock cloning by manually setting the getCloneSourceId behavior
+    public static void testAssignParentUsingClone() {
         Test.startTest();
-        clonedUserStory = [SELECT Id FROM copado__User_Story__c WHERE Id = :clonedUserStory.Id];
-        clonedUserStory.put('getCloneSourceId', parentUserStoryId); // Mock the clone source
-        update clonedUserStory;
-        Test.stopTest();
 
-        // Verify the iTrack_US__c field is correctly versioned
-        clonedUserStory = [SELECT Id, iTrack_US__c FROM copado__User_Story__c WHERE Id = :clonedUserStory.Id];
-        System.assert(clonedUserStory.iTrack_US__c.startsWith('ITrack123_v'), 'The iTrack_US__c should be versioned correctly.');
-    }
-
-    @isTest
-    static void testAssignParent() {
-        // Clone another User Story (mocking cloning behavior)
-        copado__User_Story__c clonedUserStory = new copado__User_Story__c(
-                copado__Org_Credential__c = copadoOrgId,
-                iTrack_US__c = null
+        User peerReviewer = [SELECT Id, Name FROM USer WHERE email = 'peer.reviewer@test.com'];
+        User prApprover = [SELECT Id, Name FROM USer WHERE email = 'pr.approver@test.com'];
+        // Create copado__Org__c record
+        copado__Org__c copadoOrg = new copado__Org__c(
+                Name = 'Test Org'
         );
-        insert clonedUserStory;
+        insert copadoOrg;
+        Id copadoOrgId = copadoOrg.Id;
 
-        // Mock cloning by manually setting the getCloneSourceId behavior
-        Test.startTest();
-        clonedUserStory = [SELECT Id FROM copado__User_Story__c WHERE Id = :clonedUserStory.Id];
-        clonedUserStory.put('getCloneSourceId', parentUserStoryId); // Mock the clone source
-        update clonedUserStory;
-        Test.stopTest();
+        // Create Parent User Story
+        copado__User_Story__c parentStory = new copado__User_Story__c(
+                copado__Org_Credential__c = copadoOrgId,
+                iTrack_US__c = 'PARENT-123',copado__Developer__c = peerReviewer.Id,
+                Peer_Reviewer__c = prApprover.Id
+        );
+        insert parentStory;
 
-        // Verify that the Team Dependency is created correctly
+        // Clone the User Story
+        copado__User_Story__c clonedStory = parentStory.clone(false, true, false, false);
+        clonedStory.iTrack_US__c = 'CHILD-123';
+        insert clonedStory;
+
+        // Verify Parent Assignment
         List<copado__Team_Dependency__c> dependencies = [
-                SELECT Id, copado__Provider_User_Story__c, copado__Dependent_User_Story__c
+                SELECT copado__Provider_User_Story__c, copado__Dependent_User_Story__c
                 FROM copado__Team_Dependency__c
-                WHERE copado__Dependent_User_Story__c = :clonedUserStory.Id
+                WHERE copado__Dependent_User_Story__c = :clonedStory.Id
         ];
 
-        System.assertEquals(1, dependencies.size(), 'There should be one Team Dependency created.');
-        System.assertEquals(parentUserStoryId, dependencies[0].copado__Provider_User_Story__c, 'The Provider User Story should match the parent.');
-        System.assertEquals(clonedUserStory.Id, dependencies[0].copado__Dependent_User_Story__c, 'The Dependent User Story should match the cloned User Story.');
+        System.assertEquals(1, dependencies.size(), 'Parent should be assigned to the cloned story.');
+        System.assertEquals(clonedStory.getCloneSourceId(), dependencies[0].copado__Provider_User_Story__c, 'Dependency should link to the correct parent story.');
+
+        Test.stopTest();
+    }
+
+    @isTest
+    public static void testTriggerDisabledUsingClone() {
+        Test.startTest();
+
+        getCustomMetadataRecord('UserStoryTrigger');
+        User peerReviewer = [SELECT Id, Name FROM USer WHERE email = 'peer.reviewer@test.com'];
+        User prApprover = [SELECT Id, Name FROM USer WHERE email = 'pr.approver@test.com'];
+        // Create copado__Org__c record
+        copado__Org__c copadoOrg = new copado__Org__c(
+                Name = 'Test Org'
+        );
+        insert copadoOrg;
+        Id copadoOrgId = copadoOrg.Id;
+
+        // Create Parent User Story
+        copado__User_Story__c parentStory = new copado__User_Story__c(
+                copado__Org_Credential__c = copadoOrgId,
+                iTrack_US__c = 'PARENT-1234',copado__Developer__c = peerReviewer.Id,
+                Peer_Reviewer__c = prApprover.Id
+        );
+        insert parentStory;
+
+        // Clone the User Story
+        copado__User_Story__c clonedStory = parentStory.clone(false, true, false, false);
+        clonedStory.iTrack_US__c = 'CHILD-1234';
+        insert clonedStory;
+
+        // Verify that no dependencies are created
+        List<copado__Team_Dependency__c> dependencies = [
+                SELECT Id FROM copado__Team_Dependency__c WHERE copado__Dependent_User_Story__c = :clonedStory.Id
+        ];
+        System.assertEquals(1, dependencies.size(), 'No dependencies should be created when the trigger is disabled.');
+
+        Test.stopTest();
+    }
+
+    public static CustomTrigger__mdt getCustomMetadataRecord(String triggerName) {
+        CustomTrigger__mdt triggerFlag = new CustomTrigger__mdt();
+        triggerFlag.On_off__c = false;
+        triggerFlag.Label = triggerName;
+        return triggerFlag;
     }
 }

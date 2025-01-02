@@ -30,6 +30,7 @@ global class BackPromotionReportController {
                 [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
                 WHERE copado__Promotion__r.Destination_Env__c =: advOrg1
                 AND copado__Promotion__r.copado__Status__c = 'Completed'
+                AND copado__Status__c != 'Outdated'
                 AND copado__Promotion__r.CreatedDate >= : calcDate
                 AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
                 AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
@@ -45,6 +46,7 @@ global class BackPromotionReportController {
                     WHERE copado__Promotion__r.Source_Env__c =: oldOrgSrc
                     AND copado__Promotion__r.Destination_Env__c =: advOrg1
                     AND copado__Promotion__r.copado__Status__c = 'Completed'
+                    AND copado__Status__c != 'Outdated'
                     AND copado__Promotion__r.CreatedDate >= : promo.CreatedDate
                     AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
                     AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
@@ -72,6 +74,7 @@ global class BackPromotionReportController {
                 WHERE  (copado__Promotion__r.Destination_Env__c =: reportOrg
                 OR copado__Promotion__r.Source_Env__c =: reportOrg )
                 AND copado__Promotion__r.copado__Status__c = 'Completed'
+                AND copado__Status__c != 'Outdated'
                 AND copado__User_Story__r.Name IN : USTListSet
                 AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
                 AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
@@ -94,6 +97,19 @@ global class BackPromotionReportController {
         Set<String> tempSet = USTSetAdvanceOrg1Set.clone();
         tempSet.removeAll(USTListSet);
         uniqueElements.addAll(tempSet);
+
+        //See if any of those user stories were deployed to prod before the env was plugged in.
+        List<copado__Promoted_User_Story__c> listOfProdDeployedStories = new List<copado__Promoted_User_Story__c>(
+                [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
+                WHERE copado__User_Story__r.Name IN : uniqueElements
+                AND copado__Promotion__r.Destination_Env__c = 'ACCPROD'
+                AND copado__Promotion__r.LastModifiedDate < : calcDate]);
+
+        for(copado__Promoted_User_Story__c prmUst : listOfProdDeployedStories){
+            if(uniqueElements.contains(prmUst.copado__User_Story__r.Name)){
+                uniqueElements.remove(prmUst.copado__User_Story__r.Name);
+            }
+        }
 
         List<List<copado__User_Story__c>> copadoStoriesListForBackPromotion = new List<List<copado__User_Story__c>>();
         copadoStoriesListForBackPromotion.add([SELECT Id, Name, Developer_Name__c, copado__Team__r.Name, copado__Release__r.Name

@@ -22,7 +22,7 @@ public with sharing class bwcCopadoUSController {
             set<String> sprintSet = new Set<String>();
             Map<String,Id> sprintMap = new Map<String,Id>();
             String sprintName = '';
-            
+            List<copado__Project__c> project = new List<copado__Project__c>([SELECT Id FROM  copado__Project__c WHERE Name =: System.Label.Copado_Project LIMIT 1]);
             if(sprintId == '')
             {
                 sprintId = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.id : iTrackUSList[0].fields.closedSprints[0]?.id;
@@ -66,10 +66,8 @@ public with sharing class bwcCopadoUSController {
             for(BWC_Copado_US.issue selectedUS: iTrackUSList){
                 copado__User_Story__c copadoUS = new copado__User_Story__c();
                 copadoUS.Is_Created_from_Itrack_Utility__c = true;
-                copadoUS.Itrack_UST_Version__c = 1;
-                copadoUS.copado__Project__c = System.Label.ACC_Project_Id;
+                copadoUS.copado__Project__c = project.size() == 1 ? project[0].Id : null;
                 copadoUS.iTrack_US__c = selectedUS.key;
-                copadoUS.Shadow_ITrack_US__c = selectedUS.key;
                 copadoUS.copado__User_Story_Title__c  = selectedUS.summary;
                 copadoUS.copado__Developer__c = userNameMap.get(selectedUS.assigneeUID);
                 if(copadoUS.copado__Developer__c != null){
@@ -85,6 +83,7 @@ public with sharing class bwcCopadoUSController {
                 }
                 	
                 copadoUS.copado__Team__c = teamMap.get(selectedUS.fields.customfield_16473.value);
+                copadoUS.Allow_Field_Change__c = true;
                 /*CDEX Parameters*/
                 if(!String.isBlank(selectedUS.key) && selectedUS.key.startsWithIgnoreCase('CDEX')){
                     Id RecordTypeId = Schema.SObjectType.copado__User_Story__c.getRecordTypeInfosByName().get('Bug').getRecordTypeId();
