@@ -9,12 +9,5 @@
         <target>lightning__HomePage</target> <!-- Allows it on home pages -->
         <target>lightning__FlowScreen</target>
     </targets>
-    <!--<targetConfigs>
-        <targetConfig targets="lightning__RecordPage">
-            <objects>
-                <object>*</object> 
-            </objects>
-        </targetConfig>
-    </targetConfigs>-->
     <masterLabel>Show Toast For Platform Event</masterLabel>
 </LightningComponentBundle>

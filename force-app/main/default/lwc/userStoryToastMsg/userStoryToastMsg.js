@@ -28,8 +28,8 @@ export default class ToastMessageComponent extends LightningElement {
             // Show error toast if either field is empty
             const evt = new ShowToastEvent({
                 message: 'Both Developer and Peer Reviewer fields must be filled out.',
-                variant: 'warning', // Red toast message
-                mode: 'dismissable'
+                variant: 'error', // Red toast message
+                mode: 'sticky'
             });
             this.dispatchEvent(evt);
         }

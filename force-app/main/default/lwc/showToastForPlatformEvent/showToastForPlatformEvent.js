@@ -3,25 +3,24 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import customCSS from '@salesforce/resourceUrl/toastCSS';
-import USER_ID from '@salesforce/user/Id'; 
+import USER_ID from '@salesforce/user/Id';
 
 export default class PlatformEventListener extends LightningElement {
     isCSSLoaded = false;
     @api recordId;
     channelName = '/event/NotificationEvent__e';
     subscription = null;
-    storageKey = 'lastEventId';
-    replayIdKey = 'lastReplayId'; // Key for storing the last replay ID in sessionStorage
+    processedEventsKey = 'processedEventIds'; // Key for storing processed Replay IDs in localStorage
 
     renderedCallback() {
-        if(this.isCSSLoaded) return;
+        if (this.isCSSLoaded) return;
         this.isCSSLoaded = true;
         loadStyle(this, customCSS)
-            .then(result => {
+            .then(() => {
                 console.log('CSS Loaded...');
             })
-            .catch(reason => {
-                console.log('Error CSS Loading...');
+            .catch(() => {
+                console.log('Error Loading CSS...');
             });
     }
 
@@ -33,36 +32,34 @@ export default class PlatformEventListener extends LightningElement {
     // Ensure we are subscribed to the event channel with the correct replay ID
     ensureSubscription() {
         if (!this.subscription) {
-            // Retrieve the last Replay ID from sessionStorage or set it to -2 to fetch events from the last 24 hours
-            let replayId = -2; // Default to -2 for last 24 hours if no stored ID
-            const lastReplayId = sessionStorage.getItem(this.replayIdKey);
-
-            if (lastReplayId) {
-                replayId = parseInt(lastReplayId, 10); // Use stored replay ID if available
-            }
+            let replayId = -1; // Start with -1 to only fetch new events
 
             console.log('Subscribing to Platform Event with replay ID:', replayId);
 
             subscribe(this.channelName, replayId, (message) => {
                 const payload = message.data.payload;
-                console.log('Received Platform Event:', message);
-                /*console.log('Current User ID:', USER_ID);
-                console.log('Current Record ID:', this.recordId);
-                console.log('Event UserId__c:', payload.UserId__c);
-                console.log('Event RecordId__c:', payload.RecordId__c);*/
+                const replayId = message.data.event.replayId;
+
+                // Retrieve processed Replay IDs from localStorage
+                let processedEvents = JSON.parse(localStorage.getItem(this.processedEventsKey)) || [];
+
+                // If the event has already been processed, skip displaying it
+                if (processedEvents.includes(replayId.toString())) {
+                    console.log('Event already processed, skipping:', replayId);
+                    return;
+                }
+
+                console.log('Received new Platform Event:', message);
 
                 if (payload.UserId__c === USER_ID && payload.RecordId__c === this.recordId) {
                     console.log('Event matches current user and record');
-                    const eventId = message.data.event.replayId;
 
-                    // Show the toast if this event hasn’t been shown yet in this session
-                    if (sessionStorage.getItem(this.storageKey) !== eventId.toString()) {
-                        this.showToast(payload);
-                        sessionStorage.setItem(this.storageKey, eventId.toString());
-                    }
+                    // Show the toast message
+                    this.showToast(payload);
 
-                    // Update the lastReplayId in sessionStorage
-                    sessionStorage.setItem(this.replayIdKey, eventId.toString());
+                    // Add the Replay ID to the processed list and update localStorage
+                    processedEvents.push(replayId.toString());
+                    localStorage.setItem(this.processedEventsKey, JSON.stringify(processedEvents));
                 } else {
                     console.log('Event does NOT match current user or record');
                 }
@@ -79,7 +76,6 @@ export default class PlatformEventListener extends LightningElement {
 
     // Display a toast notification
     showToast(payload) {
-        const message = '• This is the first line\n• This is the second line\n• Here is the third line';
         const event = new ShowToastEvent({
             title: payload.Title__c,
             message: payload.Message__c,
