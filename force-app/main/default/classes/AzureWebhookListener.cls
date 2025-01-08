@@ -36,3 +36,4 @@ global with sharing class AzureWebhookListener {
         }
     }
 }
+
