@@ -23,7 +23,7 @@ public class UserStoryMetadataTriggerHandler {
                         UserId__c = currentUserId,
                         RecordId__c = ustMeta.copado__User_Story__c,
                         Title__c = 'CLI Commit Error',
-                        Message__c = 'The metadata cannot be saved since it was committed from CLI : \n' +
+                        Message__c = 'A restricted metadata type was mistakenly committed through the CLI : \n' +
                                 'User Story Name: ' + ustMeta.User_Story_Name__c + '\n' +
                                 'Metadata Name : '+ustMeta.Name,
                         Variant__c = 'Error'
@@ -34,7 +34,8 @@ public class UserStoryMetadataTriggerHandler {
         }
         NotificationService.sendBulkNotification(listEbents);
         for(copado__User_Story_Metadata__c ustMeta : addErrorList){
-            ustMeta.addError('The metadata cannot be saved since it was comitted from CLI');
+            ustMeta.Wrong_CLI_Commit__c = true;
+            //ustMeta.addError('The metadata cannot be saved since it was comitted from CLI');
         }
     }
 }
