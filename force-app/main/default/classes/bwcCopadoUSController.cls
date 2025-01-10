@@ -23,14 +23,10 @@ public with sharing class bwcCopadoUSController {
             Map<String,Id> sprintMap = new Map<String,Id>();
             String sprintName = '';
             List<copado__Project__c> project = new List<copado__Project__c>([SELECT Id FROM  copado__Project__c WHERE Name =: System.Label.Copado_Project LIMIT 1]);
-            System.debug('1:'+iTrackUSList[0]);
-            System.debug('2:'+iTrackUSList[0].fields);
-            System.debug('3:'+iTrackUSList[0].fields.sprint);
-            System.debug('4:'+iTrackUSList[0].fields.closedSprints[0]);
             if(sprintId == '')
             {
-                sprintId = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.id : iTrackUSList[0].fields.closedSprints[0]?.id;
-                sprintName = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.name : iTrackUSList[0].fields.closedSprints[0]?.name;
+                sprintId = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.id : iTrackUSList[0].fields.closedSprints != null ? iTrackUSList[0].fields.closedSprints[0].id : null;
+                sprintName = (iTrackUSList[0].fields.sprint != null) ? iTrackUSList[0].fields.sprint.name : iTrackUSList[0].fields.closedSprints != null ? iTrackUSList[0].fields.closedSprints[0]?.name : null;
             }
             System.debug('sprintId::'+sprintId);
             System.debug('sprintId::'+sprintName);
@@ -39,12 +35,12 @@ public with sharing class bwcCopadoUSController {
             if(!String.isBlank(sprintId)){
                 sprintList  = new List<copado__Sprint__c>([SELECT Id,Itrack_Sprint__c, Name FROM copado__Sprint__c WHERE Itrack_Sprint__c = :sprintId limit 1]);
             }
-            if(sprintList.size() == 0 && String.isBlank(sprintId)){
+            if(sprintList.size() == 0 && !String.isBlank(sprintId)){
                 sprint = new copado__Sprint__c();
                 sprint.Itrack_Sprint__c = sprintId;
                 sprint.Name = sprintName;
                 upsert sprint;
-            }else{
+            }else if(sprintList.size() > 0){
                 sprint = sprintList[0];
             }
             for(BWC_Copado_US.issue selectedUS: iTrackUSList)
@@ -86,7 +82,7 @@ public with sharing class bwcCopadoUSController {
                     copadoUS.copado__Release__c = releaseMap.get(selectedUS.fixVersionName);
                 }
                 	
-                copadoUS.copado__Team__c = teamMap.get(selectedUS.fields.customfield_16473.value);
+                copadoUS.copado__Team__c = selectedUS.fields.customfield_16473!=null ? teamMap.get(selectedUS.fields.customfield_16473.value) : null;
                 copadoUS.Allow_Field_Change__c = true;
                 /*CDEX Parameters*/
                 if(!String.isBlank(selectedUS.key) && selectedUS.key.startsWithIgnoreCase('CDEX')){
