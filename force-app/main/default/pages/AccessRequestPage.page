@@ -1,4 +1,4 @@
-<apex:page controller="AccessRequestController" showHeader="false" sidebar="false">
+<apex:page controller="AccessRequestController" showHeader="false" sidebar="false" >
     <!-- Header Section with Logo and Title -->
     <div style="text-align: center; padding: 10px; background-color: #003366; color: white;">
         <img src="{!$Resource.AT_T_Logo}" alt="AT&T Logo" style="width: 80px; vertical-align: middle;"/>
@@ -75,30 +75,40 @@
 
     <!-- Form Containers for Each Tab -->
     <div id="modify" class="form-container" style="display: block;">
-        <apex:form >
+        <apex:form id = "modifyAccessForm">
             <apex:pageMessages />
             <!-- Fields for Modify Access -->
+
             <div class="form-group">
                 <label for="envSelect">Environment</label>
-                <apex:selectList value="{!selectedEnvironmentId}" size="1" id="envSelect" required="true">
+                <apex:selectList value="{!selectedEnvironmentId}" size="1" id="envSelect">
                     <apex:selectOptions value="{!environmentOptions}" />
                 </apex:selectList>
             </div>
+
             <div class="form-group">
                 <label for="userName">User Name</label>
-                <apex:inputText value="{!accessRequest.ATT_UID__c}" id="userName" styleClass="text-input" required="true"/>
+                <apex:inputText value="{!accessRequest.ATT_UID__c}" id="userName" styleClass="text-input" />
             </div>
             <div class="form-group">
-                <label for="userName">Email</label>
-                <apex:inputText value="{!accessRequest.ATT_Email__c}" id="email" styleClass="text-input" required="true"/>
+                <label for="userName">Your AT&amp;T Email</label>
+                <apex:inputText value="{!accessRequest.ATT_Email__c}" id="email" styleClass="text-input" />
             </div>
             <div class="form-group">
                 <label for="profile">Profile</label>
-                <apex:inputField value="{!accessRequest.Profile_Access__c}" id="profile" required="true"/>
+                <apex:inputField value="{!accessRequest.Profile_Access__c}" id="profile" />
             </div>
             <div class="form-group">
                 <label for="duration">Duration for Access</label>
-                <apex:inputField value="{!accessRequest.Access_Given_For__c}" id="duration" required="true"/>
+                <apex:inputField value="{!accessRequest.Access_Given_For__c}" id="duration" />
+            </div>
+            <div class="form-group">
+                <label for="reasonAdmin">Reason for Elevated Access
+                <apex:outputText value="?"
+                                 title="You must specify the PS and PSG to be assigned to user for this access."
+                                 style="cursor: help; color: red; text-decoration: underline; font-size: 1.2em; margin-left: 8px;"/>
+                </label>
+                <apex:inputTextarea value="{!accessRequest.Reason_for_Admin_access__c}" id="details_input" rows="5" cols="63"/>
             </div>
             <div class="form-group">
                 <apex:commandButton value="Submit Request" action="{!saveAccessRequest}" styleClass="btn"/>
@@ -125,11 +135,15 @@
                 <apex:inputText value="{!accessRequest.Last_Name__c}" id="lastName" styleClass="text-input" required="true"/>
             </div>
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">Your AT&amp;T Email</label>
                 <apex:inputText value="{!accessRequest.ATT_Email__c}" id="email" styleClass="text-input" required="true"/>
             </div>
             <div class="form-group">
-                <label for="replicateUserName">Replicate User Name</label>
+                <label for="replicateUserName">Replicate User Name
+                <apex:outputText value="?"
+                                 title="You must specify the User Name in the selected Org ONLY to request access."
+                                 style="cursor: help; color: red; text-decoration: underline; font-size: 1.2em; margin-left: 8px;"/>
+                </label>
                 <apex:inputText value="{!accessRequest.Replicate_UserName__c}" id="replicateUserName" styleClass="text-input" required="true"/>
             </div>
             <div class="form-group">

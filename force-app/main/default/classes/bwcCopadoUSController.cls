@@ -3,7 +3,7 @@ public with sharing class bwcCopadoUSController {
     @AuraEnabled(cacheable = true)
     public static List<Itrack_Board__c> getBoardNameValues()
     {
-        List<Itrack_Board__c> lst = new List<Itrack_Board__c> ([SELECT name, Itrack_Board_Number__c FROM Itrack_Board__c]);
+        List<Itrack_Board__c> lst = new List<Itrack_Board__c> ([SELECT name, Itrack_Board_Number__c FROM Itrack_Board__c WHERE isActive__c = TRUE]);
         return lst; 
     }
     

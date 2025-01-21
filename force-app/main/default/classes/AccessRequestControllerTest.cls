@@ -52,7 +52,7 @@ public class AccessRequestControllerTest {
         controller.accessRequest.First_Name__c = 'John';
         controller.accessRequest.Last_Name__c = 'Doe';
         controller.accessRequest.ATT_Email__c = 'johndoe@att.com';
-        controller.accessRequest.Replicate_UserName__c = 'replicateuser';
+        controller.accessRequest.Replicate_UserName__c = 'replicateuser@att.com.devint';
 
         Test.startTest();
         controller.saveCreateAccessRequest();
@@ -77,7 +77,7 @@ public class AccessRequestControllerTest {
         Test.stopTest();
 
         // Validate that errors were added to the page
-        System.assertEquals(2, ApexPages.getMessages().size(), 'Validation errors should be present.');
+        System.assertEquals(3, ApexPages.getMessages().size(), 'Validation errors should be present.');
     }
 
     @IsTest
@@ -121,7 +121,7 @@ public class AccessRequestControllerTest {
         Test.startTest();
         controller.saveCreateAccessRequest();
         Test.stopTest();
-        System.assertEquals(1, ApexPages.getMessages().size(), 'Environment validation should fail.');
+        System.assertEquals(2, ApexPages.getMessages().size(), 'Environment validation should fail.');
 
         // Case: Missing First_Name__c
         controller.selectedEnvironmentId = 'TestEnvironment1';
@@ -142,6 +142,17 @@ public class AccessRequestControllerTest {
         controller.accessRequest.ATT_Email__c = 'johndoe@att.com';
         controller.accessRequest.Replicate_UserName__c = null; // Missing
         controller.saveCreateAccessRequest();
+    }
+
+    @IsTest
+    public static void testIsValidUsername() {
+        System.assert(AccessRequestController.isValidUsername('la3386@attone.com.accint') == true, 'Valid accint username');
+        System.assert(AccessRequestController.isValidUsername('kd472h@attone.com.devint') == true, 'Valid devint username');
+        System.assert(AccessRequestController.isValidUsername('cr4180@att.com.releaseqa') == true, 'Valid releaseqa username');
+        System.assert(AccessRequestController.isValidUsername('ab1234@attone.com.prod') == true, 'Valid prod username');
+        System.assert(AccessRequestController.isValidUsername('zz9876@attone.com.uat') == true, 'Valid uat username');
+        System.assert(AccessRequestController.isValidUsername('la3386@attone.com.') == false, 'Invalid: missing suffix');
+        System.assert(AccessRequestController.isValidUsername('invaliduser') == false, 'InValid username format');
     }
 
 }

@@ -2,6 +2,7 @@ public with sharing class AccessRequestController {
     public ACC_Environment_Access__c accessRequest { get; set; }
     public String selectedEnvironmentId { get; set; }
 
+
     public AccessRequestController() {
         accessRequest = new ACC_Environment_Access__c();
         ApexPages.getMessages().clear();
@@ -40,7 +41,7 @@ public with sharing class AccessRequestController {
                 accessRequest.Environment_Name__c = org.Id;
                 accessRequest.RecordTypeId = Schema.SObjectType.ACC_Environment_Access__c.getRecordTypeInfosByDeveloperName().get('Create_Access').getRecordTypeId();
                 insert accessRequest;
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM, 'User Created Successfully!'));
+                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM, 'New Access Request Submitted Successfully!'));
                 accessRequest = new ACC_Environment_Access__c();
             }
         } catch (Exception e) {
@@ -55,6 +56,7 @@ public with sharing class AccessRequestController {
         if (selectedEnvironmentId == null || selectedEnvironmentId.equals('Select')) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Environment is required.'));
             isValid = false;
+
         }
         if (String.isBlank(accessRequest.ATT_UID__c)) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'User Name is required.'));
@@ -70,6 +72,11 @@ public with sharing class AccessRequestController {
         }
         if (!String.isBlank(accessRequest.ATT_Email__c) && !accessRequest.ATT_Email__c.toLowerCase().endsWith('@att.com')) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Only at&t email addresses are allowed.'));
+            isValid = false;
+        }
+
+        if (accessRequest.Profile_Access__c != null && accessRequest.Profile_Access__c.equalsIgnoreCase('System Administrator') && String.isBlank(accessRequest.Reason_for_Admin_access__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Reason is required.'));
             isValid = false;
         }
         return isValid;
@@ -102,6 +109,20 @@ public with sharing class AccessRequestController {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Replicate UserName is required.'));
             isValid = false;
         }
+        if (!String.isBlank(accessRequest.Replicate_UserName__c) && Label.isRegexOn == 'Y' && !isValidUsername(accessRequest.Replicate_UserName__c)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Please enter correct username in email.orgname format'));
+            isValid = false;
+        }
         return isValid;
     }
+
+    public static Boolean isValidUsername(String username) {
+        // Generic regex for dynamic environment suffixes
+        String regex = '^[a-z0-9._%+-]+@[a-z0-9.-]+(?:\\.[a-z0-9]+)?\\.[a-z]+$';
+        // Pattern and Matcher to validate the username
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(username);
+        return matcher.matches();
+    }
+
 }
