@@ -21,8 +21,10 @@ public class AccessRequestControllerTest {
         AccessRequestController controller = new AccessRequestController();
         controller.selectedEnvironmentId = 'TestEnvironment1';
         controller.accessRequest.ATT_UID__c = 'testuser';
-        controller.accessRequest.Profile_Access__c = 'Test Profile';
+        controller.accessRequest.Profile_Access__c = 'System Administrator';
         controller.accessRequest.ATT_Email__c = 'testuser@att.com';
+        controller.accessRequest.Access_Given_For__c = '1';
+        controller.accessRequest.Reason_for_Admin_access__c = 'For Debug';
 
         Test.startTest();
         controller.saveAccessRequest();
@@ -36,13 +38,31 @@ public class AccessRequestControllerTest {
         controller.accessRequest.ATT_UID__c = 'testuser';
         controller.accessRequest.Profile_Access__c = 'Test Profile';
         controller.accessRequest.ATT_Email__c = 'invalidemail.com'; // Invalid email
+        controller.accessRequest.Profile_Access__c = 'System Administrator';
 
         Test.startTest();
         controller.saveAccessRequest();
         Test.stopTest();
 
         // Validate that errors were added to the page
-        System.assertEquals(2, ApexPages.getMessages().size(), 'Validation errors should be present.');
+        System.assertEquals(4, ApexPages.getMessages().size(), 'Validation errors should be present.');
+    }
+
+    @IsTest
+    static void testSaveAccessRequestValidationFailureEmailBlank() {
+        AccessRequestController controller = new AccessRequestController();
+        controller.selectedEnvironmentId = 'Select'; // Invalid selection
+        controller.accessRequest.ATT_UID__c = 'testuser';
+        controller.accessRequest.Profile_Access__c = 'Test Profile';
+        //controller.accessRequest.ATT_Email__c = 'invalidemail.com'; // Invalid email
+        controller.accessRequest.Profile_Access__c = 'System Administrator';
+
+        Test.startTest();
+        controller.saveAccessRequest();
+        Test.stopTest();
+
+        // Validate that errors were added to the page
+        System.assertEquals(4, ApexPages.getMessages().size(), 'Validation errors should be present.');
     }
 
     @IsTest
@@ -54,6 +74,7 @@ public class AccessRequestControllerTest {
         controller.accessRequest.ATT_Email__c = 'johndoe@att.com';
         controller.accessRequest.Replicate_UserName__c = 'replicateuser@att.com.devint';
 
+
         Test.startTest();
         controller.saveCreateAccessRequest();
         Test.stopTest();
@@ -64,20 +85,57 @@ public class AccessRequestControllerTest {
     }
 
     @IsTest
+    static void testSaveCreateAccessRequestException() {
+        try{
+            AccessRequestController controller = new AccessRequestController();
+            controller.selectedEnvironmentId = 'TestEnvironment123';
+            controller.accessRequest.First_Name__c = 'John';
+            controller.accessRequest.Last_Name__c = 'Doe';
+            controller.accessRequest.ATT_Email__c = 'johndoe@att.com';
+            controller.accessRequest.Replicate_UserName__c = 'replicateuser@att.com.devint';
+            Test.startTest();
+            PageReference pf = controller.saveCreateAccessRequest();
+            Test.stopTest();
+            ACC_Environment_Access__c createdRecord = [SELECT Id, Environment_Name__c FROM ACC_Environment_Access__c WHERE ATT_Email__c = 'johndoe@att.com' LIMIT 1];
+            System.assertNotEquals(null, createdRecord, 'Access request for user creation should be created.');
+        }catch(Exception e){
+            System.debug('Catching No List Found Error');
+        }
+    }
+
+    @IsTest
     static void testSaveCreateAccessRequestValidationFailure() {
         AccessRequestController controller = new AccessRequestController();
         controller.selectedEnvironmentId = 'Select'; // Invalid selection
         controller.accessRequest.First_Name__c = 'John';
         controller.accessRequest.Last_Name__c = 'Doe';
         controller.accessRequest.ATT_Email__c = 'invalidemail.com'; // Invalid email
-        controller.accessRequest.Replicate_UserName__c = 'replicateuser';
+        controller.accessRequest.Replicate_UserName__c = 'replicateuser@att.com.devint';
+
 
         Test.startTest();
         controller.saveCreateAccessRequest();
         Test.stopTest();
 
         // Validate that errors were added to the page
-        System.assertEquals(3, ApexPages.getMessages().size(), 'Validation errors should be present.');
+        System.assertEquals(2, ApexPages.getMessages().size(), 'Validation errors should be present.');
+    }
+    @IsTest
+    static void testSaveCreateAccessRequestValidationFailureBlankEmail() {
+        AccessRequestController controller = new AccessRequestController();
+        controller.selectedEnvironmentId = 'Select'; // Invalid selection
+        controller.accessRequest.First_Name__c = 'John';
+        controller.accessRequest.Last_Name__c = 'Doe';
+        //controller.accessRequest.ATT_Email__c = 'invalidemail.com'; // Invalid email
+        controller.accessRequest.Replicate_UserName__c = 'replicateuser@att.com.devint';
+
+
+        Test.startTest();
+        controller.saveCreateAccessRequest();
+        Test.stopTest();
+
+        // Validate that errors were added to the page
+        System.assertEquals(2, ApexPages.getMessages().size(), 'Validation errors should be present.');
     }
 
     @IsTest

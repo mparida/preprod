@@ -1,11 +1,13 @@
 public with sharing class AccessRequestController {
     public ACC_Environment_Access__c accessRequest { get; set; }
     public String selectedEnvironmentId { get; set; }
+    public String activeTab { get; set; }
 
 
     public AccessRequestController() {
         accessRequest = new ACC_Environment_Access__c();
         ApexPages.getMessages().clear();
+        activeTab = 'modify';
     }
 
     public List<SelectOption> getEnvironmentOptions() {
@@ -19,6 +21,7 @@ public with sharing class AccessRequestController {
     }
 
     public PageReference saveAccessRequest() {
+        activeTab = 'modify';
         try {
             if (validateFields()) {
                 copado__Org__c org = [SELECT Id FROM copado__Org__c WHERE Name = :selectedEnvironmentId];
@@ -35,6 +38,7 @@ public with sharing class AccessRequestController {
     }
 
     public PageReference saveCreateAccessRequest() {
+        activeTab = 'create';
         try {
             if (validateCreateAccessFields()) {
                 copado__Org__c org = [SELECT Id FROM copado__Org__c WHERE Name = :selectedEnvironmentId];
@@ -45,6 +49,7 @@ public with sharing class AccessRequestController {
                 accessRequest = new ACC_Environment_Access__c();
             }
         } catch (Exception e) {
+            System.debug('Stacktrace::'+e.getStackTraceString());
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Error: ' + e.getMessage()));
         }
         return null;
@@ -72,6 +77,15 @@ public with sharing class AccessRequestController {
         }
         if (!String.isBlank(accessRequest.ATT_Email__c) && !accessRequest.ATT_Email__c.toLowerCase().endsWith('@att.com')) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Only at&t email addresses are allowed.'));
+            isValid = false;
+        }
+
+        if (String.isBlank(accessRequest.Profile_Access__c) ) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Profile is required'));
+            isValid = false;
+        }
+        if (String.isBlank(accessRequest.Access_Given_For__c) ) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Access duration is required'));
             isValid = false;
         }
 
@@ -106,7 +120,7 @@ public with sharing class AccessRequestController {
             isValid = false;
         }
         if (String.isBlank(accessRequest.Replicate_UserName__c)) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Replicate UserName is required.'));
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Replicate User Name is required.'));
             isValid = false;
         }
         if (!String.isBlank(accessRequest.Replicate_UserName__c) && Label.isRegexOn == 'Y' && !isValidUsername(accessRequest.Replicate_UserName__c)) {
