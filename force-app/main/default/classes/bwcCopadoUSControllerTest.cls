@@ -15,7 +15,7 @@ public class bwcCopadoUSControllerTest {
         copadoProject.Name = 'Copado Project';
         insert copadoProject;
 
-        Itrack_Board__c board = new Itrack_Board__c(Name = 'POS-Abilities', Itrack_Board_Number__c = '12345');
+        Itrack_Board__c board = new Itrack_Board__c(Name = 'POS-Abilities', Itrack_Board_Number__c = '12345', isActive__c = true);
         insert board;
     }
 

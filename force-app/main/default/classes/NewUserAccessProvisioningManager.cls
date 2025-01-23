@@ -9,6 +9,7 @@ public with sharing class NewUserAccessProvisioningManager {
     };
     // Retrieves Profile, Permission Sets, and Permission Set Groups for Replicate_UserName__c
     private static String newUserName;
+    private static String newUserId;
     // Main method to create and provision access for the new user
     @InvocableMethod(label='New User Access' description='Creates a new User from an Existing User')
     public static void provisionAccessForNEwUser(List<String> accessRecordIds) {
@@ -39,7 +40,7 @@ public with sharing class NewUserAccessProvisioningManager {
         List<String> permissionSetIds;
         List<String> permissionSetGroupIds;
         List<String> permissionSetLicenseIds;
-        String newUserId;
+        //String newUserId;
         Boolean hasError = false;
         try{
             // Step 2: Create a new user with specified details
@@ -52,12 +53,20 @@ public with sharing class NewUserAccessProvisioningManager {
             permissionSetGroupIds = new List<String>();
             permissionSetGroupIds.addAll(PSGIdsSet);
             permissionSetLicenseIds = accessDetails.get('PermissionSetLicenseIds') != null ? accessDetails.get('PermissionSetLicenseIds').split(',') : new List<String>();
+
             System.debug('Assigning PS Lic ');
             assignPermissionSetLicenses(namedCredentialName, newUserId, permissionSetLicenseIds);
+
             System.debug('Assigning PS');
             assignPermissionsBulk(namedCredentialName, newUserId, permissionSetIds, permissionSetGroupIds);
+
+
+            System.debug('Copying public group memberships...');
+            copyPublicGroupMembership(namedCredentialName, replicateUserName, newUserId);
+
             System.debug('PW RESET');
             sendPasswordResetEmail(namedCredentialName,newUserId);
+
             System.debug('Employee for Retail User');
             if(profileMapping.containsKey(accessDetails.get('ProfileName'))){
                 createEmployeeRecordInTargetOrg(namedCredentialName, attEmail, newUserId, accessDetails.get('ProfileName'), firstName, lastName);
@@ -434,6 +443,87 @@ public with sharing class NewUserAccessProvisioningManager {
         } catch (Exception e) {
             System.debug('Error while creating Employee record in target org: ' + e.getMessage());
             throw new UserAccessException('Error while creating Employee record in target org: ' + e.getMessage());
+        }
+    }
+
+    // Copies public group membership from the replicate user to the new user
+    public static void copyPublicGroupMembership(String namedCredentialName, String replicateUserName, String newUserId) {
+        try {
+            // Retrieve User ID of the replicate user
+            String replicateUserId = getUserByFederationIdentifier(namedCredentialName, replicateUserName);
+            if (replicateUserId == null) {
+                throw new UserAccessException('Replicate user not found: ' + replicateUserName);
+            }
+
+            // Query the public group memberships of the replicate user
+            String query = EncodingUtil.urlEncode(
+                    'SELECT GroupId FROM GroupMember WHERE UserOrGroupId = \'' + replicateUserId + '\'',
+                    'UTF-8'
+            );
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/query/?q=' + query);
+            req.setMethod('GET');
+
+            Http http = new Http();
+            HttpResponse res = http.send(req);
+
+            if (res.getStatusCode() == 200) {
+                Map<String, Object> queryResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+                List<Object> groupRecords = (List<Object>) queryResponse.get('records');
+                if (groupRecords.isEmpty()) {
+                    System.debug('No public group memberships found for replicate user: ' + replicateUserName);
+                    return;
+                }
+
+                // Add the new user to the same groups
+                List<Map<String, Object>> groupMemberships = new List<Map<String, Object>>();
+                for (Object groupRecord : groupRecords) {
+                    Map<String, Object> recordMap = (Map<String, Object>) groupRecord;
+                    String groupId = (String) recordMap.get('GroupId');
+                    groupMemberships.add(new Map<String, Object>{
+                            'GroupId' => groupId,
+                            'UserOrGroupId' => newUserId
+                    });
+                    System.debug('FROUP ID is : '+groupId);
+                }
+
+                System.debug('Print group Ids::'+groupMemberships);
+                System.debug('Print group size::'+groupMemberships.size());
+
+                // Composite API for bulk insertion
+                List<Map<String, Object>> compositeRequests = new List<Map<String, Object>>();
+                Integer referenceIdCounter = 1;
+                for (Map<String, Object> membership : groupMemberships) {
+                    compositeRequests.add(new Map<String, Object>{
+                            'method' => 'POST',
+                            'url' => '/services/data/v56.0/sobjects/GroupMember/',
+                            'referenceId' => 'Membership' + referenceIdCounter++,
+                            'body' => membership
+                    });
+                }
+
+                Map<String, Object> compositeBody = new Map<String, Object>{
+                        'compositeRequest' => compositeRequests
+                };
+
+                HttpRequest compositeReq = new HttpRequest();
+                compositeReq.setEndpoint('callout:' + namedCredentialName + '/services/data/v56.0/composite/');
+                compositeReq.setMethod('POST');
+                compositeReq.setHeader('Content-Type', 'application/json');
+                compositeReq.setBody(JSON.serialize(compositeBody));
+                HttpResponse compositeRes = http.send(compositeReq);
+
+                if (compositeRes.getStatusCode() != 200) {
+                    throw new UserAccessException('Failed to assign group memberships to new user. Response: ' + compositeRes.getBody());
+                }
+
+                System.debug('Public group memberships copied successfully for new user: ' + newUserId);
+            } else {
+                throw new UserAccessException('Failed to query group memberships. Response: ' + res.getBody());
+            }
+        } catch (Exception e) {
+            System.debug('Error copying public group membership: ' + e.getStackTraceString());
+            throw new UserAccessException('Error copying public group membership: ' + e.getMessage());
         }
     }
 

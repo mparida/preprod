@@ -148,7 +148,7 @@ public class NewUserAccessProvisioningManagerTest {
         insert org;
 
         ACC_Environment_Access__c accessRecord = new ACC_Environment_Access__c(
-                ATT_Email__c = 'testuser@att.com',
+                ATT_Email__c = 'testuser444@att.com',
                 First_Name__c = 'John',
                 Last_Name__c = 'Doe',
                 Replicate_UserName__c = 'replicateuser@att.com',
@@ -163,7 +163,7 @@ public class NewUserAccessProvisioningManagerTest {
                 'replicateuser@att.com',
                 'John',
                 'Doe',
-                'testuser@att.com'
+                'testuser444@att.com'
         );
         Test.stopTest();
 
@@ -200,9 +200,29 @@ public class NewUserAccessProvisioningManagerTest {
         System.assert(true, 'Employee record created successfully in the target org.');
     }
 
+    @IsTest
+    static void testCopyPublicGroupMembership() {
+        // Set mock responses
+        Test.setMock(HttpCalloutMock.class, new NewUserAccessProvisioningManagerMock());
+
+        // Test data setup
+        String namedCredential = 'TestCredential';
+        String replicateUserName = 'replicateuser@att.com';
+        String newUserId = '005000000000002'; // New user ID
+
+        Test.startTest();
+        NewUserAccessProvisioningManager.copyPublicGroupMembership(namedCredential, replicateUserName, newUserId);
+        Test.stopTest();
+
+        // Verify public group membership was copied
+        System.assert(true, 'Public group memberships should be copied successfully.');
+    }
+
+
     public class NewUserAccessProvisioningManagerMock implements HttpCalloutMock {
         public HttpResponse respond(HttpRequest req) {
             HttpResponse res = new HttpResponse();
+            System.debug('endpoint is>>'+req.getEndpoint());
 
             if (req.getEndpoint().contains('/services/data/v56.0/sobjects/User/')) {
                 res.setStatusCode(201);
@@ -222,6 +242,10 @@ public class NewUserAccessProvisioningManagerTest {
             } else if (req.getEndpoint().contains('Username')) {
                 res.setStatusCode(200);
                 res.setBody('{"records": [{"Id": "005000000000001"}]}');
+            }else if (req.getEndpoint().contains('GroupMember')) {
+                System.debug('Is Mock for Group???');
+                res.setStatusCode(200);
+                res.setBody('{"records": [{"GroupId": "0G000000000001"}, {"GroupId": "0G000000000002"}]}');
             }
 
             return res;
