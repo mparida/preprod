@@ -1,0 +1,32 @@
+<!--
+ - Created by mp1863 on 31/01/25.
+ -->
+
+<!-- Csv Uploader -->
+<template>
+    <div class="container">
+        <h2>Import CSV File</h2>
+
+        <!-- Environment Selection Dropdown -->
+        <lightning-combobox
+                name="environment"
+                label="Select Environment"
+                value={selectedEnvironment}
+                options={environmentOptions}
+                onchange={handleEnvironmentChange}>
+        </lightning-combobox>
+
+        <!-- File Upload -->
+        <lightning-input type="file"
+                         label="Upload CSV File"
+                         accept=".csv"
+                         onchange={handleFileUpload}>
+        </lightning-input>
+
+        <!-- Import Button -->
+        <lightning-button label="Import"
+                          variant="brand"
+                          onclick={handleImport}>
+        </lightning-button>
+    </div>
+</template>

@@ -76,7 +76,9 @@ public with sharing class BWC_Copado_US_Callout {
         String GetActiveSprints_Endpoint = System.Label.GetActiveSprints;
         String Itrack_Mulesoft_Service = System.Label.Itrack_Mulesoft_Service;
         HttpRequest req = new HttpRequest();
-        String endPoint = Itrack_Mulesoft_Service+GetActiveSprints_Endpoint + boardID+'/sprint?state=active';
+        String endPoint = '';
+        endPoint = (Label.getAllSprints == 'Y') ? Itrack_Mulesoft_Service+GetActiveSprints_Endpoint + boardID+'/sprint' :
+                Itrack_Mulesoft_Service+GetActiveSprints_Endpoint + boardID+'/sprint?state=active';
         req.setEndpoint(endpoint);
         req.setMethod('GET');
         Http http = new Http();

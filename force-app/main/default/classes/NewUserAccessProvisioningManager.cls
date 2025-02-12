@@ -9,7 +9,6 @@ public with sharing class NewUserAccessProvisioningManager {
     };
     // Retrieves Profile, Permission Sets, and Permission Set Groups for Replicate_UserName__c
     private static String newUserName;
-    private static String newUserId;
     // Main method to create and provision access for the new user
     @InvocableMethod(label='New User Access' description='Creates a new User from an Existing User')
     public static void provisionAccessForNEwUser(List<String> accessRecordIds) {
@@ -40,7 +39,7 @@ public with sharing class NewUserAccessProvisioningManager {
         List<String> permissionSetIds;
         List<String> permissionSetGroupIds;
         List<String> permissionSetLicenseIds;
-        //String newUserId;
+        String newUserId;
         Boolean hasError = false;
         try{
             // Step 2: Create a new user with specified details
@@ -368,6 +367,7 @@ public with sharing class NewUserAccessProvisioningManager {
             }
             return null;
         } catch (Exception e) {
+            System.debug('Error retrieving User details from target Org : '+e.getMessage());
             System.debug('Error retrieving user by Federation Identifier: ' + e.getStackTraceString());
             throw new UserAccessException('Exception While getting User Details ');
         }

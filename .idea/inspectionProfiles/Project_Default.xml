@@ -13,6 +13,7 @@
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManager.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManagerTest.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/triggers/JobStepTrigger.trigger-meta.xml" />
         </list>
       </option>
     </inspection_tool>

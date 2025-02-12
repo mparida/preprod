@@ -35,7 +35,7 @@ public class UserStoryMetadataTriggerHandler {
         NotificationService.sendBulkNotification(listEbents);
         for(copado__User_Story_Metadata__c ustMeta : addErrorList){
             ustMeta.Wrong_CLI_Commit__c = true;
-            //ustMeta.addError('The metadata cannot be saved since it was comitted from CLI');
+            ustMeta.addError('The metadata cannot be saved since it was comitted from CLI');
         }
     }
 }
