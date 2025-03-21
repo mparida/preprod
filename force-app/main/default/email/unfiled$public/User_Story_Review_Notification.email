@@ -1,0 +1,61 @@
+<messaging:emailTemplate subject="User Story Review Assignment - {!relatedTo.Name}" 
+                         recipientType="User" 
+                         relatedToType="copado__User_Story__c">
+
+    <messaging:htmlEmailBody >
+        <html>
+            <body>
+                <p>Dear {!recipient.Name},</p>
+
+                <!-- Email for Peer Reviewer -->
+                <apex:outputPanel rendered="{!relatedTo.Peer_Reviewer__c == recipient.Id}">
+                    <p>You have been chosen as the <strong>Peer Reviewer</strong> for this User Story record. Please review the User Story and related code/metadata changes, and take necessary action in approving or rejecting the changes.</p>
+                    
+                    <p><strong>Actions Required:</strong></p>
+                    <ul>
+                        <li>Validate the fields of the User Story, including Itrack User Story number, Release version, and Itrack Epic number.</li>
+                        <li>Optionally, create records for Review Comments to share your feedback.</li>
+                        <li>Examine the Pull Request and provide your code review comments, ensuring that the code does not override any existing code in the forwarding org.</li>
+                        <li>Review any manual steps mentioned in the User Story, if applicable.</li>
+                    </ul>
+
+                    <c:approvalComponent userStoryId="{!relatedTo.Id}"/>
+                </apex:outputPanel>
+
+                <!-- Email for Lead Reviewer -->
+                <apex:outputPanel rendered="{!relatedTo.Peer_Reviewer_2__c == recipient.Id}">
+                    <p>You have been chosen as the <strong>Lead Reviewer</strong> for this User Story record. Please review the User Story and related code/metadata changes, and verify that the review conducted by the Peer Reviewer ({!relatedTo.Peer_Reviewer__r.Name}) follows all necessary steps.</p>
+                    
+                    <p><strong>Actions Required:</strong></p>
+                    <ul>
+                        <li>Validate the fields of the User Story, including Itrack User Story number, Release version, and Itrack Epic number.</li>
+                        <li>Optionally, create records for Review Comments to share your feedback.</li>
+                        <li>Examine the Pull Request and provide your code review comments, ensuring that the code does not override any existing code in the forwarding org.</li>
+                        <li>Review any manual steps mentioned in the User Story, if applicable.</li>
+                        <li>Review conducted by the Level 1 reviewer (Peer Reviewer).</li>
+                    </ul>
+
+                    <c:approvalComponent userStoryId="{!relatedTo.Id}"/>
+
+                </apex:outputPanel>
+
+                <!-- Common Details -->
+                <p><strong>User Story Record:</strong>
+                    <a href="https://accdevops23--preprod.sandbox.lightning.force.com/{!relatedTo.Id}" target="_blank">
+                        {!relatedTo.Name}
+                    </a>
+                </p>
+                <p><strong>Developer:</strong> {!relatedTo.copado__Developer__r.Name}</p>
+                <p><strong>Team:</strong> {!relatedTo.copado__Team__r.Name}</p>
+                <p><strong>Feature Branch:</strong> 
+                <apex:outputText value="{!relatedTo.copado__View_in_Git__c}" escape="false"/></p>
+
+                
+                <p>Thank You,</p>
+                <p><strong>DevOps Team</strong></p>
+                <p><a href="mailto:dl-acc-core-copado-devops@intl.att.com">dl-acc-core-copado-devops@intl.att.com</a></p>
+            </body>
+        </html>
+    </messaging:htmlEmailBody>
+
+</messaging:emailTemplate>

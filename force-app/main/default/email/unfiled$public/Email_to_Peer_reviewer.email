@@ -1,0 +1,24 @@
+<body>
+    <p>Dear Peer Reviewer,</p>
+    <p>You have been chosen as Peer reviewer for this User Story record, Requesting to review the User Story and related code / metadata changes and take necessary action in approving or rejecting the changes </p>
+
+    <p>You are requested to perform the following actions for the User Story Review:</p>
+
+
+<ul>
+  <li>Validate the fields of the User Story, including Itrack User Story number, Release version, and Itrack Epic number.</li>
+  <li>Optionally, create records for Review Comments to share your feedback.</li>
+  <li>Examine the Pull Request and provide your code review comments, ensuring that the code does not override any existing code in the forwarding org.</li>
+  <li>Review any manual steps mentioned in the User Story, if applicable.</li>
+</ul>
+
+       <p><b>Approval Link: </b><a href="{!ApprovalRequest.Internal_URL}" target="_blank">Click here</a></p>
+    <p><b>User Story Record: </b><a href="https://accdevops23.my.salesforce.com/{!copado__User_Story__c.Id}" target="_blank">{!copado__User_Story__c.Name}</a></p>
+    <p><b>Developer: </b>{!copado__User_Story__c.copado__Developer__c}</p>
+    <p><b>Team : </b>{!copado__User_Story__c.copado__Team__c}</p>
+    <p><b>Feature branch : </b>{!copado__User_Story__c.copado__View_in_Git__c}</p>
+
+</body>
+
+Thank You, </br>
+Devops Team

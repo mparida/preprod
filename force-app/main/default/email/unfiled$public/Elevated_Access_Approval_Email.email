@@ -1,0 +1,12 @@
+<body>
+    <p>Dear CQE Team</p>
+    <p>Please verify and approve below elevated access for environment {!ACC_Environment_Access__c.Environment_Name__c} </p>
+    <p><b>Access Record: </b><a href="https://accdevops23.my.salesforce.com/{!ACC_Environment_Access__c.Id}" target="_blank">{!ACC_Environment_Access__c.Name}</a></p>
+    <p><b>User Name: </b>{!ACC_Environment_Access__c.ATT_UID__c}</p>
+    <p><b>Email : </b>{!ACC_Environment_Access__c.ATT_Email__c}</p>
+    <p><b>Duration of Access:</b> {!ACC_Environment_Access__c.Access_Given_For__c}</p>
+    <p><b>Reason for elevated access:</b> {!ACC_Environment_Access__c.Reason_for_Admin_access__c}</p>
+</body>
+
+Thank You, </br>
+Devops Team

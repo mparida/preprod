@@ -1,0 +1,11 @@
+<body>
+    <p>Dear {!copado__JobStep__c.OwnerFullName},</p>
+    <p>The Pre/Post deployment step created by you is Rejected for User Story <a href="https://accdevops23.my.salesforce.com/{!copado__JobStep__c.UST_ID_Formula__c}" target="_blank">{!copado__JobStep__c.UST__c}</a></p>
+    <p><b>PD Step: </b><a href="https://accdevops23.my.salesforce.com/{!copado__JobStep__c.Id}" target="_blank">{!copado__JobStep__c.Name}</a></p>
+   <p><b>Approver Comment : </b> {!ApprovalRequest.Comments} </p>
+    <p><b>PD Step Description : </b></p>
+    <p>{!copado__JobStep__c.Steps_to_execute__c}</p>
+    <p><b>PD Step created By: </b>{!copado__JobStep__c.CreatedBy}</p>
+    <p><b>Status: </b>Rejected</p>
+    <p><b>Please review and submit again/p>
+</body>

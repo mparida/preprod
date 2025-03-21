@@ -7,12 +7,18 @@
           <option value="$PROJECT_DIR$/force-app/main/default/classes/ACCComponentsViewerController.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/AccessProvisioningService.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/AccessRequestControllerTest.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/AzurePRHandler.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/AzureWebhookListener.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US_Callout.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/JenkinsJobService.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/JenkinsJobUtil.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManager.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManagerTest.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/UserStoryApprovalController.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/lwc/gitDiffViewer/gitDiffViewer.js-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/lwc/showToastForPlatformEvent/showToastForPlatformEvent.js-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/triggers/JobStepTrigger.trigger-meta.xml" />
         </list>
       </option>

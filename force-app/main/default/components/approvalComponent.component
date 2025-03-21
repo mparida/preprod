@@ -1,0 +1,11 @@
+<!--
+ - Created by mp1863 on 17/02/25.
+ -->
+
+<apex:component id="approvalComponent" controller="UserStoryApprovalController" access="global">
+    <apex:attribute name="userStoryId" assignTo="{!storyId}" type="Id"  description="storyId"/>
+
+    <p><strong>Approval Link:</strong>
+        <a href="{!approvalLink}" target="_blank">Click here to approve</a>
+    </p>
+</apex:component>

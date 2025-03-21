@@ -1,0 +1,10 @@
+<body>
+    <p>Dear {!copado__JobStep__c.Team_Formula__c} Leads,</p>
+    <p>Please verify and approve below PD step for User Story <a href="https://accdevops23.my.salesforce.com/{!copado__JobStep__c.UST_ID_Formula__c}" target="_blank">{!copado__JobStep__c.UST__c}</a></p>
+    <p><b>PD Step: </b><a href="https://accdevops23.my.salesforce.com/{!copado__JobStep__c.Id}" target="_blank">{!copado__JobStep__c.Name}</a></p>
+    <p><b>PD Step Description : </b></p>
+    <p>{!copado__JobStep__c.Steps_to_execute__c}</p>
+    <p><b>PD Step created By: </b>{!copado__JobStep__c.CreatedBy}</p>
+</body>
+
+<b><font color="red">Please note all {!copado__JobStep__c.Team__c} Leads are added to email, due to limitations in configuring leads for specific scrum teams</font></b>

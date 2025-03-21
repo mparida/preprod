@@ -1,0 +1,7 @@
+<body>
+    <p>Dear {!ACC_Environment_Access__c.ATT_UID__c},</p>
+    <p>Your access request for {!ACC_Environment_Access__c.Profile_Access__c} for environment {!ACC_Environment_Access__c.Environment_Name__c} has been rejected by CQE</p>
+   <p><b>Approver Comment : </b> {!ApprovalRequest.Comments} </p>
+    <p><b>Please review and resubmit again using </b><a href="https://accdevops23.my.salesforce-sites.com/AccessManagement" target="_blank">Access Site</a></p>
+    <p><b>Status: </b>Rejected</p>
+</body>

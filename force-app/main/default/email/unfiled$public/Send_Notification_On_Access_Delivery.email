@@ -1,0 +1,19 @@
+Hi,
+<br>
+<br>
+Your access has been successfully provisioned to the specified environment. 
+<br>
+<br>
+User Name: {!ACC_Environment_Access__c.ATT_UID__c}
+<br>
+Environment: {!ACC_Environment_Access__c.Environment_Name__c}
+<br>
+<br>
+If you have requested new user access, you should have received an email to reset your password. Should you encounter any issues, please do not hesitate to contact the DevOps team.
+<br>
+<br>
+Thank you,
+<br>
+DevOps Team
+<br>
+<a href="mailto:dl-acc-core-copado-devops@intl.att.com">Contact Devops</a>

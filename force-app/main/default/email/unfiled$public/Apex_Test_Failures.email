@@ -1,0 +1,19 @@
+Hi all,
+<br>
+<br>
+Following Apex Test errors have been reported for the Environment {!QuickText.Environment__c}. Please find the detailed report below for today, {!QuickText.Date__c}.
+<br>
+<br>
+Please note that due to email message limitations, a maximum of 50 test failures are displayed here.
+<br>
+<br>
+<center>
+{!QuickText.Datatable__c}
+</center>
+<br>
+In case of any questions or further assistance please reach out to the Copado team.
+<br>
+<br>
+Best regards,
+<br>
+Copado Team

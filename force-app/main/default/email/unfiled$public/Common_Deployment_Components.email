@@ -1,0 +1,16 @@
+Hi Team,
+<br>
+<br>
+Copado automation has successfully detected potential conflicts on same file(s) across developers and environments ({!QuickText.Environment__c}) for {!QuickText.Release__c} release. Please find the detailed report below for today, {!QuickText.Date__c}.
+<br>
+<br>
+<center>
+{!QuickText.Datatable__c}
+</center>
+<br>
+In case of any questions or further assistance please reach out to the Copado team.
+<br>
+<br>
+Best regards,
+<br>
+Copado Team
