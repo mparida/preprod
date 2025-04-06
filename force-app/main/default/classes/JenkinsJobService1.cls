@@ -3,9 +3,23 @@
  */
 
 public without sharing class JenkinsJobService1 {
-    @InvocableMethod(Label='Jenkins Test Execution' Description='Get Status after 30 mins')
+    @InvocableMethod(Label='Jenkins Test Execution' Description='Get Status after 30 mins' Callout=true)
     public static void makeCallOutFromFromInvocableFlows(List<JenkinInvocableParams> paramsList){
-        List<Id> ids = paramsList[0].ids;
+        if(paramsList == null) return;
+        for(JenkinInvocableParams param : paramsList){
+            switch on param.apis[0] {
+                when 'trigger jenkins job'{
+                    System.enqueueJob(new TriggerJenkinsJobQueueable(param.ids[0], param.jobNames[0], param.envNames[0]!=null?param.envNames[0] : null));
+                    //triggerJenkinsJobAsync(param.ids[0], param.jobNames[0], param.envNames[0]!=null?param.envNames[0] : null);
+                }when else {
+                    System.enqueueJob(new GetJenkinsBuildStatusQueueable(param.ids[0]));
+                    //getJenkinsBuildStatusAsync(param.ids[0]);
+                }
+            }
+        }
+        /*List<Id> ids = paramsList[0].ids;
+        System.debug('All params : '+paramsList);
+        System.debug('All ids : '+ids);
         List<String> apis = paramsList[0].apis;
         List<String> jobNames = paramsList[0].jobNames;
         List<String> envNames = paramsList[0].envNames;
@@ -15,8 +29,7 @@ public without sharing class JenkinsJobService1 {
             }when else {
                 getJenkinsBuildStatusAsync(ids[0]);
             }
-        }
-        System.debug('API : '+apis[0] +'-----Job : '+jobNames[0]+'----Ids : '+ids[0]);
+        }*/
     }
     @Future(Callout=true)
     public static void triggerJenkinsJobAsync(Id ptsId, String jobName, String envName) {
@@ -36,7 +49,7 @@ public without sharing class JenkinsJobService1 {
     }
 
     // Fetch Mock Response for Job Trigger API from Salesforce
-    private static Map<String, Object> getMockResponsePOST(String jobName) {
+    public static Map<String, Object> getMockResponsePOST(String jobName) {
         Mock_Jenkins_Response__c mockData = [
                 SELECT Location_URL__c, Status_Code__c, Response_JSON__c FROM Mock_Jenkins_Response__c
                 WHERE Job_Name__c = :jobName AND API_Name__c = 'trigger jenkins job'
@@ -46,7 +59,7 @@ public without sharing class JenkinsJobService1 {
     }
 
     // Call Real Mule~Jenkins Job Trigger API
-    private static Map<String, Object> initiateJenkinsJob(String jobName, String parameters) {
+    public static Map<String, Object> initiateJenkinsJob(String jobName, String parameters) {
         String endpoint = 'callout:Jenkins_Auth/api/v1/jobs/trigger' ;
         System.debug('endpoint:'+endpoint);
         HttpRequest request = new HttpRequest();

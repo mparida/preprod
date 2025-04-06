@@ -2,7 +2,7 @@
  * Created by mp1863 on 17/03/25.
  */
 @RestResource(UrlMapping='/github/api/prhook/incoming/*')
-global with sharing class GitHubPRHandler {
+global without sharing class GitHubPRHandler {
     @HttpPost
     global static void handleGitHubPR() {
 
@@ -50,12 +50,15 @@ global with sharing class GitHubPRHandler {
                     FROM copado__User_Story__c
                     WHERE Name = :extractedBranchName LIMIT 1
             ];
+            System.debug('branchRecords:'+branchRecords);
             if (branchRecords.isEmpty()) {
                 System.debug('No reviewers found for branch: ' + extractedBranchName);
                 response.statusCode = 200;
                 return;
             }
             copado__User_Story__c branch = branchRecords[0];
+            System.debug('Lead Reviewer ::'+branch.Peer_Reviewer_2__r.FederationIdentifier);
+            System.debug('Peer Reviewer ::'+branch.Peer_Reviewer__r.FederationIdentifier);
             List<String> reviewers = new List<String>();
             if (branch.Peer_Reviewer__r != null && String.isNotBlank(branch.Peer_Reviewer__r.FederationIdentifier)) {
                 reviewers.add(branch.Peer_Reviewer__r.FederationIdentifier+'_ATT');
