@@ -35,7 +35,7 @@ jobs:
           node .github/scripts/analyze-dependencies.js '${{ github.event.inputs.branches }}'
 
       - name: Upload Dependency Graph Output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-graph
           path: ./output/dependency-graph.json
