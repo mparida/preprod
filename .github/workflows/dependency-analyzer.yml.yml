@@ -26,10 +26,6 @@ jobs:
       - name: Create scripts directory (if needed)
         run: mkdir -p .github/scripts
 
-      - name: Install dependencies (if needed)
-        run: |
-          npm install
-
       - name: Run Dependency Analyzer
         run: |
           node .github/scripts/analyze-dependencies.js '${{ github.event.inputs.branches }}'
