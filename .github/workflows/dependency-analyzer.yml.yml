@@ -1,0 +1,41 @@
+name: Code Dependency Analyzer
+
+on:
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: "JSON array of branches"
+        required: true
+        type: string
+
+jobs:
+  analyze-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Create scripts directory (if needed)
+        run: mkdir -p .github/scripts
+
+      - name: Install dependencies (if needed)
+        run: |
+          npm install
+
+      - name: Run Dependency Analyzer
+        run: |
+          node .github/scripts/analyze-dependencies.js '${{ github.event.inputs.branches }}'
+
+      - name: Upload Dependency Graph Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-graph
+          path: ./output/dependency-graph.json
