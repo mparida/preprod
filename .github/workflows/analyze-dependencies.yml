@@ -23,18 +23,21 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Verify scripts directory exists
+    - name: Verify scripts directory and files
       run: |
-        echo "Current directory structure:"
+        echo "Repository contents:"
         ls -la
         echo "Checking scripts directory..."
         if [ ! -d "scripts" ]; then
-          echo "Error: scripts directory not found"
-          ls -la
+          echo "❌ Error: scripts directory not found"
           exit 1
         fi
-        echo "Contents of scripts directory:"
+        echo "Scripts directory contents:"
         ls -la scripts/
+        echo "Checking for required files..."
+        [ -f "scripts/analyze.ts" ] || { echo "❌ scripts/analyze.ts not found"; exit 1; }
+        [ -f "scripts/generate_plan.py" ] || { echo "❌ scripts/generate_plan.py not found"; exit 1; }
+        echo "✅ All files present"
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -51,32 +54,32 @@ jobs:
         python -m pip install --upgrade pip
         pip install networkx gitpython python-dotenv pyyaml
 
-    - name: Install Salesforce CLI
+    - name: Install Salesforce CLI and dependencies
       run: |
         npm install -g @salesforce/cli
         sfdx --version
-
-    - name: Install Node.js dependencies
-      run: |
         npm install -g @salesforce/source-deploy-retrieve ts-node
         npm install fast-xml-parser glob@9 lodash @salesforce/core @salesforce/source-deploy-retrieve --legacy-peer-deps
 
-    - name: Run full analysis
+    - name: Run analysis
       id: analysis
       run: |
-        echo "Current working directory: $PWD"
-        echo "Running analysis from repository root..."
+        echo "Starting analysis..."
         cd scripts
-        echo "Now in: $PWD"
-        ls -la
         git fetch --all
         npx ts-node analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}" "${{ inputs.sfdx_project_path }}"
         python generate_plan.py
         cd ..
+        echo "Analysis completed successfully"
 
     - name: Verify output files
       run: |
-        echo "Checking for output files in scripts directory:"
+        echo "Checking for output files..."
+        [ -f "scripts/change_sets.json" ] || { echo "⚠️ change_sets.json not found"; }
+        [ -f "scripts/deployment_plan.json" ] || { echo "⚠️ deployment_plan.json not found"; }
+        [ -f "scripts/dependency_graph.json" ] || { echo "⚠️ dependency_graph.json not found"; }
+        [ -f "scripts/dependency_report.html" ] || { echo "⚠️ dependency_report.html not found"; }
+        echo "Output files in scripts directory:"
         ls -la scripts/*.json scripts/*.html || echo "No output files found"
 
     - name: Upload artifacts
