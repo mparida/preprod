@@ -58,9 +58,8 @@ jobs:
       run: |
         npm install -g @salesforce/cli
         sfdx --version
-        npm install -g @salesforce/source-deploy-retrieve ts-node
-        npm install fast-xml-parser glob@9 lodash @salesforce/core @salesforce/source-deploy-retrieve --legacy-peer-deps
-
+        npm install -g @salesforce/cli @salesforce/source-deploy-retrieve ts-node typescript
+        npm install fast-xml-parser@4 @types/lodash lodash glob@9 @salesforce/core @salesforce/source-deploy-retrieve --legacy-peer-deps
     - name: Run analysis
       id: analysis
       run: |
