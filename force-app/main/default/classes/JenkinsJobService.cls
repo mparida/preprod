@@ -4,13 +4,14 @@
 
 public with sharing class JenkinsJobService {
 
-    @InvocableMethod(label='Inititate Jenkin Callout' description='Get Status after 30 mins')
-    public static void makeCallOutFromFromInvocableFlows(List<String> apis){
+    //@InvocableMethod(label='Jenkins Test Execution Status' description='Get Status after 30 mins')
+    /*public static void makeCallOutFromFromInvocableFlows(List<Id> ids, List<String> apis, List<String> jobNames){
         String api = apis[0];
         if(api != null && api == 'get build status'){
-
+            Id id = ids[0];
+            getJenkinsBuildStatusAsyn(id);
         }
-    }
+    }*/
     public static void triggerJenkinsJob(Promotion_Test_Script__c pts, Map<String, String> parameters) {
         Boolean isMockEnabled = Jenkins_Settings__mdt.getInstance('Default_Settings').Is_Mock_Enabled__c;
 

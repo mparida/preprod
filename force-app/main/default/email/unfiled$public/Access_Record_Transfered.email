@@ -1,0 +1,5 @@
+<body>
+    <p>ACC Environment Access {!ACC_Environment_Access__c.Name} has been assigned to you. Please click on the link below to view the record.</p>
+   
+https://accdevops23--preprod.sandbox.my.salesforce.com/{!ACC_Environment_Access__c.Id}
+</body>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Email to Lead reviewer</name>
+    <style>none</style>
+    <subject>You are assigned as Lead Reviewer for {!copado__User_Story__c.Name}</subject>
+    <textOnly>Dear Leads,
+
+Please verify below PD step for User Story US-0002133{!copado__JobStep__c.copado__UserStory__r.Name}
+
+PD Step: {!copado__JobStep__c.Name}</textOnly>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

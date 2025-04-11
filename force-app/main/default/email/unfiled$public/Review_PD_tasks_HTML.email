@@ -1,0 +1,5 @@
+<body>
+    <p>Dear {!copado__JobStep__c.Team_Formula__c} Leads,</p>
+    <p>Please verify below PD step for User Story <a href="https://accdevops23--preprod.sandbox.lightning.force.com/{!copado__JobStep__c.UST_ID_Formula__c}" target="_blank">{!copado__JobStep__c.UST__c}</a></p>
+    <p>PD Step: <a href="https://accdevops23--preprod.sandbox.lightning.force.com/{!copado__JobStep__c.Id}" target="_blank">{!copado__JobStep__c.Name}</a></p>
+</body>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Review PD tasks HTML</name>
+    <style>none</style>
+    <subject>Attention : {!copado__JobStep__c.Team_Formula__c} : Review Post deploy Step for Release : {!copado__JobStep__c.Release_Formula__c}</subject>
+    <textOnly>Dear Leads,
+
+Please verify below PD step for User Story US-0002133{!copado__JobStep__c.copado__UserStory__r.Name}
+
+PD Step: {!copado__JobStep__c.Name}</textOnly>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

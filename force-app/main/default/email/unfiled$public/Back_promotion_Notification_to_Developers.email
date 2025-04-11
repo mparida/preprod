@@ -1,0 +1,13 @@
+Dear {!QuickText.Dev_Name__c},
+<br>
+<br>
+The User Story <b><font color="#C70039"><a href="https://accdevops23.lightning.force.com/{!QuickText.Name}">{!QuickText.Release__c}</a></font></b>  has been deployed to <b><font color="#1017DF">{!QuickText.Environment__c}</font></b>. We kindly request you to back promote this User Story to <b><font color="#C70039">{!QuickText.Message}</font></b> promptly. If there are any questions or a need for further assistance, please reach out to the Copado team. 
+<br>
+<br>
+<br>
+<a href="https://accdevops23.lightning.force.com/one/one.app?source=alohaHeader#eyJjb21wb25lbnREZWYiOiJvbmU6YWxvaGFQYWdlIiwiYXR0cmlidXRlcyI6eyJhZGRyZXNzIjoiaHR0cHM6Ly9hY2NkZXZvcHMyMy5saWdodG5pbmcuZm9yY2UuY29tL2FwZXgvY29wYWRvX19QaXBlbGluZU1hbmFnZXI%2FbW9kZT1tYW5hZ2VyJmlkPWEwWUhzMDAwMDBGaVY2ViJ9LCJzdGF0ZSI6e319">Link to Pipeline</a>
+<br>
+<br>
+Best regards,
+<br>
+Copado Team

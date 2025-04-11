@@ -1,0 +1,64 @@
+<apex:component id="commitsStats" controller="CommitStatsController" access="global">
+    <apex:attribute name="title" description="Title for the Component" type="String" required="false" />
+
+    <!-- Email Introduction -->
+    <p>
+        Hi Team,
+        <br/><br/>
+        <b>Report Date: {!reportDate}</b>
+        <br/><br/>
+        Please find the daily commit report below. To ensure smooth code reviews and maintain a stable, trackable codebase,
+        it is recommended to commit code daily. Regular commits help minimize merge conflicts, prevent lost work, and streamline collaboration.
+        <br/><br/>
+        Total commits made last week :<br/>
+        <apex:outputText value="{!lastWeekCommits}" style="font-weight:bold; color:#000080; font-size:20px;" />
+        <br/><br/>
+    </p>
+
+    <table style="width:100%; border-collapse: collapse;">
+        <tr>
+            <!-- Header for both tables -->
+            <th style="text-align: left; width: 50%; background-color: #4CAF50; color: white; padding: 10px;">
+                Developers who did commit yesterday ({!countDid})
+            </th>
+            <th style="text-align: left; width: 50%; background-color: #E55B3C; color: white; padding: 10px;">
+                Developers who didn't do any commits yesterday ({!countDidNot})
+            </th>
+        </tr>
+        <tr>
+            <!-- Left Table: People who committed yesterday -->
+            <td style="vertical-align: top; border: 1px solid #ddd; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background-color: #DFF0D8;">
+                        <th style="text-align: left; border-bottom: 1px solid #ddd; padding: 8px;">Name</th>
+                        <th style="text-align: left;border-bottom: 1px solid #ddd; padding: 8px;">Team</th>
+                        <th style="text-align: left; border-bottom: 1px solid #ddd; padding: 8px;">Number of Commits</th>
+                    </tr>
+                    <apex:repeat value="{!committedYesterday}" var="commit">
+                        <tr style="background-color: {!IF(MOD(commit.index, 2) == 0, 'white', '#B5CFFF')}">
+                            <td style="border-bottom: 1px solid #ddd; padding: 8px;">{!commit.name}</td>
+                            <td style="border-bottom: 1px solid #ddd; padding: 8px;">{!commit.team}</td>
+                            <td style="border-bottom: 1px solid #ddd; padding: 8px;">{!commit.numOfCommits}</td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+            </td>
+
+            <!-- Right Table: People who didn't commit yesterday -->
+            <td style="vertical-align: top; border: 1px solid #ddd; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background-color: #F8B88B;">
+                        <th style="text-align: left; border-bottom: 1px solid #ddd; padding: 8px;">Name</th>
+                        <th style="text-align: left; border-bottom: 1px solid #ddd; padding: 8px;">ATT Id</th>
+                    </tr>
+                    <apex:repeat value="{!didNotCommitYesterday}" var="user">
+                        <tr style="background-color: {!IF(MOD(user.index, 2) == 0, 'white', '#FFE5B4' )}">
+                            <td style="border-bottom: 1px solid #ddd; padding: 8px;">{!user.name}</td>
+                            <td style="border-bottom: 1px solid #ddd; padding: 8px;">{!user.fedId}</td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+            </td>
+        </tr>
+    </table>
+</apex:component>

@@ -1,0 +1,5 @@
+<body>
+    <p>Dear {!copado__User_Story__c.copado__Developer__c},</p>
+    <p>The Peer / Lead Review has been {!ApprovalRequest.Status}  for User Story <a href="https://accdevops23.my.salesforce.com/{!copado__User_Story__c.Id}" target="_blank">{!copado__User_Story__c.Name}</a></p>
+   <p><b>Approver Comment : </b> {!ApprovalRequest.Comments} </p>
+</body>

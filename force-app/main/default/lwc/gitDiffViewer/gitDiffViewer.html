@@ -1,0 +1,38 @@
+<template>
+    <lightning-card title={gitDiffTitle}>
+        <!-- Fetch Button -->
+        <lightning-button label="Fetch GitHub Diff" onclick={handleFetchDiff} variant="brand"></lightning-button>
+
+        <!-- Show Spinner When Loading -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+
+        <!-- Show Error Message -->
+        <template if:true={error}>
+            <p class="slds-text-color_error">{error}</p>
+        </template>
+
+        <!-- Show GitHub Differences -->
+        <template if:true={processedDiffData.length}>
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                <thead>
+                <tr>
+                    <th>Component Name</th>
+                    <th>Change Type</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template for:each={processedDiffData} for:item="file">
+                    <tr key={file.filename}>
+                        <td>{file.filename}</td>
+                        <td>
+                            <span class={file.cssClass}>{file.status}</span>
+                        </td>
+                    </tr>
+                </template>
+                </tbody>
+            </table>
+        </template>
+    </lightning-card>
+</template>

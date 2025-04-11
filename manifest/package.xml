@@ -2,84 +2,11 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>*</members>
-        <name>AuraDefinitionBundle</name>
-    </types>
-    <types>
-        <members>*</members>
         <name>LightningComponentBundle</name>
     </types>
     <types>
         <members>*</members>
         <name>ApexClass</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ApexPage</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ApexTrigger</name>
-    </types>
-    <types>
-        <members>SiteFooter</members>
-        <members>SiteHeader</members>
-        <members>SiteLogin</members>
-        <members>SitePoweredBy</members>
-        <name>ApexComponent</name>
-    </types>
-    <types>
-        <members>ACCUAT</members>
-        <members>RELEASEQA</members>
-        <members>SFS_AzureClientCreds</members>
-        <name>AuthProvider</name>
-    </types>
-    <types>
-        <members>ATT_ChatWindowStyles</members>
-        <members>AT_T_Logo</members>
-        <members>ChatWindowStyles</members>
-        <members>CopadoCchPresetData</members>
-        <members>LICENSE</members>
-        <members>PendingClassAnimation</members>
-        <members>SiteSamples</members>
-        <members>activeChatIcon</members>
-        <members>agent</members>
-        <members>agentChatHistory</members>
-        <members>agentChatIcon</members>
-        <members>agentSubTabIcon</members>
-        <members>agentTransfer</members>
-        <members>agentpng</members>
-        <members>bell</members>
-        <members>borderResize</members>
-        <members>chatBot</members>
-        <members>cleanup_result_records</members>
-        <members>clockStaticIcon</members>
-        <members>consultationIcon</members>
-        <members>copado_cchr_LICENSE</members>
-        <members>customer</members>
-        <members>customerIcon</members>
-        <members>customerToggle</members>
-        <members>customerToggleActive</members>
-        <members>iconStaticWarning</members>
-        <members>iconW_conference</members>
-        <members>images</members>
-        <members>manualRedactClearAllIcon</members>
-        <members>manualRedactClearIcon</members>
-        <members>manualRedactCustomSelectIcon</members>
-        <members>manualRedactIcon</members>
-        <members>manualRedactLogoIcon</members>
-        <members>mobileLandingImage</members>
-        <members>profanityAgent</members>
-        <members>reduxCoral</members>
-        <members>reduxLoggerCoral</members>
-        <members>reduxThunkCoral</members>
-        <members>resizeVerticalIcon</members>
-        <members>sficon</members>
-        <members>standardResponseDefault</members>
-        <members>standardResponseFilled</members>
-        <members>supervisorSubTabIcon</members>
-        <members>test</members>
-        <members>toastCSS</members>
-        <name>StaticResource</name>
     </types>
     <version>61.0</version>
 </Package>

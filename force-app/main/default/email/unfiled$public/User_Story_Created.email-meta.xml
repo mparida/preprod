@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>User Story Created</name>
+    <style>none</style>
+    <subject>User Story Created</subject>
+    <textOnly>Hi all,
+&lt;br&gt;
+&lt;br&gt;
+Following Apex Test errors have been reported for the Environment {!QuickText.Environment__c}. Please find the detailed report below for today, {!QuickText.Date__c}.
+&lt;br&gt;
+&lt;br&gt;
+&lt;center&gt;
+{!QuickText.Datatable__c}
+&lt;/center&gt;
+&lt;br&gt;
+In case of any questions or further assistance please reach out to the Copado team.
+&lt;br&gt;
+&lt;br&gt;
+Best regards,
+&lt;br&gt;
+Copado Team</textOnly>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

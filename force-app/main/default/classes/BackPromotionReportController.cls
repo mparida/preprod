@@ -6,6 +6,24 @@ global class BackPromotionReportController {
     @InvocableMethod(label = 'Back promotion calculator' description = 'This will return the list of eligible stories for bck promotion' category='User Story')
     public static List<List<copado__User_Story__c>> getUSTListForBackDeploy(List<String> copadoEnvs){
         String environments = copadoEnvs.get(0);
+        System.debug('ENVs::'+environments);
+        List<String> expressions = environments.split('-');
+        System.debug('expressions>>'+expressions);
+        List<List<copado__User_Story__c>> result = new List<List<copado__User_Story__c>>();
+        result.add(new List<copado__User_Story__c>());
+        if(expressions!=null && expressions.size() > 0){
+            for(String expr: expressions){
+                List<List<copado__User_Story__c>> envResult = calculateBackPromotions(expr);
+                for(List<copado__User_Story__c> lst : envResult){
+                    List <copado__User_Story__c> exList = result.get(0);
+                    exList.addAll(lst);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static List<List<copado__User_Story__c>> calculateBackPromotions(String environments){
         System.debug('environments::'+environments);
         List<String> e = environments.split('#');
         /* ReportOrg#AdvanceOrg2#AdvanceOrg1#OldOrgSrc##true
@@ -27,13 +45,13 @@ global class BackPromotionReportController {
         Datetime calcDate = promo.CreatedDate;
         //Check how many PROMOTED (F & B) to target after "Environment" plugged to PL.
         List<copado__Promoted_User_Story__c> promotedUSTList = new List<copado__Promoted_User_Story__c>(
-                [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
-                WHERE copado__Promotion__r.Destination_Env__c =: advOrg1
-                AND copado__Promotion__r.copado__Status__c = 'Completed'
-                AND copado__Status__c != 'Outdated'
-                AND copado__Promotion__r.CreatedDate >= : calcDate
-                AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
-                AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
+        [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
+        WHERE copado__Promotion__r.Destination_Env__c =: advOrg1
+        AND copado__Promotion__r.copado__Status__c = 'Completed'
+        AND copado__Status__c != 'Outdated'
+        AND copado__Promotion__r.CreatedDate >= : calcDate
+        AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
+        AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
         );
         System.debug('Size of List in Advance Environment: ' + advOrg1 + ' : '+promotedUSTList.size());
         List<copado__Promoted_User_Story__c> promotedUSTListFromOldEnv;
@@ -42,14 +60,14 @@ global class BackPromotionReportController {
         if(flag == 'true'){
             copado__Promotion__c promo1 = [SELECT Id, CreatedDate FROM copado__Promotion__c WHERE Destination_Env__c = 'DEVINT' ORDER BY CreatedDate ASC LIMIT 1];
             promotedUSTListFromOldEnv = new List<copado__Promoted_User_Story__c>(
-                    [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
-                    WHERE copado__Promotion__r.Source_Env__c =: oldOrgSrc
-                    AND copado__Promotion__r.Destination_Env__c =: advOrg1
-                    AND copado__Promotion__r.copado__Status__c = 'Completed'
-                    AND copado__Status__c != 'Outdated'
-                    AND copado__Promotion__r.CreatedDate >= : promo.CreatedDate
-                    AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
-                    AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
+            [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
+            WHERE copado__Promotion__r.Source_Env__c =: oldOrgSrc
+            AND copado__Promotion__r.Destination_Env__c =: advOrg1
+            AND copado__Promotion__r.copado__Status__c = 'Completed'
+            AND copado__Status__c != 'Outdated'
+            AND copado__Promotion__r.CreatedDate >= : promo.CreatedDate
+            AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
+            AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
             );
         }
         if(promotedUSTListFromOldEnv != null){
@@ -70,14 +88,14 @@ global class BackPromotionReportController {
         }
         System.debug(usName);
         List<copado__Promoted_User_Story__c> promotedUSTListToAdvanceOrg1FromReportOrg = new List<copado__Promoted_User_Story__c>(
-                [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
-                WHERE  (copado__Promotion__r.Destination_Env__c =: reportOrg
-                OR copado__Promotion__r.Source_Env__c =: reportOrg )
-                AND copado__Promotion__r.copado__Status__c = 'Completed'
-                AND copado__Status__c != 'Outdated'
-                AND copado__User_Story__r.Name IN : USTListSet
-                AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
-                AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
+        [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
+        WHERE  (copado__Promotion__r.Destination_Env__c =: reportOrg
+        OR copado__Promotion__r.Source_Env__c =: reportOrg )
+        AND copado__Promotion__r.copado__Status__c = 'Completed'
+        AND copado__Status__c != 'Outdated'
+        AND copado__User_Story__r.Name IN : USTListSet
+        AND copado__User_Story__r.copado__Is_Bundle__c = FALSE
+        AND copado__User_Story__r.copado__Exclude_From_CBM__c = FALSE]
         );
         Set<String> USTSetAdvanceOrg1Set = new Set<String>();
         for(copado__Promoted_User_Story__c proUST : promotedUSTListToAdvanceOrg1FromReportOrg){
@@ -100,10 +118,10 @@ global class BackPromotionReportController {
 
         //See if any of those user stories were deployed to prod before the env was plugged in.
         List<copado__Promoted_User_Story__c> listOfProdDeployedStories = new List<copado__Promoted_User_Story__c>(
-                [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
-                WHERE copado__User_Story__r.Name IN : uniqueElements
-                AND copado__Promotion__r.Destination_Env__c = 'ACCPROD'
-                AND copado__Promotion__r.LastModifiedDate < : calcDate]);
+        [SELECT Id, copado__User_Story__r.Name FROM copado__Promoted_User_Story__c
+        WHERE copado__User_Story__r.Name IN : uniqueElements
+        AND copado__Promotion__r.Destination_Env__c = 'ACCPROD'
+        AND copado__Promotion__r.LastModifiedDate < : calcDate]);
 
         for(copado__Promoted_User_Story__c prmUst : listOfProdDeployedStories){
             if(uniqueElements.contains(prmUst.copado__User_Story__r.Name)){
@@ -113,8 +131,8 @@ global class BackPromotionReportController {
 
         List<List<copado__User_Story__c>> copadoStoriesListForBackPromotion = new List<List<copado__User_Story__c>>();
         copadoStoriesListForBackPromotion.add([SELECT Id, Name, Developer_Name__c, copado__Team__r.Name, copado__Release__r.Name
-                                                FROM copado__User_Story__c
-                                                WHERE Name IN : uniqueElements]);
+        FROM copado__User_Story__c
+        WHERE Name IN : uniqueElements]);
         return copadoStoriesListForBackPromotion;
     }
 }

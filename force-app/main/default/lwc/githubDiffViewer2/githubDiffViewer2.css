@@ -1,0 +1,36 @@
+/**
+ * Created by mp1863 on 22/03/25.
+ */
+.file-link {
+    font-weight: bold;
+    color: #0070d2;
+}
+
+.github-modal .modal-scroll {
+    max-height: 500px;
+    overflow: auto;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+.diff-line pre {
+    margin: 0;
+    font-family: monospace;
+    padding: 0.2rem 0.5rem;
+    white-space: pre-wrap;
+}
+
+.added {
+    background-color: #e6ffed;
+    color: #22863a;
+}
+
+.removed {
+    background-color: #ffeef0;
+    color: #b31d28;
+}
+
+.neutral {
+    background-color: #f6f8fa;
+    color: #24292e;
+}
