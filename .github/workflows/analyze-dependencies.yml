@@ -23,6 +23,19 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Verify scripts directory exists
+      run: |
+        echo "Current directory structure:"
+        ls -la
+        echo "Checking scripts directory..."
+        if [ ! -d "scripts" ]; then
+          echo "Error: scripts directory not found"
+          ls -la
+          exit 1
+        fi
+        echo "Contents of scripts directory:"
+        ls -la scripts/
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -48,31 +61,23 @@ jobs:
         npm install -g @salesforce/source-deploy-retrieve ts-node
         npm install fast-xml-parser glob@9 lodash @salesforce/core @salesforce/source-deploy-retrieve --legacy-peer-deps
 
-    - name: Verify files exist
-      working-directory: ./scripts
-      run: |
-        ls -la
-        echo "Checking for analysis files..."
-        [ -f analyze.ts ] || { echo "analyze.ts not found"; exit 1; }
-        [ -f generate_plan.py ] || { echo "generate_plan.py not found"; exit 1; }
-        echo "All required files present"
-
     - name: Run full analysis
-      working-directory: ./scripts
       id: analysis
       run: |
+        echo "Current working directory: $PWD"
+        echo "Running analysis from repository root..."
+        cd scripts
+        echo "Now in: $PWD"
+        ls -la
         git fetch --all
         npx ts-node analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}" "${{ inputs.sfdx_project_path }}"
         python generate_plan.py
+        cd ..
 
     - name: Verify output files
-      working-directory: ./scripts
       run: |
-        ls -la *.json *.html
-        [ -f change_sets.json ] || echo "change_sets.json not found"
-        [ -f deployment_plan.json ] || echo "deployment_plan.json not found"
-        [ -f dependency_graph.json ] || echo "dependency_graph.json not found"
-        [ -f dependency_report.html ] || echo "dependency_report.html not found"
+        echo "Checking for output files in scripts directory:"
+        ls -la scripts/*.json scripts/*.html || echo "No output files found"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
