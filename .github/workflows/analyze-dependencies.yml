@@ -9,10 +9,6 @@ on:
         description: 'Base branch/reference'
         required: true
         default: 'main'
-      sfdx_project_path:
-        description: 'Path to sfdx-project.json'
-        required: false
-        default: './'
 
 jobs:
   analyze:
@@ -33,26 +29,18 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Install Python dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install networkx gitpython python-dotenv pyyaml
+        npm install -g @salesforce/cli ts-node
+        npm install fast-xml-parser glob lodash @salesforce/source-deploy-retrieve
 
-    - name: Install Salesforce CLI
-      run: |
-        npm install -g @salesforce/cli
-        sfdx --version
-
-    - name: Install Node.js dependencies
-      run: |
-        npm install -g @salesforce/source-deploy-retrieve ts-node
-        npm install fast-xml-parser glob@9 lodash @salesforce/core @salesforce/source-deploy-retrieve --legacy-peer-deps
-
-    - name: Run full analysis
-      id: analysis
+    - name: Run analysis
+      working-directory: ./scripts
       run: |
         git fetch --all
-        npx ts-node analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}" "${{ inputs.sfdx_project_path }}"
+        npx ts-node analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}"
         python generate_plan.py
 
     - name: Upload artifacts
@@ -60,7 +48,7 @@ jobs:
       with:
         name: dependency-analysis
         path: |
-          change_sets.json
-          deployment_plan.json
-          dependency_graph.json
-          dependency_report.html
+          scripts/change_sets.json
+          scripts/deployment_plan.json
+          scripts/dependency_graph.json
+          scripts/dependency_report.html
