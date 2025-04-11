@@ -1,0 +1,63 @@
+name: Salesforce Dependency Analyzer
+on:
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: 'Comma-separated list of branches to analyze'
+        required: true
+      base_ref:
+        description: 'Base branch/reference'
+        required: true
+        default: 'main'
+      sfdx_project_path:
+        description: 'Path to sfdx-project.json'
+        required: false
+        default: './'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        pip install networkx gitpython python-dotenv pyyaml
+        npm install -g sfdx-cli @salesforce/source-deploy-retrieve ts-node
+        npm install fast-xml-parser glob lodash
+
+    - name: Run full analysis
+      id: analysis
+      run: |
+        git fetch --all
+        npx ts-node analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}" "${{ inputs.sfdx_project_path }}"
+        python generate_plan.py
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dependency-analysis
+        path: |
+          change_sets.json
+          deployment_plan.json
+          dependency_graph.json
+          dependency_report.html
+
+    - name: Output results
+      run: |
+        echo "Deployment Order:"
+        cat deployment_plan.json
+        echo "=== Dependency Analysis Complete ==="
