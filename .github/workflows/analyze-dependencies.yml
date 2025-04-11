@@ -17,9 +17,6 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -52,34 +49,37 @@ jobs:
         npm install fast-xml-parser glob@9 lodash @salesforce/core @salesforce/source-deploy-retrieve --legacy-peer-deps
 
     - name: Verify files exist
+      working-directory: ./scripts
       run: |
         ls -la
         echo "Checking for analysis files..."
-        [ -f analyze.ts ] || exit 1
-        [ -f generate_plan.py ] || exit 1
+        [ -f analyze.ts ] || { echo "analyze.ts not found"; exit 1; }
+        [ -f generate_plan.py ] || { echo "generate_plan.py not found"; exit 1; }
         echo "All required files present"
 
     - name: Run full analysis
+      working-directory: ./scripts
       id: analysis
       run: |
         git fetch --all
-        npx ts-node ./analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}" "${{ inputs.sfdx_project_path }}"
-        python ./generate_plan.py
+        npx ts-node analyze.ts "${{ inputs.branches }}" "${{ inputs.base_ref }}" "${{ inputs.sfdx_project_path }}"
+        python generate_plan.py
 
     - name: Verify output files
+      working-directory: ./scripts
       run: |
+        ls -la *.json *.html
         [ -f change_sets.json ] || echo "change_sets.json not found"
         [ -f deployment_plan.json ] || echo "deployment_plan.json not found"
         [ -f dependency_graph.json ] || echo "dependency_graph.json not found"
         [ -f dependency_report.html ] || echo "dependency_report.html not found"
-        ls -la *.json *.html
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: dependency-analysis
         path: |
-          change_sets.json
-          deployment_plan.json
-          dependency_graph.json
-          dependency_report.html
+          scripts/change_sets.json
+          scripts/deployment_plan.json
+          scripts/dependency_graph.json
+          scripts/dependency_report.html
