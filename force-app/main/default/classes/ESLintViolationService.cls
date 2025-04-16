@@ -27,7 +27,8 @@ public class ESLintViolationService {
             ESLintPayload.ViolationWrapper violation,
             ESLintPayload.MessageWrapper message) {
         return new ESLint_Violation__c(
-                User_Story_Commit__c = payload.userStoryId,
+                User_Story__c = payload.userStoryId,
+                User_Story_Commit__c = payload.userStoryCommitId,
                 Run_ID__c = payload.run_id,
                 Commit_ID__c = payload.commitId,
                 File_Path__c = extractCleanPath(violation.filePath),

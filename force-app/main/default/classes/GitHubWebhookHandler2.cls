@@ -16,7 +16,7 @@ global without sharing class GitHubWebhookHandler2 {
             String promotionId = (String) jsonBody.get('promotionId');
 
             // 1. Store Full Diff JSON as ContentVersion
-            ContentVersion cv = new ContentVersion();
+            ContentVersion cv = new ContentVersion();//test123567
             cv.Title = 'GitHub Diff - ' + promotionId;
             cv.PathOnClient = 'diff_result.json';
             cv.VersionData = Blob.valueOf(requestBody);
@@ -28,6 +28,7 @@ global without sharing class GitHubWebhookHandler2 {
 
             // 3. Store GitHub_Run__c record with ContentDocumentId
             GitHub_Run__c run = new GitHub_Run__c();
+            run.Promotion__c = promotionId;
             run.Promotion_Id_Text__c = promotionId;
             run.GitHub_Run_Id__c = (String) jsonBody.get('run_id');
             run.Content_Document_Id__c = saved.ContentDocumentId;
@@ -46,19 +47,17 @@ global without sharing class GitHubWebhookHandler2 {
     /* Utility method to get the parsed diff JSON from latest GitHub_Run__c using Promotion ID */
     @AuraEnabled(cacheable=true)
     public static List<Map<String, String>> getDiffJsonForPromotion(Id promotionId) {
-        GitHub_Run__c run = [
-                SELECT Content_Document_Id__c
-                FROM GitHub_Run__c
-                WHERE Promotion_Id_Text__c = :promotionId
-                AND GitHub_Run_Id__c <> NULL
-                ORDER BY CreatedDate DESC
-                LIMIT 1
-        ];
+        List<GitHub_Run__c> ghList = new List<GitHub_Run__c>([SELECT Content_Document_Id__c
+        FROM GitHub_Run__c
+        WHERE Promotion_Id_Text__c = :promotionId 
+        AND GitHub_Run_Id__c <> NULL
+        ORDER BY CreatedDate DESC
+        LIMIT 1]);
 
         ContentVersion cv = [
                 SELECT VersionData
                 FROM ContentVersion
-                WHERE ContentDocumentId = :run.Content_Document_Id__c
+                WHERE ContentDocumentId = :ghList[0].Content_Document_Id__c
                 ORDER BY CreatedDate DESC
                 LIMIT 1
         ];
@@ -85,8 +84,11 @@ global without sharing class GitHubWebhookHandler2 {
         // Step 3: Now safely iterate
         List<Map<String, String>> results = new List<Map<String, String>>();
         List<String> lines = new List<String>();
+        Set<String> fileDiffsInPromotion = new Set<String>();
         for (Object obj : files) {
             Map<String, Object> file = (Map<String, Object>) obj;
+            System.debug('file::'+file);
+            System.debug('file.getfilename::'+file.get('filename'));
             Map<String, String> formatted = new Map<String, String>();
             formatted.put('filename', (String) file.get('filename'));
             lines.add((String) file.get('filename'));
@@ -108,14 +110,16 @@ global without sharing class GitHubWebhookHandler2 {
                 if(promotionMetadataMap.get(promotionFile).equalsIgnoreCase('CustomLabel') && formatted.get('filename').containsIgnoreCase('CustomLabel')){
                     results1.add(formatted);
                 }else if(formatted.get('filename').containsIgnoreCase(promotionFile)){
+                    fileDiffsInPromotion.add(formatted.get('filename'));
                     results1.add(formatted);
                 }
             }
         }
 
+        //getCommonComponentsMap(fileDiffsInPromotion, promotionId);
+
         return results1;
     }
-
     public static String getTextAfterLastDot(String metadataName) {
         if (String.isEmpty(metadataName)) {
             return null;
@@ -126,4 +130,20 @@ global without sharing class GitHubWebhookHandler2 {
         }
         return metadataName.substring(lastDotIndex + 1);
     }
+
+    /*public static Map<String, Integer> getCommonComponentsMap(Set<string> fileDiffsInPromotion, Id PromotionId){
+        //copado__Promotion__c promo = [SELECT Id, copado__Source_Environment__c FROM copado__Promotion__c WHERE Id =: PromotionId];
+        Map<String, Integer> compUsageCount = new Map<String, Integer>();
+        for (AggregateResult ar : [
+                SELECT copado__Metadata_API_Name__c, COUNT(Id) numOfChanges
+                FROM copado__User_Story_Metadata__c
+                WHERE copado__User_Story__r.copado__Environment__c = : [SELECT  Id, copado__Source_Environment__c FROM copado__Promotion__c WHERE Id =: PromotionId].copado__Source_Environment__c
+
+                GROUP BY copado__Metadata_API_Name__c
+        ]) {
+            compUsageCount.put((String) ar.get('copado__Metadata_API_Name__c'), (Integer) ar.get('numOfChanges'));
+        }
+        System.debug('compUsageCount:::'+compUsageCount);
+        return compUsageCount;
+    }*/
 }

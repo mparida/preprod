@@ -10,41 +10,10 @@ public without sharing class JenkinsJobService1 {
             switch on param.apis[0] {
                 when 'trigger jenkins job'{
                     System.enqueueJob(new TriggerJenkinsJobQueueable(param.ids[0], param.jobNames[0], param.envNames[0]!=null?param.envNames[0] : null));
-                    //triggerJenkinsJobAsync(param.ids[0], param.jobNames[0], param.envNames[0]!=null?param.envNames[0] : null);
                 }when else {
                     System.enqueueJob(new GetJenkinsBuildStatusQueueable(param.ids[0]));
-                    //getJenkinsBuildStatusAsync(param.ids[0]);
                 }
             }
-        }
-        /*List<Id> ids = paramsList[0].ids;
-        System.debug('All params : '+paramsList);
-        System.debug('All ids : '+ids);
-        List<String> apis = paramsList[0].apis;
-        List<String> jobNames = paramsList[0].jobNames;
-        List<String> envNames = paramsList[0].envNames;
-        switch on apis[0] {
-            when 'trigger jenkins job'{
-                triggerJenkinsJobAsync(ids[0], jobNames[0], envNames!=null?envNames[0] : null);
-            }when else {
-                getJenkinsBuildStatusAsync(ids[0]);
-            }
-        }*/
-    }
-    @Future(Callout=true)
-    public static void triggerJenkinsJobAsync(Id ptsId, String jobName, String envName) {
-        Boolean isMockEnabled = Jenkins_Settings__mdt.getInstance(Bwc_Constants.metadata_defaultSettings).Is_Mock_Enabled__c;
-
-        if (isMockEnabled) {
-            Map<String, Object> mockResponse =  getMockResponsePOST(jobName);
-            System.debug('build#'+mockResponse.get(Bwc_Constants.response_buildNumber));
-            Integer buildNumber = Integer.valueOf(mockResponse.get(Bwc_Constants.response_buildNumber));
-            JenkinsJobUtil.updateJenkinsJobRunStatus(null,ptsId, null, null,buildNumber);
-        } else {
-            String jobParams = BWC_JobMetadataHelper.getSerializedJobMetadata(jobName, envName);
-            Map<String, Object> realResponse = initiateJenkinsJob(jobName, jobParams);
-            Integer buildNumber = (Integer) realResponse.get(Bwc_Constants.response_buildNumber);
-            JenkinsJobUtil.updateJenkinsJobRunStatus(null,ptsId, null, null, buildNumber);
         }
     }
 
@@ -98,19 +67,6 @@ public without sharing class JenkinsJobService1 {
     }
 
     //================GET BUILD STATUS==============================================================
-    @future(callout=true)
-    public static void getJenkinsBuildStatusAsync(Id id) {
-        Map<String, Object> response;
-        Promotion_Test_Script__c pts ;
-        pts = [SELECT Id, Name, Test_Script__r.Jenkins_Test_Suite_Name__c, Job_Run_Status__c, Job_Status_Retry_Count__c, Build__c
-        FROM Promotion_Test_Script__c WHERE Id =: id];
-        System.debug('PROMOTION SCRIPT : '+pts.Id + '---'+pts.name);
-        System.debug('Test script name %%%%%%%%%'+pts.Test_Script__r.Jenkins_Test_Suite_Name__c);
-        response = getJenkinsJobBuildStatus(pts.Test_Script__r.Jenkins_Test_Suite_Name__c, String.valueOf(pts.Build__c));
-        if(response.containsKey(Bwc_Constants.response_status) ){
-            JenkinsJobUtil.updateJenkinsJobRunStatus(pts, null, null, (String)response.get(Bwc_Constants.response_status), null);
-        }
-    }
     public static Map<String, Object> getJenkinsJobBuildStatus(String jobName, String buildNumber) {
         Boolean isMockEnabled = Jenkins_Settings__mdt.getInstance(Bwc_Constants.metadata_defaultSettings).Is_Mock_Enabled__c;
         Map<String, Object> response;
@@ -156,6 +112,38 @@ public without sharing class JenkinsJobService1 {
             return getResponseMap(response.getBody());
         } else {
             throw new CalloutException('Jenkins API GET call failed: ' + response.getBody());
+        }
+    }
+    
+    public static Map<String, Object> initiateJenkinsJobMule() {
+        String endpoint = 'https://digital-internal-api-dev-w2.az.3pc.att.com/ccapi/digital/dev-jenkins-integration-e/api/v1/jobs/trigger' ;
+        System.debug('endpoint:'+endpoint);
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(endpoint);
+        request.setMethod('POST');
+        String jsonString = '{' +
+        '"jobName": "Monitoring_API_HealthCheck",' +
+        '"buildParameters": {' +
+        '"branch": "develop",' +
+        '"environment": "qa",' +
+        '"logLevel": "INFO"' +
+        '},' +
+        '"triggeredBy": "ccmule"' +
+        '}';
+        request.setBody(jsonString);
+        applyHeaders(request);
+        request.setHeader('client_id','91c01cf9bf5448f9bec1b94331de527f');
+        request.setHeader('client_secret','2797FA1DC0104c469B5f17d4e90B561D');
+        //request.setBody(parameters);
+
+        Http http = new Http();
+        HttpResponse response = http.send(request);
+
+        if (response.getStatusCode() == Bwc_Constants.callOutStatus_201) {
+            System.debug('Response from Real Post call:::'+response.getBody());
+            return getResponseMap(response.getBody());
+        } else {
+            throw new CalloutException('Jenkins API call failed: ' + response.getBody());
         }
     }
 }

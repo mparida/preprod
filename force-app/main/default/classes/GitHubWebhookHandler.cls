@@ -17,16 +17,7 @@ global with sharing class GitHubWebhookHandler {
             String diffRaw = (String) jsonBody.get('diff');
             Id promotionId = (Id) jsonBody.get('promotionId');
 
-            // 🔹 Convert to List<String>
-            List<String> diffFiles = diffRaw.split('\n');
-
-            // 🔹 Skip First Line (Remove First Element)
-            if (!diffFiles.isEmpty()) {
-                diffFiles.remove(0);
-            }
-
             System.debug('📢 GitHub Webhook Received for promotionId: ' + promotionId);
-            System.debug('📢 File Differences: ' + JSON.serializePretty(diffFiles));
 
             // 🔹 Store run_id and diff result
             GitHub_Run__c githubRun = new GitHub_Run__c();
@@ -48,7 +39,7 @@ global with sharing class GitHubWebhookHandler {
         }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(Cacheable=true)
     public static GitHub_Run__c getLatestGitHubRun(String promotionId) {
         try {
             // Fetch the latest GitHub_Run__c record linked to the promotion

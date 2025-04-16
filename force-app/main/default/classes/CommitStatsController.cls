@@ -21,7 +21,7 @@ public class CommitStatsController {
         for (User u : [
                 SELECT Id, Name, FederationIdentifier
                 FROM User
-                WHERE IsActive = TRUE AND Profile.Name = 'Developer'
+                WHERE IsActive = TRUE 
                 AND Id IN (SELECT CreatedById FROM copado__User_Story_Commit__c WHERE CreatedDate >= LAST_N_MONTHS:6)
         ]) {
             activeUsers.put(u.Id, u);

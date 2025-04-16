@@ -44,7 +44,7 @@ public class GitHubWebhookHandler2Test {
     System.assertNotEquals(null, insertedCv);
 
     // Verify GitHub_Run__c was created
-    GitHub_Run__c run = [SELECT Id, Promotion_Id_Text__c, GitHub_Run_Id__c, Content_Document_Id__c FROM GitHub_Run__c WHERE Promotion_Id_Text__c = :promotionId LIMIT 1];
+    GitHub_Run__c run = [SELECT Id, Promotion_Id_Text__c, Promotion__c, GitHub_Run_Id__c, Content_Document_Id__c FROM GitHub_Run__c WHERE Promotion__c = :promotionId OR Promotion_Id_Text__c =: promotionId LIMIT 1];
     System.assertEquals('12345', run.GitHub_Run_Id__c);
     System.assertEquals(insertedCv.ContentDocumentId, run.Content_Document_Id__c);
     }

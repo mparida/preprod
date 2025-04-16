@@ -229,5 +229,3 @@ public with sharing class GitHubPRHandlerTest {
         }
     }
 }
-
-

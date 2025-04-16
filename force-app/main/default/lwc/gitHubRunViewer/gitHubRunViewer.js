@@ -19,7 +19,7 @@ export default class GitHubRunViewer extends LightningElement {
             this.processDiffResults();
         } else if (error) {
             this.error = 'Error fetching GitHub Run data';
-            console.error('🔥 Error fetching GitHub Run data:', error);
+            console.error('Error fetching GitHub Run data:', error);
         }
     }
 

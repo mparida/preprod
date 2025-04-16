@@ -38,14 +38,14 @@ public with sharing class GitHubActionService {
             }
         } catch (Exception e) {
             System.debug('🔥 Error triggering GitHub Action: ' + e.getMessage());
-            System.debug('Stack Tracce: ' + e.getStackTraceString());
+            System.debug('Stack Tracce: ' + e.getStackTraceString()); 
         }
     }
 
-    public static void triggerEslintScan(String userStoryId, String commitSha) {
+    public static void triggerEslintScan(String userStoryId, String userStoryCommitId, String commitSha) {
         try {
             // Replace with your repo path and workflow file
-            String repoPath = System.Label.GItHub_ACC_Repo; // 👈 update this
+            String repoPath = 'ATT-DP5/apm0013668-ccsf-acc-sfdc';//System.Label.GItHub_ACC_Repo; // 👈 update this
 
             // Build the REST API URL using Named Credential
             String apiUrl = 'callout:GitHubAPI/repos/' + repoPath + '/actions/workflows/eslint.yml/dispatches';
@@ -53,9 +53,11 @@ public with sharing class GitHubActionService {
 
             // Payload for the workflow_dispatch event
             Map<String, Object> body = new Map<String, Object>{
-                    'ref' => 'maintest3', // The branch where your workflow lives
+                    //'ref' => 'maintest3', // The branch where your workflow lives
+                    'ref' => 'eslint', // The branch where your workflow lives
                     'inputs' => new Map<String, String>{
                             'userStoryId' => userStoryId,
+                            'userStoryCommitId' => userStoryCommitId,
                             'commitId' => commitSha
                     }
             };
@@ -81,4 +83,3 @@ public with sharing class GitHubActionService {
         }
     }
 }
-

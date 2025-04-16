@@ -4,6 +4,7 @@
 
 public class ESLintPayload {
     public String userStoryId;
+    public String userStoryCommitId;
     public String commitId;
     public String run_id;
     public List<ViolationWrapper> violations;
