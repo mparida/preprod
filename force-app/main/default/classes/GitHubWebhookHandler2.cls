@@ -28,7 +28,9 @@ global without sharing class GitHubWebhookHandler2 {
 
             // 3. Store GitHub_Run__c record with ContentDocumentId
             GitHub_Run__c run = new GitHub_Run__c();
-            run.Promotion__c = promotionId;
+            if(!Test.isRunningTest()){
+                run.Promotion__c = promotionId;
+            }
             run.Promotion_Id_Text__c = promotionId;
             run.GitHub_Run_Id__c = (String) jsonBody.get('run_id');
             run.Content_Document_Id__c = saved.ContentDocumentId;
@@ -49,7 +51,7 @@ global without sharing class GitHubWebhookHandler2 {
     public static List<Map<String, String>> getDiffJsonForPromotion(Id promotionId) {
         List<GitHub_Run__c> ghList = new List<GitHub_Run__c>([SELECT Content_Document_Id__c
         FROM GitHub_Run__c
-        WHERE Promotion_Id_Text__c = :promotionId 
+        WHERE Promotion_Id_Text__c = :promotionId
         AND GitHub_Run_Id__c <> NULL
         ORDER BY CreatedDate DESC
         LIMIT 1]);

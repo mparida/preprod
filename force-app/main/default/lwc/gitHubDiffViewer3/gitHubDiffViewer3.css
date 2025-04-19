@@ -1,0 +1,46 @@
+.slds-tabs_default__link {
+    cursor: pointer;
+    color: #006dcc;
+    text-decoration: none;
+}
+
+.file-link {
+    cursor: pointer;
+    color: #006dcc;
+}
+
+.file-link:hover {
+    text-decoration: underline;
+}
+
+.diff-line {
+    font-family: monospace;
+    white-space: pre;
+    padding: 2px 4px;
+    line-height: 1.2; /* Reduced from default */
+    margin: 0; /* Remove default margins */
+}
+.modal-scroll pre {
+    margin: 0; /* Remove margins from pre tags */
+    padding: 0; /* Remove padding from pre tags */
+}
+
+.diff-line.added {
+    background-color: #e7f5e7;
+    color: #2e844a;
+}
+
+.diff-line.removed {
+    background-color: #fce8e8;
+    color: #ea001e;
+}
+
+.modal-scroll {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.github-modal .slds-modal__container {
+    max-width: 80%;
+    width: 80%;
+}
