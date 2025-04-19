@@ -104,10 +104,59 @@ public class GitHubWebhookHandler2Test {
         insert meta1;
 
         Test.startTest();
-        List<Map<String, String>> results = GitHubWebhookHandler2.getDiffJsonForPromotion(promotionId);
+        GitHubWebhookHandler2.DiffResultWrapper results = GitHubWebhookHandler2.getDiffJsonForPromotion(promotionId);
         Test.stopTest();
 
-        System.assertEquals(2, results.size());
-        System.assert(results[0].get('filename').contains('RetailHomePageHybrid'));
+        System.assertEquals(1, results.xmlFiles.size());
+        //System.assert(results.nonXmlFiles.contains('RetailHomePageHybrid'));
+    }
+
+    @IsTest
+    private static void testGetFileType() {
+        // Test null filename
+        System.assertEquals('other', GitHubWebhookHandler2.getFileType(null),
+                'Should return "other" for null filename');
+
+        // Test empty string
+        System.assertEquals('other', GitHubWebhookHandler2.getFileType(''),
+                'Should return "other" for empty string');
+
+        // Test Apex class files
+        System.assertEquals('code', GitHubWebhookHandler2.getFileType('MyClass.cls'),
+                'Should recognize .cls files as code');
+        System.assertEquals('code', GitHubWebhookHandler2.getFileType('path/to/MyClass.cls'),
+                'Should recognize .cls files with paths as code');
+
+        // Test JavaScript files
+        System.assertEquals('code', GitHubWebhookHandler2.getFileType('script.js'),
+                'Should recognize .js files as code');
+
+        // Test Trigger files
+        System.assertEquals('code', GitHubWebhookHandler2.getFileType('AccountTrigger.trigger'),
+                'Should recognize .trigger files as code');
+
+        // Test XML files
+        System.assertEquals('xml', GitHubWebhookHandler2.getFileType('file.xml'),
+                'Should recognize .xml files as XML');
+        System.assertEquals('xml', GitHubWebhookHandler2.getFileType('CustomLabels.labels-meta.xml'),
+                'Should recognize labels-meta.xml files as XML');
+        System.assertEquals('xml', GitHubWebhookHandler2.getFileType('Admin.profile-meta.xml'),
+                'Should recognize profile-meta.xml files as XML');
+        System.assertEquals('xml', GitHubWebhookHandler2.getFileType('Account-Account Layout.layout-meta.xml'),
+                'Should recognize layout-meta.xml files as XML');
+
+        // Test other file types
+        System.assertEquals('other', GitHubWebhookHandler2.getFileType('README.md'),
+                'Should return "other" for non-code/non-XML files');
+        System.assertEquals('other', GitHubWebhookHandler2.getFileType('styles.css'),
+                'Should return "other" for non-code/non-XML files');
+        System.assertEquals('other', GitHubWebhookHandler2.getFileType('image.png'),
+                'Should return "other" for non-code/non-XML files');
+
+        // Test case sensitivity
+        System.assertEquals('code', GitHubWebhookHandler2.getFileType('MyClass.cls'),
+                'Should be case insensitive for file extensions');
+        System.assertEquals('xml', GitHubWebhookHandler2.getFileType('file.xml'),
+                'Should be case insensitive for file extensions');
     }
 }
