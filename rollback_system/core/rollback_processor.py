@@ -10,11 +10,12 @@ from rollback_system.utils.logger import logger
 
 class RollbackProcessor:
     def __init__(self, repo_path: str = None):
+        """Initialize with services"""
         self.git_service = GitService(repo_path)
         self.conflict_service = ConflictService()
         self.validation_service = ValidationService()
-        self.repo = self.git_service.repo  # Add this line to expose the repo
-        self.git_service.verify_repository()
+        self.repo = self.git_service.repo
+        self.git_service.verify_repository()  # Debug output
         
     def rollback_features(self, release_branch: str, features: List[str], dry_run: bool = False):
         result = RollbackResult(  # Initialize result first

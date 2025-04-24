@@ -9,30 +9,20 @@ import subprocess
 from typing import List
 
 class GitService:
-    def get_all_branches(self) -> List[str]:
-        """Get all branches using the most reliable method available"""
+    def __init__(self, repo_path: str = None):  # Add parameter here
+        """Initialize with optional repo path"""
         try:
-            # Try GitPython first
-            if hasattr(self, 'repo'):
-                return [
-                    *[ref.name.split('/')[-1] for ref in self.repo.references if 'heads' in str(ref)],
-                    *[ref.name.split('/')[-1] for ref in self.repo.references if 'remotes' in str(ref)]
-                ]
+            self.repo_path = repo_path or os.getcwd()
             
-            # Fallback to git CLI
-            result = subprocess.run(
-                ['git', 'branch', '-a'],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            return [
-                line.strip().replace('* ', '').replace('remotes/', '')
-                for line in result.stdout.split('\n')
-                if line.strip()
-            ]
+            # Navigate up from rollback_system/ if needed
+            if os.path.basename(self.repo_path) == 'rollback_system':
+                self.repo_path = str(Path(self.repo_path).parent)
+            
+            self.repo = Repo(self.repo_path, search_parent_directories=True)
+            self.git = self.repo.git
+            self.repo.git.fetch('--all')  # Ensure all branches are available
         except Exception as e:
-            raise RuntimeError(f"Could not list branches: {str(e)}")
+            raise RuntimeError(f"Failed to initialize GitService: {str(e)}")
 
         
     def checkout_branch(self, branch_name: str) -> bool:
@@ -119,8 +109,8 @@ class GitService:
     def verify_repository(self):
         """Debug method to check repository state"""
         print("\n=== Repository Verification ===")
+        print(f"Working directory: {os.getcwd()}")
         print(f"Repo path: {self.repo_path}")
         print(f"Active branch: {self.repo.active_branch}")
-        print("Branches:", [ref.name for ref in self.repo.references])
-        print("Git directory:", self.repo.git_dir)
+        print("References:", [ref.name for ref in self.repo.references])
         print("=============================\n")
