@@ -14,16 +14,15 @@ class RollbackProcessor:
         self.validation_service = ValidationService()
         self.dry_run = False
         
-    def rollback_features(self, release_branch: str, features: List[str], 
-                         dry_run: bool = False) -> RollbackResult:
-        self.dry_run = dry_run
-        result = RollbackResult(
-            success=False,
-            rolled_back_files=[],
-            conflicts=[],
-            warnings=[],
-            dry_run=dry_run
-        )
+    def rollback_features(self, release_branch: str, features: List[str], dry_run: bool = False):
+        if not self.git_service.branch_exists(release_branch):
+            return RollbackResult(
+                success=False,
+                rolled_back_files=[],
+                conflicts=[f"Branch {release_branch} not found locally or in remotes"],
+                warnings=["Did you forget to fetch remotes?"],
+                dry_run=dry_run
+            )
         
         try:
             # Validate inputs

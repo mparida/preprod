@@ -70,3 +70,20 @@ class GitService:
         except git.exc.GitCommandError as e:
             logger.error(f"Backup branch creation failed: {str(e)}")
             return False
+
+    def branch_exists(self, branch_name: str) -> bool:
+    """Check if branch exists locally or remotely"""
+    try:
+        # Check local branches
+        if branch_name in [ref.name for ref in self.repo.references]:
+            return True
+            
+        # Check remote branches
+        for remote in self.repo.remotes:
+            remote.fetch()
+            if f"{remote.name}/{branch_name}" in [ref.name for ref in self.repo.references]:
+                return True
+                
+        return False
+    except Exception as e:
+        raise RuntimeError(f"Branch check failed: {str(e)}")
