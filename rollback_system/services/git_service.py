@@ -72,18 +72,27 @@ class GitService:
             return False
 
     def branch_exists(self, branch_name: str) -> bool:
-        """Check if branch exists locally or remotely"""
+        """Check if branch exists locally or remotely with exact matching"""
         try:
+            # Normalize branch name (remove refs/heads/ prefix if present)
+            clean_branch = branch_name.replace('refs/heads/', '')
+            
             # Check local branches
-            if branch_name in [ref.name for ref in self.repo.references]:
+            local_branches = [str(ref.name).replace('refs/heads/', '') 
+                            for ref in self.repo.references 
+                            if 'heads/' in str(ref.name)]
+            if clean_branch in local_branches:
                 return True
                 
-            # Check remote branches
-            for remote in self.repo.remotes:
-                remote.fetch()
-                if f"{remote.name}/{branch_name}" in [ref.name for ref in self.repo.references]:
-                    return True
+            # Check remote branches (fetch first)
+            self.repo.git.fetch('--all')
+            remote_branches = [str(ref.name).replace('refs/remotes/', '') 
+                            for ref in self.repo.references 
+                            if 'remotes/' in str(ref.name)]
+            
+            # Match against both origin/branch and branch name
+            return (f"origin/{clean_branch}" in remote_branches 
+                    or clean_branch in remote_branches)
                     
-            return False
         except Exception as e:
-            raise RuntimeError(f"Branch check failed: {str(e)}")
+            raise RuntimeError(f"Branch detection failed for '{branch_name}': {str(e)}")

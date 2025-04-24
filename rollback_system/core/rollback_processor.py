@@ -60,12 +60,11 @@ class RollbackProcessor:
             result.success = False
             return result
             
-    def _validate_inputs(self, release_branch: str, features: List[str], 
-                        result: RollbackResult) -> bool:
-        # Check if branch exists
-        if release_branch not in self.git_service.repo.branches:
-            result.conflicts.append(f"Branch {release_branch} does not exist")
+    def _validate_inputs(self, release_branch: str, features: List[str], result: RollbackResult):
+        if not self.git_service.branch_exists(release_branch):
+            result.conflicts.append(f"Branch '{release_branch}' not found. Available branches: {self.get_available_branches()}")
             return False
+        # ... other validations
             
         # Check if features exist
         for feature in features:
@@ -158,3 +157,13 @@ class RollbackProcessor:
             
         if not all(file_result.verification_passed for file_result in result.rolled_back_files):
             result.warnings.append("Some files failed post-rollback validation")
+    
+    def get_available_branches(self):
+        """Return formatted string of available branches"""
+        local = [str(ref.name).replace('refs/heads/', '') 
+                for ref in self.repo.references 
+                if 'heads/' in str(ref.name)]
+        remote = [str(ref.name).replace('refs/remotes/', '') 
+                for ref in self.repo.references 
+                if 'remotes/' in str(ref.name)]
+        return f"\nLocal: {local}\nRemote: {remote}"
