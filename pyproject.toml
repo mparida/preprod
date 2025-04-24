@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "salesforce-rollback"
+version = "1.0.0"
+description = "Salesforce Automated Rollback System"
+requires-python = ">=3.10"
+dependencies = [
+    "gitpython>=3.1.30",
+    "lxml>=4.9.1",
+    "pandas>=1.5.0",
+    "pytest>=7.0.0"
+]
+
+[project.scripts]
+rollback = "rollback_system.main:main"
