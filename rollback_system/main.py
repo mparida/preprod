@@ -1,7 +1,6 @@
-
 #!/usr/bin/env python3
 import argparse
-from core.rollback_processor import RollbackProcessor
+from rollback_system.core.rollback_processor import RollbackProcessor  # Updated import
 
 def main():
     parser = argparse.ArgumentParser()
@@ -17,8 +16,7 @@ def main():
         args.dry_run
     )
     
-    # Save report
-    with open('../rollback_report.json', 'w') as f:
+    with open('rollback_report.json', 'w') as f:
         f.write(result.to_json())
 
 if __name__ == "__main__":
