@@ -5,6 +5,7 @@ from rollback_system.services.git_service import GitService
 from rollback_system.services.conflict_service import ConflictService
 from rollback_system.services.validation_service import ValidationService
 from rollback_system.core.file_handlers import get_handler_for_file
+from rollback_system.utils.logger import logger
 
 
 class RollbackProcessor:
