@@ -35,6 +35,7 @@ jobs:
 
     - name: Execute rollback
       run: |
+        git fetch --all
         python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \
           --features "${{ inputs.features_to_rollback }}" \
