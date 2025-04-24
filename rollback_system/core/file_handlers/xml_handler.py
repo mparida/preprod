@@ -2,9 +2,9 @@
 from lxml import etree
 from typing import List, Dict, Optional
 from pathlib import Path
-from ..models.rollback_models import CodeChange, FileAnalysisResult
-from ..utils.logger import logger
-from ..utils.xml_utils import xml_to_dict, dict_to_xml
+from rollback_system.core.models.rollback_models import CodeChange, FileAnalysisResult
+from rollback_system.utils.logger import logger
+from rollback_system.utils.xml_utils import xml_to_dict, dict_to_xml
 
 class XmlHandler:
     """Handles rollback operations for Salesforce XML metadata files"""

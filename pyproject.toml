@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "salesforce-rollback"
 version = "1.0.0"
 description = "Salesforce Automated Rollback System"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "gitpython>=3.1.30",
     "lxml>=4.9.1",
@@ -16,3 +16,7 @@ dependencies = [
 
 [project.scripts]
 rollback = "rollback_system.main:main"
+
+# ADD THIS SECTION (typically at the end)
+[tool.setuptools.packages]
+find = {}  # This enables automatic package discovery

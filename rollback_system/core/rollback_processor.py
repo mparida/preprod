@@ -1,11 +1,11 @@
 from typing import List, Dict, Optional
 from pathlib import Path
-from ..models.rollback_models import RollbackResult, FileAnalysisResult
-from ..services.git_service import GitService
-from ..services.conflict_service import ConflictService
-from ..services.validation_service import ValidationService
-from ..file_handlers import get_handler_for_file
-from ..utils.logger import logger
+from rollback_system.core.models.rollback_models import RollbackResult, FileAnalysisResult
+from rollback_system.services.git_service import GitService
+from rollback_system.services.conflict_service import ConflictService
+from rollback_system.services.validation_service import ValidationService
+from rollback_system.core.file_handlers import get_handler_for_file
+
 
 class RollbackProcessor:
     def __init__(self, repo_path: str = '.'):

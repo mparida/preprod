@@ -1,6 +1,6 @@
 from typing import List, Dict, Set
-from ..models.rollback_models import CodeChange, FileAnalysisResult
-from ..utils.logger import logger
+from rollback_system.core.models.rollback_models import CodeChange, FileAnalysisResult
+from rollback_system.utils.logger import logger
 from difflib import SequenceMatcher
 
 class ConflictService:

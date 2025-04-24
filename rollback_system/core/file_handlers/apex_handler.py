@@ -1,7 +1,7 @@
 import re
 from typing import List, Optional, Dict
-from ..models.rollback_models import CodeChange, FileAnalysisResult
-from ..utils.logger import logger
+from rollback_system.core.models.rollback_models import CodeChange, FileAnalysisResult
+from rollback_system.utils.logger import logger
 
 class ApexHandler:
     METHOD_PATTERN = re.compile(

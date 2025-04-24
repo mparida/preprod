@@ -2,8 +2,8 @@ import git
 from git import Repo, Diff
 from typing import List, Dict, Optional
 from pathlib import Path
-from ..models.rollback_models import CodeChange, ChangeType
-from ..utils.logger import logger
+from rollback_system.core.models.rollback_models import CodeChange, ChangeType
+from rollback_system.utils.logger import logger
 
 class GitService:
     def __init__(self, repo_path: str = '.'):

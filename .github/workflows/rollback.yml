@@ -36,7 +36,7 @@ jobs:
     - name: Execute rollback
       run: |
         cd rollback_system
-        python -m main \
+        python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \
           --features "${{ inputs.features_to_rollback }}" \
           --dry-run "${{ inputs.dry_run }}"
