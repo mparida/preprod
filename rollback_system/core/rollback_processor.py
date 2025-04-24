@@ -14,6 +14,7 @@ class RollbackProcessor:
         self.conflict_service = ConflictService()
         self.validation_service = ValidationService()
         self.repo = self.git_service.repo  # Add this line to expose the repo
+        self.git_service.verify_repository()
         
     def rollback_features(self, release_branch: str, features: List[str], dry_run: bool = False):
         result = RollbackResult(  # Initialize result first

@@ -19,29 +19,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
       with:
-        fetch-depth: 0
+        fetch-depth: 0  # Get full history immediately
+        ref: ${{ github.ref }}  # Explicitly checkout the correct ref
+
+    - name: Setup Git environment
+      run: |
+        # Safe directory for GitHub Actions
+        git config --global --add safe.directory /github/workspace
+        
+        # Fetch all branches and tags (no --unshallow needed)
+        git fetch --all --tags
+        
+        # Debug: Show branch information
+        echo "--- Git Branch Info ---"
+        git branch -a
+        git show-ref --heads
+        echo "-----------------------"
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
+    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -e .
 
-    - name: Execute rollback
+    - name: Debug branch info
       run: |
-        # Ensure full git history is available
-        git config --global --add safe.directory /github/workspace
-        git fetch --unshallow --all
-        
-        # Debug: Show all branches
         git branch -a
         git show-ref
+        git remote -v
+
+    - name: Execute rollback
+      run: |
         
         python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \

@@ -115,3 +115,12 @@ class GitService:
             return f"\nLocal: {local}\nRemote: {remote}"
         except:
             return "Could not retrieve branches"
+    
+    def verify_repository(self):
+        """Debug method to check repository state"""
+        print("\n=== Repository Verification ===")
+        print(f"Repo path: {self.repo_path}")
+        print(f"Active branch: {self.repo.active_branch}")
+        print("Branches:", [ref.name for ref in self.repo.references])
+        print("Git directory:", self.repo.git_dir)
+        print("=============================\n")
