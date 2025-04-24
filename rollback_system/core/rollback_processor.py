@@ -9,11 +9,11 @@ from rollback_system.utils.logger import logger
 
 
 class RollbackProcessor:
-    def __init__(self, repo_path: str = '.'):
+    def __init__(self, repo_path: str = None):
         self.git_service = GitService(repo_path)
         self.conflict_service = ConflictService()
         self.validation_service = ValidationService()
-        self.dry_run = False
+        self.repo = self.git_service.repo  # Add this line to expose the repo
         
     def rollback_features(self, release_branch: str, features: List[str], dry_run: bool = False):
         result = RollbackResult(  # Initialize result first

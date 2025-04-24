@@ -8,17 +8,18 @@ from rollback_system.utils.logger import logger
 
 class GitService:
     def __init__(self, repo_path: str = None):
-        # Navigate up from rollback_system to the actual repo root
-        self.repo_path = repo_path or os.getcwd()
-        
-        # If we're in rollback_system/, go up one level
-        if os.path.basename(self.repo_path) == 'rollback_system':
-            self.repo_path = str(Path(self.repo_path).parent)
-            
         try:
+            self.repo_path = repo_path or os.getcwd()
+            if os.path.basename(self.repo_path) == 'rollback_system':
+                self.repo_path = str(Path(self.repo_path).parent)
+            
             self.repo = Repo(self.repo_path)
+            self.git = self.repo.git
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize Git repo at {self.repo_path}: {str(e)}")
+            raise RuntimeError(f"Git initialization failed: {str(e)}\n"
+                            f"Current path: {os.getcwd()}\n"
+                            f"Repo path: {self.repo_path}")
+
         
     def checkout_branch(self, branch_name: str) -> bool:
         try:
