@@ -35,11 +35,10 @@ jobs:
 
     - name: Execute rollback
       run: |
-        cd rollback_system
         python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \
           --features "${{ inputs.features_to_rollback }}" \
-          --dry-run  # Remove "true" since it's a flag
+          --dry-run
           
     - name: Upload rollback report
       if: always()
