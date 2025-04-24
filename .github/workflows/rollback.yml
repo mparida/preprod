@@ -35,9 +35,13 @@ jobs:
 
     - name: Execute rollback
       run: |
-
-        git status
+        # Ensure full git history is available
+        git config --global --add safe.directory /github/workspace
+        git fetch --unshallow --all
+        
+        # Debug: Show all branches
         git branch -a
+        git show-ref
         
         python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \

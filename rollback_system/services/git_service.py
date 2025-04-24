@@ -9,16 +9,26 @@ from rollback_system.utils.logger import logger
 class GitService:
     def __init__(self, repo_path: str = None):
         try:
-            self.repo_path = repo_path or os.getcwd()
-            if os.path.basename(self.repo_path) == 'rollback_system':
-                self.repo_path = str(Path(self.repo_path).parent)
+            # Get absolute path to repo root
+            self.repo_path = os.path.abspath(repo_path) if repo_path else os.getcwd()
             
-            self.repo = Repo(self.repo_path)
+            # Navigate up from rollback_system/ if needed
+            while os.path.basename(self.repo_path) == 'rollback_system':
+                self.repo_path = os.path.dirname(self.repo_path)
+            
+            # Initialize repo with search_parent_directories=True
+            self.repo = Repo(self.repo_path, search_parent_directories=True)
             self.git = self.repo.git
+            
+            # Force fetch all remote branches
+            self.repo.git.fetch('--all')
         except Exception as e:
-            raise RuntimeError(f"Git initialization failed: {str(e)}\n"
-                            f"Current path: {os.getcwd()}\n"
-                            f"Repo path: {self.repo_path}")
+            available = self._try_get_branches()
+            raise RuntimeError(
+                f"Git initialization failed in {self.repo_path}\n"
+                f"Error: {str(e)}\n"
+                f"Available branches: {available}"
+            )
 
         
     def checkout_branch(self, branch_name: str) -> bool:
@@ -73,27 +83,31 @@ class GitService:
             return False
 
     def branch_exists(self, branch_name: str) -> bool:
-        """Check if branch exists locally or remotely with exact matching"""
+        """Robust branch checking with fallbacks"""
         try:
-            # Normalize branch name (remove refs/heads/ prefix if present)
-            clean_branch = branch_name.replace('refs/heads/', '')
-            
-            # Check local branches
-            local_branches = [str(ref.name).replace('refs/heads/', '') 
-                            for ref in self.repo.references 
-                            if 'heads/' in str(ref.name)]
-            if clean_branch in local_branches:
-                return True
-                
-            # Check remote branches (fetch first)
-            self.repo.git.fetch('--all')
-            remote_branches = [str(ref.name).replace('refs/remotes/', '') 
-                            for ref in self.repo.references 
-                            if 'remotes/' in str(ref.name)]
-            
-            # Match against both origin/branch and branch name
-            return (f"origin/{clean_branch}" in remote_branches 
-                    or clean_branch in remote_branches)
-                    
+            # Check both local and remote branches
+            branches = [
+                *[ref.name.split('/')[-1] for ref in self.repo.references if 'heads' in str(ref)],
+                *[ref.name.split('/')[-1] for ref in self.repo.references if 'remotes' in str(ref)]
+            ]
+            return branch_name in branches
+        
         except Exception as e:
-            raise RuntimeError(f"Branch detection failed for '{branch_name}': {str(e)}")
+            # Fallback to git CLI if python-git fails
+            try:
+                output = subprocess.check_output(
+                    ['git', 'show-ref', '--verify', f'refs/heads/{branch_name}'],
+                    stderr=subprocess.PIPE
+                )
+                return True
+            except subprocess.CalledProcessError:
+                return False
+
+    def _try_get_branches(self):
+        """Fallback branch detection when repo init fails"""
+        try:
+            local = subprocess.check_output(['git', 'branch', '--list']).decode().split()
+            remote = subprocess.check_output(['git', 'branch', '-r']).decode().split()
+            return f"\nLocal: {local}\nRemote: {remote}"
+        except:
+            return "Could not retrieve branches"
