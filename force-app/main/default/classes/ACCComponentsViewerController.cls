@@ -40,6 +40,8 @@ public with sharing class ACCComponentsViewerController {
         componentQuery+= ' LIMIT 50000';
         System.debug('componentQuery:::'+componentQuery);
         List<copado__User_Story_Metadata__c> componentResults = Database.query(componentQuery);
+        System.debug('System Rollback:::'+componentQuery);
+
 
         List<Map<String, String>> componentsListMap = new List<Map<String, String>>();
         for (copado__User_Story_Metadata__c component : componentResults) {
