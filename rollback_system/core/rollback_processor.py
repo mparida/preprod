@@ -61,17 +61,18 @@ class RollbackProcessor:
             return result
             
     def _validate_inputs(self, release_branch: str, features: List[str], result: RollbackResult):
-        if not self.git_service.branch_exists(release_branch):
-            result.conflicts.append(f"Branch '{release_branch}' not found. Available branches: {self.get_available_branches()}")
+        try:
+            available_branches = self.git_service.get_all_branches()
+            if release_branch not in available_branches:
+                result.conflicts.append(
+                    f"Branch '{release_branch}' not found.\n"
+                    f"Available branches: {sorted(set(available_branches))}"
+                )
+                return False
+            return True
+        except Exception as e:
+            result.conflicts.append(f"Branch validation failed: {str(e)}")
             return False
-        # ... other validations
-            
-        # Check if features exist
-        for feature in features:
-            if feature not in self.git_service.repo.branches:
-                result.conflicts.append(f"Feature branch {feature} does not exist")
-                
-        return len(result.conflicts) == 0
         
     def _create_backup(self, release_branch: str, result: RollbackResult) -> bool:
         backup_name = f"{release_branch}_backup_pre_rollback"

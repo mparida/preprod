@@ -5,30 +5,34 @@ from typing import List, Dict, Optional
 from pathlib import Path
 from rollback_system.core.models.rollback_models import CodeChange, ChangeType
 from rollback_system.utils.logger import logger
+import subprocess
+from typing import List
 
 class GitService:
-    def __init__(self, repo_path: str = None):
+    def get_all_branches(self) -> List[str]:
+        """Get all branches using the most reliable method available"""
         try:
-            # Get absolute path to repo root
-            self.repo_path = os.path.abspath(repo_path) if repo_path else os.getcwd()
+            # Try GitPython first
+            if hasattr(self, 'repo'):
+                return [
+                    *[ref.name.split('/')[-1] for ref in self.repo.references if 'heads' in str(ref)],
+                    *[ref.name.split('/')[-1] for ref in self.repo.references if 'remotes' in str(ref)]
+                ]
             
-            # Navigate up from rollback_system/ if needed
-            while os.path.basename(self.repo_path) == 'rollback_system':
-                self.repo_path = os.path.dirname(self.repo_path)
-            
-            # Initialize repo with search_parent_directories=True
-            self.repo = Repo(self.repo_path, search_parent_directories=True)
-            self.git = self.repo.git
-            
-            # Force fetch all remote branches
-            self.repo.git.fetch('--all')
-        except Exception as e:
-            available = self._try_get_branches()
-            raise RuntimeError(
-                f"Git initialization failed in {self.repo_path}\n"
-                f"Error: {str(e)}\n"
-                f"Available branches: {available}"
+            # Fallback to git CLI
+            result = subprocess.run(
+                ['git', 'branch', '-a'],
+                capture_output=True,
+                text=True,
+                check=True
             )
+            return [
+                line.strip().replace('* ', '').replace('remotes/', '')
+                for line in result.stdout.split('\n')
+                if line.strip()
+            ]
+        except Exception as e:
+            raise RuntimeError(f"Could not list branches: {str(e)}")
 
         
     def checkout_branch(self, branch_name: str) -> bool:
