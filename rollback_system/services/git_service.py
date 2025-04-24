@@ -1,4 +1,5 @@
 import git
+import os
 from git import Repo, Diff
 from typing import List, Dict, Optional
 from pathlib import Path
@@ -6,9 +7,18 @@ from rollback_system.core.models.rollback_models import CodeChange, ChangeType
 from rollback_system.utils.logger import logger
 
 class GitService:
-    def __init__(self, repo_path: str = '.'):
-        self.repo = Repo(repo_path)
-        self.git = self.repo.git
+    def __init__(self, repo_path: str = None):
+        # Navigate up from rollback_system to the actual repo root
+        self.repo_path = repo_path or os.getcwd()
+        
+        # If we're in rollback_system/, go up one level
+        if os.path.basename(self.repo_path) == 'rollback_system':
+            self.repo_path = str(Path(self.repo_path).parent)
+            
+        try:
+            self.repo = Repo(self.repo_path)
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize Git repo at {self.repo_path}: {str(e)}")
         
     def checkout_branch(self, branch_name: str) -> bool:
         try:
