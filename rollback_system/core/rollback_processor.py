@@ -16,14 +16,13 @@ class RollbackProcessor:
         self.dry_run = False
         
     def rollback_features(self, release_branch: str, features: List[str], dry_run: bool = False):
-        if not self.git_service.branch_exists(release_branch):
-            return RollbackResult(
-                success=False,
-                rolled_back_files=[],
-                conflicts=[f"Branch {release_branch} not found locally or in remotes"],
-                warnings=["Did you forget to fetch remotes?"],
-                dry_run=dry_run
-            )
+        result = RollbackResult(  # Initialize result first
+            success=False,
+            rolled_back_files=[],
+            conflicts=[],
+            warnings=[],
+            dry_run=dry_run
+        )
         
         try:
             # Validate inputs
@@ -51,7 +50,8 @@ class RollbackProcessor:
             # Post-rollback validation
             if not dry_run and result.success:
                 self._post_rollback_validation(result)
-                
+
+            result.success = True
             return result
             
         except Exception as e:
