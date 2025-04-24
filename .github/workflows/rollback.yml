@@ -58,7 +58,9 @@ jobs:
 
     - name: Execute rollback
       run: |
-        
+        # Debug first
+        git branch -a
+        git show-ref  
         python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \
           --features "${{ inputs.features_to_rollback }}" \

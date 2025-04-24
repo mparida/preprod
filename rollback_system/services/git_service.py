@@ -1,116 +1,62 @@
-import git
 import os
-from git import Repo, Diff
-from typing import List, Dict, Optional
 from pathlib import Path
-from rollback_system.core.models.rollback_models import CodeChange, ChangeType
-from rollback_system.utils.logger import logger
+from git import Repo
 import subprocess
 from typing import List
 
 class GitService:
-    def __init__(self, repo_path: str = None):  # Add parameter here
-        """Initialize with optional repo path"""
-        try:
-            self.repo_path = repo_path or os.getcwd()
+    def __init__(self, repo_path: str = None):
+        self.repo_path = repo_path or os.getcwd()
+        
+        # Navigate up from rollback_system/ if needed
+        if os.path.basename(self.repo_path) == 'rollback_system':
+            self.repo_path = str(Path(self.repo_path).parent)
             
-            # Navigate up from rollback_system/ if needed
-            if os.path.basename(self.repo_path) == 'rollback_system':
-                self.repo_path = str(Path(self.repo_path).parent)
-            
-            self.repo = Repo(self.repo_path, search_parent_directories=True)
-            self.git = self.repo.git
-            self.repo.git.fetch('--all')  # Ensure all branches are available
-        except Exception as e:
-            raise RuntimeError(f"Failed to initialize GitService: {str(e)}")
+        self.repo = Repo(self.repo_path, search_parent_directories=True)
+        self.git = self.repo.git
+        self.repo.git.fetch('--all')  # Ensure all branches are available
 
-        
-    def checkout_branch(self, branch_name: str) -> bool:
+    def get_all_branches(self) -> List[str]:
+        """Get all local and remote branches"""
         try:
-            self.git.checkout(branch_name)
-            return True
-        except git.exc.GitCommandError as e:
-            logger.error(f"Failed to checkout branch {branch_name}: {str(e)}")
-            return False
+            # Get local branches
+            local = [ref.name.split('/')[-1] 
+                    for ref in self.repo.references 
+                    if 'heads' in str(ref)]
             
-    def get_merge_base(self, branch1: str, branch2: str) -> Optional[str]:
-        try:
-            return self.repo.merge_base(branch1, branch2)[0].hexsha
+            # Get remote branches
+            remote = [ref.name.split('/')[-1] 
+                     for ref in self.repo.references 
+                     if 'remotes' in str(ref)]
+            
+            return list(set(local + remote))  # Remove duplicates
+            
         except Exception as e:
-            logger.error(f"Failed to find merge base: {str(e)}")
-            return None
-            
-    def get_file_at_commit(self, commit_sha: str, file_path: str) -> Optional[str]:
-        try:
-            return self.git.show(f"{commit_sha}:{file_path}")
-        except git.exc.GitCommandError:
-            return None
-            
-    def get_changes_between_commits(self, from_commit: str, to_commit: str) -> Dict[str, List[Diff]]:
-        changes = {}
-        try:
-            diffs = self.repo.commit(from_commit).diff(to_commit)
-            for diff in diffs:
-                path = diff.a_path if diff.a_path else diff.b_path
-                if path not in changes:
-                    changes[path] = []
-                changes[path].append(diff)
-        except Exception as e:
-            logger.error(f"Error getting changes: {str(e)}")
-        return changes
-        
-    def commit_changes(self, message: str) -> bool:
-        try:
-            self.git.commit('-m', message)
-            return True
-        except git.exc.GitCommandError as e:
-            logger.error(f"Commit failed: {str(e)}")
-            return False
-            
-    def create_backup_branch(self, base_branch: str, backup_name: str) -> bool:
-        try:
-            self.git.checkout(base_branch)
-            self.git.checkout('-b', backup_name)
-            return True
-        except git.exc.GitCommandError as e:
-            logger.error(f"Backup branch creation failed: {str(e)}")
-            return False
+            # Fallback to git CLI
+            try:
+                result = subprocess.run(
+                    ['git', 'branch', '-a'],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                branches = [
+                    line.strip().replace('* ', '').split('/')[-1]
+                    for line in result.stdout.split('\n')
+                    if line.strip()
+                ]
+                return list(set(branches))
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Failed to get branches: {str(e)}")
 
     def branch_exists(self, branch_name: str) -> bool:
-        """Robust branch checking with fallbacks"""
-        try:
-            # Check both local and remote branches
-            branches = [
-                *[ref.name.split('/')[-1] for ref in self.repo.references if 'heads' in str(ref)],
-                *[ref.name.split('/')[-1] for ref in self.repo.references if 'remotes' in str(ref)]
-            ]
-            return branch_name in branches
-        
-        except Exception as e:
-            # Fallback to git CLI if python-git fails
-            try:
-                output = subprocess.check_output(
-                    ['git', 'show-ref', '--verify', f'refs/heads/{branch_name}'],
-                    stderr=subprocess.PIPE
-                )
-                return True
-            except subprocess.CalledProcessError:
-                return False
+        """Check if branch exists (case-sensitive)"""
+        return branch_name in self.get_all_branches()
 
-    def _try_get_branches(self):
-        """Fallback branch detection when repo init fails"""
-        try:
-            local = subprocess.check_output(['git', 'branch', '--list']).decode().split()
-            remote = subprocess.check_output(['git', 'branch', '-r']).decode().split()
-            return f"\nLocal: {local}\nRemote: {remote}"
-        except:
-            return "Could not retrieve branches"
-    
     def verify_repository(self):
-        """Debug method to check repository state"""
-        print("\n=== Repository Verification ===")
-        print(f"Working directory: {os.getcwd()}")
+        """Debug repository state"""
+        print("\n=== Git Repository State ===")
         print(f"Repo path: {self.repo_path}")
         print(f"Active branch: {self.repo.active_branch}")
-        print("References:", [ref.name for ref in self.repo.references])
-        print("=============================\n")
+        print(f"Available branches: {self.get_all_branches()}")
+        print("==========================\n")

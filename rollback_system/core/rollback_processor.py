@@ -64,11 +64,11 @@ class RollbackProcessor:
             
     def _validate_inputs(self, release_branch: str, features: List[str], result: RollbackResult):
         try:
-            available_branches = self.git_service.get_all_branches()
-            if release_branch not in available_branches:
+            if not self.git_service.branch_exists(release_branch):
+                available = self.git_service.get_all_branches()
                 result.conflicts.append(
-                    f"Branch '{release_branch}' not found.\n"
-                    f"Available branches: {sorted(set(available_branches))}"
+                    f"Branch '{release_branch}' not found. "
+                    f"Available branches: {sorted(available)}"
                 )
                 return False
             return True
