@@ -36,7 +36,8 @@ jobs:
     - name: Execute rollback
       run: |
 
-        git fetch --all
+        git status
+        git branch -a
         
         python -m rollback_system.main \
           --release-branch "${{ inputs.release_branch }}" \
