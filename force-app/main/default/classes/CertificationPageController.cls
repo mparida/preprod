@@ -1,6 +1,12 @@
 public without sharing class CertificationPageController {
     public String token {
-        get;
+        get {
+            if (token == null) {
+                // Check URL only on initial load
+                token = ApexPages.currentPage().getParameters().get('token');
+            }
+            return token;
+        }
         set;
     }
     public String managerName {
@@ -18,6 +24,11 @@ public without sharing class CertificationPageController {
     public Id selectedRecordId {
         get;
         set;
+    }
+
+    @RemoteAction
+    public static void storeToken(String inputToken) {
+        // Not needed for this approach, but kept for compatibility
     }
 
     public CertificationPageController() {
@@ -48,6 +59,7 @@ public without sharing class CertificationPageController {
     public void certifySingle() {
         User_Access_Review__c record = [SELECT Id, Certification_Status__c FROM User_Access_Review__c WHERE Id =: selectedRecordId];
         record.Certification_Status__c = 'Certified';
+        record.Last_Review_Date__c = System.now();
         update record;
         
         reportees = [
@@ -62,6 +74,7 @@ public without sharing class CertificationPageController {
     public void uncertifySingle() {
         User_Access_Review__c record = [SELECT Id, Certification_Status__c FROM User_Access_Review__c WHERE Id =: selectedRecordId];
         record.Certification_Status__c = 'Rejected';
+        record.Last_Review_Date__c = System.now();
         update record;
 		
         // Refresh the reportees list to reflect the updated status
@@ -79,7 +92,7 @@ public without sharing class CertificationPageController {
         List < User_Access_Review__c > recordsToCertify = new List < User_Access_Review__c > ();
         for (Id recordId: selectedReporteeIds.keySet()) {
             if (selectedReporteeIds.get(recordId) == true) { // If checkbox is selected
-                User_Access_Review__c record = new User_Access_Review__c(Id = recordId, Certification_Status__c = 'Certified');
+                User_Access_Review__c record = new User_Access_Review__c(Id = recordId, Certification_Status__c = 'Certified', Last_Review_Date__c = System.now());
                 recordsToCertify.add(record);
             }
         }
@@ -102,7 +115,7 @@ public without sharing class CertificationPageController {
         List < User_Access_Review__c > recordsToUncertify = new List < User_Access_Review__c > ();
         for (Id recordId: selectedReporteeIds.keySet()) {
             if (selectedReporteeIds.get(recordId) == true) { // If checkbox is selected
-                User_Access_Review__c record = new User_Access_Review__c(Id = recordId, Certification_Status__c = 'Rejected');
+                User_Access_Review__c record = new User_Access_Review__c(Id = recordId, Certification_Status__c = 'Rejected', Last_Review_Date__c = System.now());
                 recordsToUncertify.add(record);
             }
         }

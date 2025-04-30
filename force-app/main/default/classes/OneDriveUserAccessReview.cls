@@ -4,11 +4,11 @@ public with sharing class OneDriveUserAccessReview {
         try {
             // Step 1: Query Users
             List<User> users = [
-                SELECT FirstName, LastName, FederationIdentifier
+                SELECT Id, FirstName, LastName, FederationIdentifier
                 FROM User
                 WHERE IsActive = true
                 AND FederationIdentifier != null
-                AND Profile.Name IN ('System Administrator', 'Developer') LIMIT 1
+                AND Profile.Name IN ('System Administrator', 'Developer')
             ];
 
             if (users.isEmpty()) {
@@ -17,7 +17,7 @@ public with sharing class OneDriveUserAccessReview {
             }
 
             // Step 2: Generate CSV Content
-            String csvContent = 'First Name,Last Name,FederationIdentifier,Att Email,Intl Email|'; // Header
+            String csvContent = 'First Name,Last Name,FederationIdentifier,Att Email,Intl Email,UserId|'; // Header
 
             for (User user : users) {
                 String federationId = user.FederationIdentifier;
@@ -28,7 +28,8 @@ public with sharing class OneDriveUserAccessReview {
                               user.LastName + ',' +
                               federationId + ',' +
                               attEmail + ',' +
-                              intlEmail + '|';
+                              intlEmail + ',' +
+                              user.Id+'|';
             }
 			csvContent = csvContent.removeEnd('|');
             System.debug('Generated CSV Content: \n' + csvContent);

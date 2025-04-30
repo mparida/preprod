@@ -1,5 +1,11 @@
 <apex:page controller="CertificationPageController" showHeader="true" sidebar="false">
     <apex:form >
+        <script>
+            // Remove token from URL after page loads
+            if (window.location.search.includes('token=')) {
+                history.replaceState({}, document.title, window.location.pathname);
+            }
+        </script>
         <apex:pageMessages id="messages" />
         <apex:pageBlock title="Certify Reportees for {!managerName}">
             <apex:pageBlockButtons location="top">
@@ -15,12 +21,11 @@
                 <apex:column value="{!reportee.Last_Name__c}" headerValue="Last Name" />
                 <apex:column value="{!reportee.Federation_Identifier__c}" headerValue="Federation Identifier" />
                 <apex:column value="{!reportee.Att_Email__c}" headerValue="ATT Email" />
-                <!--<apex:column value="{!reportee.Intl_Email__c}" headerValue="Intl Email" />-->
                 <apex:column headerValue="Actions">
-                    <apex:commandButton value="Certify" action="{!certifySingle}" rerender="reporteeTable, messages" disabled="{!reportee.Certification_Status__c != 'Pending'}">
+                    <apex:commandButton value="Keep Access" action="{!certifySingle}" rerender="reporteeTable, messages" disabled="{!reportee.Certification_Status__c != 'Pending'}">
                         <apex:param name="recordId" value="{!reportee.Id}" assignTo="{!selectedRecordId}" />
                     </apex:commandButton>
-                    <apex:commandButton value="Uncertify" action="{!uncertifySingle}" rerender="reporteeTable, messages" disabled="{!reportee.Certification_Status__c != 'Pending'}">
+                    <apex:commandButton value="Remove Access" action="{!uncertifySingle}" rerender="reporteeTable, messages" disabled="{!reportee.Certification_Status__c != 'Pending'}">
                         <apex:param name="recordId" value="{!reportee.Id}" assignTo="{!selectedRecordId}" />
                     </apex:commandButton>
                 </apex:column>

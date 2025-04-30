@@ -38,7 +38,7 @@ public with sharing class CertificationEmailHandler {
         List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
         for (String managerEmail : managerToReportees.keySet()) {
             // Generate the secure link
-            String secureLink = 'https://accdevops23--preprod.sandbox.my.salesforce-sites.com/UserAccessReview?token=' + 
+            String secureLink = 'https://accdevops23--preprod.sandbox.my.salesforce-sites.com/AccessReview?token=' +
                                 managerToReportees.get(managerEmail)[0].Certification_Token__c;
 
             // Build reportee table for the email
@@ -70,6 +70,18 @@ public with sharing class CertificationEmailHandler {
     }
 
     private static String generateUniqueToken() {
-        return String.valueOf(Crypto.getRandomLong());
+        // Generate cryptographically secure random bytes
+        Blob randomBlob = Crypto.generateAesKey(256); // 256-bit random data
+        String base64Token = EncodingUtil.base64Encode(randomBlob);
+
+        // Make URL-safe and trim to exactly 255 characters
+        String safeToken = base64Token
+                .replace('+', '-')
+                .replace('/', '_')
+                .replace('=', '')
+                .left(255);
+
+        return safeToken;
     }
+
 }

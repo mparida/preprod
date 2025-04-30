@@ -80,7 +80,7 @@ public with sharing class UserAccessReviewCSVHandler {
             List<String> columns = rows[i].split(',');
 
             // Handle Manager Name with double quotes
-            String managerName = columns[5].replace('"', '');
+            String managerName = columns[6].replace('"', '');
 
             // Create a new record
             records.add(new User_Access_Review__c(
@@ -90,8 +90,9 @@ public with sharing class UserAccessReviewCSVHandler {
                 Att_Email__c = columns[3],
                 Intl_Email__c = columns[4],
                 Manager_Name__c = managerName,
-                Manager_Email__c = columns[6],
-                Certification_Status__c  = 'Pending'
+                Manager_Email__c = columns[7],
+                Certification_Status__c  = 'Pending',
+                    User__c = columns[5]
             ));
         }
 
