@@ -12,9 +12,14 @@
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BackPromotionReportControllerTest.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/BWC_Copado_US_Callout.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/bwcCopadoUSController.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/CertificationEmailHandler.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/CertificationPageController.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/JenkinsJobTriggerES.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManager.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManagerTest.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/lwc/bwcCopadoUSCreation/bwcCopadoUSCreation.js-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/lwc/gitDiffViewer/gitDiffViewer.js-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/triggers/PromotionTrigger.trigger-meta.xml" />
         </list>

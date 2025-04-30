@@ -82,7 +82,8 @@ public with sharing class BWC_Copado_US_Callout {
         req.setEndpoint(endpoint);
         req.setMethod('GET');
         Http http = new Http();
-        HttpResponse res = http.send(req);         
+        HttpResponse res = http.send(req);   
+        System.debug('res body:'+res.getStatus());
         BWC_Copado_US response = new BWC_Copado_US();
         response = (BWC_Copado_US) System.JSON.deserialize(res.getBody(),BWC_Copado_US.class);
         List<copado__Sprint__c > itrackSprintIDList = new List<copado__Sprint__c >();

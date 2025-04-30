@@ -3,6 +3,7 @@
  */
 @RestResource(urlMapping='/github/diffWebhook2')
 global without sharing class GitHubWebhookHandler2 {
+
     @HttpPost
     global static void receiveGitDiff() {
         RestRequest req = RestContext.request;
@@ -67,6 +68,8 @@ global without sharing class GitHubWebhookHandler2 {
         String jsonString = cv.VersionData.toString();
         Map<String, Object> parsed = (Map<String, Object>) JSON.deserializeUntyped(jsonString);
         List<Object> files = (List<Object>) parsed.get('results');
+        String baseBranch = (String) parsed.get('baseBranch');
+        String headBranch = (String) parsed.get('headBranch');
 
         // Get promotion metadata and organize by type
         Map<String, String> promotionMetadataMap = new Map<String, String>();
@@ -148,6 +151,9 @@ global without sharing class GitHubWebhookHandler2 {
         result.xmlFiles = xmlFiles;
         result.nonXmlFiles = nonXmlFiles;
         result.commonComponentsMap = commonComponentsMap;
+        result.baseBranch = baseBranch;
+        result.headBranch = headBranch;
+        System.debug('*******'+result.baseBranch+result.headBranch);
         return result;
     }
     public static String getFileType(String filename) {
@@ -207,6 +213,8 @@ global without sharing class GitHubWebhookHandler2 {
         @AuraEnabled public List<DiffFile> xmlFiles;
         @AuraEnabled public List<DiffFile> nonXmlFiles;
         @AuraEnabled public Map<String, Integer> commonComponentsMap;
+        @AuraEnabled public String baseBranch;
+        @AuraEnabled public String headBranch;
     }
 
     public class DiffFile {

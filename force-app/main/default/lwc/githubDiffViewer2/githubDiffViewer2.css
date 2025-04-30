@@ -1,36 +1,60 @@
-/**
- * Created by mp1863 on 22/03/25.
- */
+.slds-tabs_default__link {
+    cursor: pointer;
+    color: #006dcc;
+    text-decoration: none;
+}
+
 .file-link {
-    font-weight: bold;
-    color: #0070d2;
+    cursor: pointer;
+    color: #006dcc;
 }
 
-.github-modal .modal-scroll {
-    max-height: 500px;
-    overflow: auto;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+.file-link:hover {
+    text-decoration: underline;
 }
 
-.diff-line pre {
-    margin: 0;
+.diff-line {
     font-family: monospace;
-    padding: 0.2rem 0.5rem;
-    white-space: pre-wrap;
+    white-space: pre;
+    padding: 2px 4px;
+    line-height: 1.2; /* Reduced from default */
+    margin: 0; /* Remove default margins */
+}
+.modal-scroll pre {
+    margin: 0; /* Remove margins from pre tags */
+    padding: 0; /* Remove padding from pre tags */
 }
 
-.added {
-    background-color: #e6ffed;
-    color: #22863a;
+.diff-line.added {
+
+    background-color: #e7f5e7;
+    color: #2e844a;
 }
 
-.removed {
-    background-color: #ffeef0;
-    color: #b31d28;
+.diff-line.removed {
+    background-color: #fce8e8;
+    color: #ea001e;
 }
 
-.neutral {
-    background-color: #f6f8fa;
-    color: #24292e;
+.modal-scroll {
+    max-height: 70vh;
+    overflow-y: auto;
 }
+
+.github-modal .slds-modal__container {
+    max-width: 80%;
+    width: 80%;
+}
+
+.slds-p-horizontal_medium {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-bottom: 0.5rem;
+    color: #706e6b;
+}
+.slds-notify_alert {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+}
+

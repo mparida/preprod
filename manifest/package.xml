@@ -83,5 +83,9 @@
         <members>unfiled$public/Web_to_Case_Sample_1689349514248</members>
         <name>EmailTemplate</name>
     </types>
+    <types>
+        <members>*</members>
+        <name>ApexPage</name>
+    </types>
     <version>61.0</version>
 </Package>
