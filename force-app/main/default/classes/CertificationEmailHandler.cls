@@ -1,3 +1,6 @@
+/**
+ * Created by mp1863 on 28/4/25.
+ */
 public with sharing class CertificationEmailHandler {
 
     @InvocableMethod(label='Send Certification Emails' description='Send emails to managers to certify their reportees.')

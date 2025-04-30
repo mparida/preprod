@@ -1,3 +1,6 @@
+/**
+ * Created by mp1863 on 28/4/25.
+ */
 public with sharing class UserAccessReviewCSVHandler {
 
     @InvocableMethod(label='Process User Access Review CSV' description='Fetches and processes the CSV file from OneDrive.')
@@ -43,33 +46,33 @@ public with sharing class UserAccessReviewCSVHandler {
         HttpResponse res = http.send(req);
 
         // Check if the response is a redirect (302 Status Code)
-    if (res.getStatusCode() == 302) {
-        // Extract the redirect URL from the response headers
-        String redirectUrl = res.getHeader('Location');
-        System.debug('Redirect URL: ' + redirectUrl);
+        if (res.getStatusCode() == 302) {
+            // Extract the redirect URL from the response headers
+            String redirectUrl = res.getHeader('Location');
+            System.debug('Redirect URL: ' + redirectUrl);
 
-        if (String.isNotBlank(redirectUrl)) {
-            // Make another HTTP GET request to the redirect URL
-            HttpRequest redirectReq = new HttpRequest();
-            redirectReq.setEndpoint(redirectUrl);
-            redirectReq.setMethod('GET');
+            if (String.isNotBlank(redirectUrl)) {
+                // Make another HTTP GET request to the redirect URL
+                HttpRequest redirectReq = new HttpRequest();
+                redirectReq.setEndpoint(redirectUrl);
+                redirectReq.setMethod('GET');
 
-            HttpResponse redirectRes = http.send(redirectReq);
+                HttpResponse redirectRes = http.send(redirectReq);
 
-            if (redirectRes.getStatusCode() == 200) {
-                return redirectRes.getBody(); // Return the CSV content
+                if (redirectRes.getStatusCode() == 200) {
+                    return redirectRes.getBody(); // Return the CSV content
+                } else {
+                    throw new UserAccessException('Failed to fetch file from redirected URL. Status: ' + redirectRes.getStatusCode());
+                }
             } else {
-                throw new UserAccessException('Failed to fetch file from redirected URL. Status: ' + redirectRes.getStatusCode());
+                throw new UserAccessException('Redirect URL is empty. Unable to fetch file.');
             }
+        } else if (res.getStatusCode() == 200) {
+            return res.getBody(); // Return the CSV content directly
         } else {
-            throw new UserAccessException('Redirect URL is empty. Unable to fetch file.');
+            System.debug('Failed to fetch file. Status: ' + res.getStatusCode() + ', Response: ' + res.getBody());
+            throw new UserAccessException('Failed to fetch file from OneDrive. Status: ' + res.getStatusCode());
         }
-    } else if (res.getStatusCode() == 200) {
-        return res.getBody(); // Return the CSV content directly
-    } else {
-        System.debug('Failed to fetch file. Status: ' + res.getStatusCode() + ', Response: ' + res.getBody());
-        throw new UserAccessException('Failed to fetch file from OneDrive. Status: ' + res.getStatusCode());
-    }
     }
 
     private static List<User_Access_Review__c> parseCSV(String csvContent) {
@@ -92,7 +95,7 @@ public with sharing class UserAccessReviewCSVHandler {
                 Manager_Name__c = managerName,
                 Manager_Email__c = columns[7],
                 Certification_Status__c  = 'Pending',
-                    User__c = columns[5]
+                User__c = columns[5]
             ));
         }
 

@@ -1,3 +1,6 @@
+/**
+ * Created by mp1863 on 28/4/25.
+ */
 public with sharing class OneDriveUserAccessReview {
     // Method to generate and upload the CSV file
     public static void generateAndUploadCSV() {
@@ -6,8 +9,8 @@ public with sharing class OneDriveUserAccessReview {
             List<User> users = [
                 SELECT Id, FirstName, LastName, FederationIdentifier
                 FROM User
-                WHERE IsActive = true
-                AND FederationIdentifier != null
+                WHERE IsActive = TRUE
+                AND FederationIdentifier != NULL
                 AND Profile.Name IN ('System Administrator', 'Developer')
             ];
 
@@ -58,9 +61,9 @@ public with sharing class OneDriveUserAccessReview {
             HttpResponse checkFolderRes = http.send(checkFolderReq);
 
             if (checkFolderRes.getStatusCode() == 404) {
-                //throw new System.Exception('The folder "' + folderName + '" does not exist in OneDrive.');
+                throw new UserAccessException('The folder "' + folderName + '" does not exist in OneDrive.');
             } else if (checkFolderRes.getStatusCode() != 200) {
-                //throw new System.Exception('Failed to check folder existence. Status Code: ' + checkFolderRes.getStatusCode());
+                throw new UserAccessException('Failed to check folder existence. Status Code: ' + checkFolderRes.getStatusCode());
             }
 
             System.debug('Folder "' + folderName + '" exists.');
@@ -77,7 +80,7 @@ public with sharing class OneDriveUserAccessReview {
             if (uploadFileRes.getStatusCode() == 201 || uploadFileRes.getStatusCode() == 200) {
                 System.debug('File uploaded successfully: ' + uploadFileRes.getBody());
             } else {
-                //throw new System.Exception('Failed to upload file. Status Code: ' + uploadFileRes.getStatusCode());
+                throw new UserAccessException('Failed to upload file. Status Code: ' + uploadFileRes.getStatusCode());
             }
         } catch (Exception e) {
             System.debug('Error in uploadCSVToOneDrive: ' + e.getMessage());
