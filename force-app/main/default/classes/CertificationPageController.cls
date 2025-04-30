@@ -1,5 +1,19 @@
 public without sharing class CertificationPageController {
-    public String token { get; set; }
+    public String token {
+        get {
+            if(token == null) {
+                // First check URL parameters (initial load)
+                token = ApexPages.currentPage().getParameters().get('token');
+
+                // Then check hidden field (postbacks)
+                if(String.isBlank(token)) {
+                    token = ApexPages.currentPage().getParameters().get('hiddenToken');
+                }
+            }
+            return token;
+        }
+        set;
+    }
     public String managerName { get; set; }
     public List<User_Access_Review__c> reportees { get; set; }
     public Map<Id, Boolean> selectedReporteeIds { get; set; }
@@ -11,10 +25,10 @@ public without sharing class CertificationPageController {
 
     public CertificationPageController() {
         selectedReporteeIds = new Map<Id, Boolean>();
-        token = ApexPages.currentPage().getParameters().get('token');
+        //token = ApexPages.currentPage().getParameters().get('token');
         isCertifiedMap = new Map<Id, Boolean>();
         isRejectedMap = new Map<Id, Boolean>();
-
+        String tempToken = token;
         loadReportees();
 
         if(!reportees.isEmpty()) {

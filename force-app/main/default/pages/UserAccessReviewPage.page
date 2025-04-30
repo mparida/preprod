@@ -6,11 +6,24 @@
     </head>
 
     <script>
-        // Force fresh load when page is refreshed
-        if(performance.navigation.type === 1 || performance.navigation.type === 2) {
-            var params = new URLSearchParams(window.location.search);
-            window.location.search = 'token=' + params.get('token') + '&t=' + new Date().getTime();
-        }
+        // Store token and remove from URL
+        (function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var token = urlParams.get('token');
+
+            if(token) {
+                // Store token in hidden field
+                document.cookie = 'certToken=' + token + '; path=/';
+
+                // Remove token from URL without reload
+                history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Force fresh load on refresh
+            if(performance.navigation.type === 1) {
+                window.location.reload(true);
+            }
+        })();
     </script>
 
     <apex:form>
