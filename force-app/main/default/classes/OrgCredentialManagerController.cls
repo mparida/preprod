@@ -55,8 +55,11 @@ public with sharing class OrgCredentialManagerController {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Please select an Org to update.'));
             return null;
         }
-        if (String.isBlank(existingUsername) || String.isBlank(existingPassword)) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Username and Password cannot be empty.'));
+        if (String.isBlank(existingUsername) ||
+                (String.isBlank(existingPassword) && !hasExistingCredential)) {
+            ApexPages.addMessage(new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Username cannot be empty, and password is required for new credentials'));
             return null;
         }
         if (currentCredential == null) {
