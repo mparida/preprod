@@ -112,15 +112,18 @@ public with sharing class OrgCredentialManagerController {
         hasExistingCredential = false;
         currentCredential = null;
     }
-    
-    public String getDecryptedPasswordForDisplay() {
-    if(currentCredential != null && currentCredential.EncryptedPassword__c != null) {
-        try {
-            return CredentialEncryptionUtil.decrypt(currentCredential.EncryptedPassword__c);
-        } catch(Exception e) {
-            return '[Error decrypting password]';
+
+    public String passwordDisplay {
+        get {
+            if(currentCredential != null && currentCredential.EncryptedPassword__c != null) {
+                try {
+                    return CredentialEncryptionUtil.decrypt(currentCredential.EncryptedPassword__c);
+                } catch(Exception e) {
+                    return '[DECRYPTION ERROR]';
+                }
+            }
+            return '';
         }
+        set;
     }
-    return '';
-}
 }
