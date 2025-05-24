@@ -153,4 +153,49 @@ public class AttachmentTriggerHandler {
         
         return resultMap;
     }
+    
+    public static void processJenkinsTestScriptResults(List<Attachment> jenkinsAttachments) {
+    try {
+        System.debug('processJenkinsTestScriptResults1');
+        Set<Id> parentIds = new Set<Id>();
+        Map<Id, String> attachmentBodies = new Map<Id, String>();
+        
+        // Collect parent IDs and attachment bodies
+        for(Attachment att : jenkinsAttachments) {
+            parentIds.add(att.ParentId);
+            attachmentBodies.put(att.ParentId, att.Body.toString());
+        }
+        System.debug('processJenkinsTestScriptResults2');
+        if(parentIds.isEmpty()) return;
+        
+        // Query Promotion Test Script records to update
+        List<Promotion_Test_Script__c> scriptsToUpdate = new List<Promotion_Test_Script__c>();
+        for(Promotion_Test_Script__c pts : [
+            SELECT Id FROM Promotion_Test_Script__c WHERE Id IN :parentIds
+        ]) {
+            try {
+                // Parse JSON payload
+                Map<String, Object> payload = (Map<String, Object>)JSON.deserializeUntyped(
+                    attachmentBodies.get(pts.Id)
+                );
+				System.debug('processJenkinsTestScriptResults3');                
+                // Update fields
+                pts.Job_Run_Status__c = (String)payload.get('JobStatus');
+                pts.Test_Cases__c = Integer.valueOf(payload.get('TestPass'));
+                pts.Build__c = Integer.valueOf(payload.get('TestRun'));
+                pts.Test_Cases_Failed__c = Integer.valueOf(payload.get('TestFail'));
+                
+                scriptsToUpdate.add(pts);
+            } catch(Exception e) {
+                System.debug('Error processing attachment for record ' + pts.Id + ': ' + e.getMessage());
+            }
+        }
+        
+        if(!scriptsToUpdate.isEmpty()) {
+            update scriptsToUpdate;
+        }
+    } catch(Exception e) {
+        System.debug('Error in processJenkinsTestScriptResults: ' + e.getMessage());
+    }
+}
 }

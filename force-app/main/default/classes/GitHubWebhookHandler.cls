@@ -113,4 +113,22 @@ global with sharing class GitHubWebhookHandler {
         }
         return metadataName.substring(lastDotIndex + 1);
     }
+    
+    public static void unlockBranch(String repoOwner, String repoName, String branchName) {
+        String endpoint = '/repos/' + repoOwner + '/' + repoName + '/branches/' + branchName + '/protection';
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('callout:GitHubAPI' + endpoint);
+        req.setMethod('DELETE');
+        req.setHeader('Accept', 'application/vnd.github+json');
+
+        Http http = new Http();
+        HttpResponse res = http.send(req);
+
+        if (res.getStatusCode() == 204) {
+            System.debug('Branch protection removed successfully.');
+        } else {
+            System.debug('Failed to remove protection: ' + res.getStatus() + ' - ' + res.getBody());
+        }
+    }
 }

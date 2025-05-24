@@ -3,6 +3,7 @@
  */
 public with sharing class OneDriveUserAccessReview {
     // Method to generate and upload the CSV file
+    @InvocableMethod(label='Generate CSV For OneDrive' description='Creates CSV file for User Review and Uploads to OneDrive')
     public static void generateAndUploadCSV() {
         try {
             // Step 1: Query Users
@@ -46,6 +47,7 @@ public with sharing class OneDriveUserAccessReview {
     }
 
     // Method to upload the CSV file to OneDrive
+    @future(callout=true)
     private static void uploadCSVToOneDrive(String folderName, String fileName, String fileContent) {
         try {
             // Step 3.1: URL Encode the folder name
