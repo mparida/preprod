@@ -98,11 +98,12 @@ public with sharing class OrgCredentialManagerController {
         newCred.EncryptedPassword__c = CredentialEncryptionUtil.encrypt(newPassword);
         try {
             insert newCred;
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM, 'New credential created successfully.'));
-            loadOrgOptions();  // Refresh dropdown options
+
             newOrgName = null;
             newUsername = null;
             newPassword = null;
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM, 'New credential created successfully.'));
+            loadOrgOptions();  // Refresh dropdown options
         } catch (Exception e) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Error creating credential: ' + e.getMessage()));
         }
@@ -129,4 +130,5 @@ public with sharing class OrgCredentialManagerController {
         }
         set;
     }
+
 }
