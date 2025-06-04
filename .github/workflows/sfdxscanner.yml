@@ -102,30 +102,18 @@ jobs:
                 # Convert changed lines to JSON array
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
                 
-                # Extract violations matching our lines (UPDATED APPROACH)
+                # Extract violations matching our lines
                 jq --argjson changed "$changed_json" '
-                  # The structure might be different in v4.x - check if results exists
-                  if (.results? | type) == "array" then
-                    # v4.x format - violations are inside each result
-                    {
-                      filePath: input_filename,
-                      violations: [.results[].violations[] | select(
+                  # The violations are in the top-level array
+                  {
+                    filePath: input_filename,
+                    violations: [
+                      .violations[] | select(
                         (.line | tonumber) as $line |
                         $changed | index($line) != null
-                      )]
-                    }
-                  elif (.violations? | type) == "array" then
-                    # Alternative format - violations at top level
-                    {
-                      filePath: input_filename,
-                      violations: [.violations[] | select(
-                        (.line | tonumber) as $line |
-                        $changed | index($line) != null
-                      )]
-                    }
-                  else
-                    empty
-                  end |
+                      )
+                    ]
+                  } |
                   select(.violations | length > 0)
                 ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
               fi
@@ -145,32 +133,28 @@ jobs:
             
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
             jq --argjson changed "$changed_json" '
-              if (.results? | type) == "array" then
-                {
-                  filePath: input_filename,
-                  violations: [.results[].violations[] | select(
+              {
+                filePath: input_filename,
+                violations: [
+                  .violations[] | select(
                     (.line | tonumber) as $line |
                     $changed | index($line) != null
-                  )]
-                }
-              elif (.violations? | type) == "array" then
-                {
-                  filePath: input_filename,
-                  violations: [.violations[] | select(
-                    (.line | tonumber) as $line |
-                    $changed | index($line) != null
-                  )]
-                }
-              else
-                empty
-              end |
+                  )
+                ]
+              } |
               select(.violations | length > 0)
             ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
           fi
           
           # Combine results
           if [[ -f debug/filtered.json ]]; then
-            jq -s 'add' debug/filtered.json > results/output.json
+            # Handle case where filtered.json might have multiple JSON objects
+            echo '[' > debug/combined.json
+            cat debug/filtered.json | jq -s 'add' | jq '.[]' | sed '$!s/$/,/' >> debug/combined.json
+            echo ']' >> debug/combined.json
+            jq -s 'add' debug/combined.json > results/output.json
+          else
+            echo "[]" > results/output.json
           fi
           
           # Debug output
@@ -181,6 +165,8 @@ jobs:
           cat "debug/raw_force-app_main_default_classes_AccountService.cls.json" || echo "No raw output"
           echo -e "\nFiltered violations:"
           cat debug/filtered.json || echo "No filtered violations"
+          echo -e "\nCombined JSON:"
+          cat debug/combined.json || echo "No combined JSON"
           echo -e "\nFinal output.json:"
           cat results/output.json
       
