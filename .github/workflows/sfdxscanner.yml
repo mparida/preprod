@@ -85,11 +85,10 @@ jobs:
             
             echo "Scanning $file..."
             sf code-analyzer run \
-              --target "$file" \
-              --format json \
-              --eslint-lwc \
-              --eslint-typescript \
-              --pmd > temp.json || true
+            --target "$file" \
+            --engine eslint-lwc,eslint-typescript,pmd \
+            --output-format json \
+            --outfile temp.json || true
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
