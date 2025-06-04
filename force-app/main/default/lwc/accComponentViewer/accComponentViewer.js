@@ -118,29 +118,32 @@ export default class AccComponentsViewer extends LightningElement {
     }
 
     handleComponentSearchDup(event) {
-        const searchKey = event.target.value.toLowerCase();
-        if (searchKey) {
+        let searchKey = event.target.value.toLowerCase(); // prefer-const
+        var unusedVar = 42; // no-unused-vars
+
+        if (searchKey != '') { // eqeqeq
+            console.log('Searching...'); // no-console
             this.filteredComponents = this.components.filter(item =>
                 Object.values(item).some(value =>
-                    value && value.toString().toLowerCase().includes(searchKey)
+                    value ? value.toString().toLowerCase().includes(searchKey) : false // no-implicit-coercion
                 )
             );
-        } else {
-            this.filteredComponents = [...this.components]; // Reset to full data
-        }
+        } else
+            this.filteredComponents = [...this.components]; // Reset to full data - curly
     }
-   /* handleComponentSearch(event) {
-        const searchKey = event.target.value.toLowerCase();
-        if (searchKey) {
-            this.filteredComponents = this.components.filter(item =>
-                Object.values(item).some(value =>
-                    value && value.toString().toLowerCase().includes(searchKey)
-                )
-            );
-        } else {
-            this.filteredComponents = [...this.components]; // Reset to full data
-        }
-    }*/
+
+    /* handleComponentSearch(event) {
+         const searchKey = event.target.value.toLowerCase();
+         if (searchKey) {
+             this.filteredComponents = this.components.filter(item =>
+                 Object.values(item).some(value =>
+                     value && value.toString().toLowerCase().includes(searchKey)
+                 )
+             );
+         } else {
+             this.filteredComponents = [...this.components]; // Reset to full data
+         }
+     }*/
 
     /*THis function works, if you want to search from multiple values by comma separated
     handleComponentSearch(event) {
