@@ -102,14 +102,23 @@ jobs:
                 # Convert changed lines to JSON array
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
                 
-                # Extract violations matching our lines (NEW APPROACH)
+                # Extract violations matching our lines (UPDATED APPROACH)
                 jq --argjson changed "$changed_json" '
-                  # The actual violations are in the .violations array at the top level
-                  if (.violations | type) == "array" then
+                  # The structure might be different in v4.x - check if results exists
+                  if (.results? | type) == "array" then
+                    # v4.x format - violations are inside each result
+                    {
+                      filePath: input_filename,
+                      violations: [.results[].violations[] | select(
+                        (.line | tonumber) as $line |
+                        $changed | index($line) != null
+                      )]
+                    }
+                  elif (.violations? | type) == "array" then
+                    # Alternative format - violations at top level
                     {
                       filePath: input_filename,
                       violations: [.violations[] | select(
-                        # Check if violation line matches any changed line
                         (.line | tonumber) as $line |
                         $changed | index($line) != null
                       )]
@@ -136,7 +145,15 @@ jobs:
             
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
             jq --argjson changed "$changed_json" '
-              if (.violations | type) == "array" then
+              if (.results? | type) == "array" then
+                {
+                  filePath: input_filename,
+                  violations: [.results[].violations[] | select(
+                    (.line | tonumber) as $line |
+                    $changed | index($line) != null
+                  )]
+                }
+              elif (.violations? | type) == "array" then
                 {
                   filePath: input_filename,
                   violations: [.violations[] | select(
