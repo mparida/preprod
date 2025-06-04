@@ -1,0 +1,137 @@
+name: Targeted SFDX Scanner Scan (Commit Based)
+
+on:
+  workflow_dispatch:
+    inputs:
+      userStoryId:
+        required: true
+      userStoryCommitId:
+        required: true
+      commitId:
+        required: true
+
+jobs:
+  sfdx-scanner-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.commitId }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Salesforce CLI & Scanner
+        run: |
+          npm install --global sfdx-cli
+          sfdx plugins:install @salesforce/sfdx-scanner
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Extract Changed Lines
+        run: |
+          mkdir -p results
+          echo "📤 Extracting changed lines for commit: ${{ github.event.inputs.commitId }}"
+          git show --unified=0 -w ${{ github.event.inputs.commitId }} | awk '
+            /^diff --git/ {
+              if (filename) print "";
+              filename = $3;
+              sub("a/", "", filename);
+              if (filename ~ /\.(cls|trigger|js|html|cmp|app|page|evt|design|tokens|auradoc|svg|css)$/) {
+                print "FILE:" filename
+              } else {
+                filename = ""
+              }
+            }
+            /^@@/ {
+              if (filename == "") next;
+              match($0, /\+([0-9]+)(,([0-9]+))?/, m);
+              start = m[1];
+              count = m[3] ? m[3] : 1;
+              for (i = 0; i < count; i++) print "LINE:" start + i
+            }
+          ' > results/changed_lines.txt
+
+      - name: Run SFDX Scanner on Changed Lines
+        run: |
+          declare -A file_line_map
+          current_file=""
+          while read -r line; do
+            if [[ "$line" == FILE:* ]]; then
+              current_file="${line#FILE:}"
+              file_line_map["$current_file"]=""
+            elif [[ "$line" == LINE:* ]]; then
+              file_line_map["$current_file"]+="${line#LINE:} "
+            fi
+          done < results/changed_lines.txt
+
+          echo -n > all_violations.json
+
+          for file in "${!file_line_map[@]}"; do
+            [[ -f "$file" ]] || continue
+            
+            echo "Scanning $file..."
+            sfdx scanner:run --target "$file" --format json --engine eslint-lwc,pmd,eslint-typescript > temp.json || true
+
+            IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
+            changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
+
+            jq --argjson changed "$changed_json" '
+              .result[]? | 
+              {
+                filePath: .filePath,
+                violations: [.violations[] | select(.line as $line | $changed | index($line))]
+              } |
+              select(.violations | length > 0)
+            ' temp.json >> all_violations.json
+          done
+
+          jq -s '.' all_violations.json > results/output.json
+
+      - name: Prepare Payload
+        run: |
+          jq -n \
+            --arg userStoryId "${{ github.event.inputs.userStoryId }}" \
+            --arg userStoryCommitId "${{ github.event.inputs.userStoryCommitId }}" \
+            --arg commitId "${{ github.event.inputs.commitId }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --slurpfile violations results/output.json \
+            '{
+              userStoryId: $userStoryId,
+              userStoryCommitId: $userStoryCommitId,
+              commitId: $commitId,
+              run_id: $run_id,
+              violations: $violations[0]
+            }' > payload.json
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sfdx-scanner-violations
+          path: payload.json
+
+      - name: Get Salesforce Access Token
+        id: get_sf_access_token
+        run: |
+          response=$(curl -s -X POST -d "grant_type=password" \
+            -d "client_id=${{ secrets.SF_CONSUMER_KEY }}" \
+            -d "client_secret=${{ secrets.SF_CONSUMER_SECRET }}" \
+            -d "username=${{ secrets.SF_USERNAME }}" \
+            -d "password=${{ secrets.SF_PASSWORD }}${{ secrets.SF_SECURITY_TOKEN }}" \
+            https://login.salesforce.com/services/oauth2/token)
+          echo "ACCESS_TOKEN=$(echo $response | jq -r .access_token)" >> $GITHUB_ENV
+
+      - name: Send Payload to Salesforce
+        run: |
+          curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
+          -d @payload.json \
+          "https://accdevops23.my.salesforce.com/services/apexrest/github/scannerHook"
+	          
+
+	        
