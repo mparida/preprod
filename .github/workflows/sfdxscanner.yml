@@ -29,10 +29,10 @@ jobs:
       - name: Install Salesforce CLI and Scanner
         run: |
           # Install modern Salesforce CLI
-          npm install --global @salesforce/cli
+          npm install --global @salesforce/cli@latest
           
-          # Install the correct scanner plugin
-          sf plugins install @salesforce/plugin-code-analyzer
+          # Install the scanner plugin with matching version
+          sf plugins install @salesforce/plugin-code-analyzer@5.1.0
           
           # Install jq for JSON processing
           sudo apt-get update && sudo apt-get install -y jq
@@ -84,7 +84,12 @@ jobs:
             [[ -f "$file" ]] || continue
             
             echo "Scanning $file..."
-            sf code-analyzer:run --target "$file" --format json --engine eslint-lwc,eslint-typescript,pmd > temp.json || true
+            sf code-analyzer run \
+              --target "$file" \
+              --format json \
+              --eslint-lwc \
+              --eslint-typescript \
+              --pmd > temp.json || true
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
