@@ -76,7 +76,7 @@ jobs:
             [[ -f "$file" ]] || continue
             
             echo "Scanning $file..."
-            sfdx code-analyzer:run --target "$file" --format json --engine eslint-lwc,pmd,eslint-typescript > temp.json || true
+            sfdx scanner:run --target "$file" --format json --engine eslint-lwc,pmd,eslint-typescript > temp.json || true
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
