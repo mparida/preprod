@@ -24,12 +24,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '18'
 
       - name: Install Salesforce CLI & Scanner
         run: |
           npm install --global sfdx-cli
-          sfdx plugins:install @salesforce/sfdx-scanner
+          sfdx plugins:install @salesforce/sfdx-scanner@5  # Added @5 for v5
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Extract Changed Lines
