@@ -1,4 +1,4 @@
-name: Targeted SFDX Scanner Scan (Commit Based)
+name: Targeted SFDX Scanner Scan (Commit Based) 
 
 on:
   workflow_dispatch:
