@@ -106,9 +106,9 @@ jobs:
                 # Process the scanner output - handle both array and object formats
                 if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
                   # Case 1: Violations at top level
-                  jq --argjson changed "$changed_json" '
+                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
                     {
-                      filePath: (input_filename | sub("debug/raw_"; "") | gsub("_"; "/") | sub(".json$"; "")),
+                      filePath: $original_path,
                       violations: [
                         .violations[] | select(
                           (.line | tonumber) as $line |
@@ -120,9 +120,9 @@ jobs:
                   ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
                 elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
                   # Case 2: Violations in first array element
-                  jq --argjson changed "$changed_json" '
+                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
                     .[0] | {
-                      filePath: input_filename,
+                      filePath: $original_path,
                       violations: [
                         .violations[] | select(
                           (.line | tonumber) as $line |
@@ -134,9 +134,9 @@ jobs:
                   ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
                 elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
                   # Case 3: Newer format with results array
-                  jq --argjson changed "$changed_json" '
+                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
                     .results[0] | {
-                      filePath: input_filename,
+                      filePath: $original_path,
                       violations: [
                         .violations[] | select(
                           (.line | tonumber) as $line |
@@ -168,9 +168,9 @@ jobs:
             
             # Repeat the same processing logic for the last file
             if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-              jq --argjson changed "$changed_json" '
+              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
                 {
-                  filePath: (input_filename | sub("debug/raw_"; "") | gsub("_"; "/") | sub(".json$"; "")),
+                  filePath: $original_path,
                   violations: [
                     .violations[] | select(
                       (.line | tonumber) as $line |
@@ -181,9 +181,9 @@ jobs:
                 select(.violations | length > 0)
               ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
             elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-              jq --argjson changed "$changed_json" '
+              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
                 .[0] | {
-                  filePath: input_filename,
+                  filePath: $original_path,
                   violations: [
                     .violations[] | select(
                       (.line | tonumber) as $line |
@@ -194,9 +194,9 @@ jobs:
                 select(.violations | length > 0)
               ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
             elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-              jq --argjson changed "$changed_json" '
+              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
                 .results[0] | {
-                  filePath: input_filename,
+                  filePath:  $original_path,
                   violations: [
                     .violations[] | select(
                       (.line | tonumber) as $line |
