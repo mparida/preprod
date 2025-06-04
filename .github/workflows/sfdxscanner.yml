@@ -94,7 +94,7 @@ jobs:
             fi
           done < results/changed_lines.txt
       
-          echo "{}" > all_violations.json  # Initialize with empty object
+          echo "[]" > all_violations.json  # Initialize with empty array
       
           for file in "${!file_line_map[@]}"; do
             [[ -f "$file" ]] || continue
@@ -107,40 +107,29 @@ jobs:
           
             [[ -f temp.json ]] || continue
       
-            # DEBUG: Print raw scanner output
-            echo "=== Scanner output for $file ==="
-            cat temp.json
-            echo "=== End scanner output ==="
-      
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
       
-            # Process violations with more flexible filtering
+            # Process violations with proper line number matching
             jq --argjson changed "$changed_json" '
-              # Handle both v4 and v5 output formats
-              if (.result? | type == "array") then
-                # v5 format
-                .result[] | 
-                {
-                  filePath: .filePath,
-                  violations: [.violations[] | select(.line as $line | $changed | index($line))]
-                }
-              elif (.violations? | type == "array") then
-                # v4 format
+              if (.violations? | type == "array") then
                 {
                   filePath: input_filename,
-                  violations: [.violations[] | select(.line as $line | $changed | index($line))]
-                }
+                  violations: [.violations[] | select(
+                    (.line | tonumber) as $line | 
+                    $changed | index($line)
+                  )]
+                } |
+                select(.violations | length > 0)
               else
                 empty
-              end |
-              select((.violations | length) > 0)
+              end
             ' temp.json >> filtered_violations.json
           done
       
-          # Combine all filtered violations into a proper array
+          # Combine all filtered violations
           if [ -f filtered_violations.json ] && [ -s filtered_violations.json ]; then
-            jq -s '.' filtered_violations.json > results/output.json
+            jq -s 'add' filtered_violations.json > results/output.json
           else
             echo '[]' > results/output.json
           fi
