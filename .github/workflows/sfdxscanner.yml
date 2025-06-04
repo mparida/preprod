@@ -220,17 +220,6 @@ jobs:
           else
             echo "[]" > results/output.json
           fi
-          
-          # Debug output
-          echo "=== FINAL DEBUG OUTPUT ==="
-          echo "Changed lines:"
-          cat results/changed_lines.txt
-          echo -e "\nRaw scanner output for InfyPOCComponentTrackerController:"
-          cat "debug/raw_force-app_main_default_classes_InfyPOCComponentTrackerController.cls.json" || echo "No raw output"
-          echo -e "\nFiltered violations:"
-          cat debug/filtered.json || echo "No filtered violations"
-          echo -e "\nFinal output.json:"
-          cat results/output.json
       
       - name: Debug Output Files
         run: |
