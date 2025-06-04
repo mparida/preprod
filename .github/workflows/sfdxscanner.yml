@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       userStoryId:
-        required: true
+        required: false
       userStoryCommitId:
-        required: true
+        required: false
       commitId:
         required: true
 
