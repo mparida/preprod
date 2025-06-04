@@ -28,8 +28,8 @@ jobs:
 
       - name: Install Salesforce CLI and Scanner
         run: |
-          npm install --global sfdx-cli
-          sfdx plugins:install @salesforce/sfdx-scanner@4.12.0
+          npm install --global @salesforce/cli
+          sf plugins install @salesforce/plugin-scanner
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Extract Changed Lines
@@ -75,7 +75,7 @@ jobs:
             [[ -f "$file" ]] || continue
             
             echo "Scanning $file..."
-            sfdx scanner:run --target "$file" --format json --engine eslint-lwc,eslint-typescript,pmd > temp.json || true
+            sf scanner:run --target "$file" --format json --engine eslint-lwc,eslint-typescript,pmd > temp.json || true
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
