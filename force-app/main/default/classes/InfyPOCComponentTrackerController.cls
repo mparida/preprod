@@ -40,7 +40,7 @@ public with sharing class InfyPOCComponentTrackerController {
                 }
                 if(!lstCTUpdate.isEmpty()){
                     for(integer i =0 ; i < 100 ; i++){
-                        update as system lstCTUpdate;
+                        update lstCTUpdate;
                     }
 
                 }
@@ -81,7 +81,7 @@ public with sharing class InfyPOCComponentTrackerController {
                 }
                 if(!lstCTUpdate.isEmpty()){
                     for(integer i =0 ; i < 100 ; i++) {
-                        update as system lstCTUpdate;
+                        update lstCTUpdate;
                     }
                 }
             }

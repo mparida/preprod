@@ -119,7 +119,8 @@ export default class AccComponentsViewer extends LightningElement {
 
     handleComponentSearchDup(event) {
         let searchKey = event.target.value.toLowerCase(); // prefer-const
-        var unusedVar = 42; // no-unused-vars
+        var unusedVar1 = 42; // no-unused-vars
+        var unusedVar2 = 42; // no-unused-vars
 
         if (searchKey != '') { // eqeqeq
             console.log('Searching...'); // no-console
