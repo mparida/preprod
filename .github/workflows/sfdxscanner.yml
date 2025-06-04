@@ -108,7 +108,7 @@ jobs:
                   # Case 1: Violations at top level
                   jq --argjson changed "$changed_json" '
                     {
-                      filePath: input_filename,
+                      filePath: (input_filename | sub("debug/raw_"; "") | gsub("_"; "/") | sub(".json$"; "")),
                       violations: [
                         .violations[] | select(
                           (.line | tonumber) as $line |
@@ -170,7 +170,7 @@ jobs:
             if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
               jq --argjson changed "$changed_json" '
                 {
-                  filePath: input_filename,
+                  filePath: (input_filename | sub("debug/raw_"; "") | gsub("_"; "/") | sub(".json$"; "")),
                   violations: [
                     .violations[] | select(
                       (.line | tonumber) as $line |
