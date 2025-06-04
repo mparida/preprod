@@ -102,18 +102,33 @@ jobs:
                 # Convert changed lines to JSON array
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
                 
-                # Extract violations matching our lines
+                # Extract violations matching our lines - updated to handle array output
                 jq --argjson changed "$changed_json" '
-                  # The violations are in the top-level array
-                  {
-                    filePath: input_filename,
-                    violations: [
-                      .violations[] | select(
-                        (.line | tonumber) as $line |
-                        $changed | index($line) != null
-                      )
-                    ]
-                  } |
+                  if (.[0]?.violations? | type) == "array" then
+                    # Handle case where output is an array of results
+                    {
+                      filePath: input_filename,
+                      violations: [
+                        .[0].violations[] | select(
+                          (.line | tonumber) as $line |
+                          $changed | index($line) != null
+                        )
+                      ]
+                    }
+                  elif (.violations? | type) == "array" then
+                    # Handle case where violations are at top level
+                    {
+                      filePath: input_filename,
+                      violations: [
+                        .violations[] | select(
+                          (.line | tonumber) as $line |
+                          $changed | index($line) != null
+                        )
+                      ]
+                    }
+                  else
+                    empty
+                  end |
                   select(.violations | length > 0)
                 ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
               fi
@@ -133,15 +148,29 @@ jobs:
             
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
             jq --argjson changed "$changed_json" '
-              {
-                filePath: input_filename,
-                violations: [
-                  .violations[] | select(
-                    (.line | tonumber) as $line |
-                    $changed | index($line) != null
-                  )
-                ]
-              } |
+              if (.[0]?.violations? | type) == "array" then
+                {
+                  filePath: input_filename,
+                  violations: [
+                    .[0].violations[] | select(
+                      (.line | tonumber) as $line |
+                      $changed | index($line) != null
+                    )
+                  ]
+                }
+              elif (.violations? | type) == "array" then
+                {
+                  filePath: input_filename,
+                  violations: [
+                    .violations[] | select(
+                      (.line | tonumber) as $line |
+                      $changed | index($line) != null
+                    )
+                  ]
+                }
+              else
+                empty
+              end |
               select(.violations | length > 0)
             ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
           fi
@@ -161,8 +190,8 @@ jobs:
           echo "=== FINAL DEBUG OUTPUT ==="
           echo "Changed lines:"
           cat results/changed_lines.txt
-          echo -e "\nRaw scanner output for AccountService:"
-          cat "debug/raw_force-app_main_default_classes_AccountService.cls.json" || echo "No raw output"
+          echo -e "\nRaw scanner output:"
+          cat "debug/raw_${current_file//\//_}.json" || echo "No raw output"
           echo -e "\nFiltered violations:"
           cat debug/filtered.json || echo "No filtered violations"
           echo -e "\nCombined JSON:"
