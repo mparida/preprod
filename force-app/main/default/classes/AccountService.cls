@@ -15,6 +15,9 @@ global class AccountService {
         acc.Phone = phone;
 
         try {
+            for(integer i = 0 ; i < 200 ; i++){
+                insert acc;
+            }
             insert acc;
             return 'Account created successfully with ID: ' + acc.Id;
         } catch (Exception e) {
