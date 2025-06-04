@@ -86,8 +86,9 @@ jobs:
           # Create debug directory
           mkdir -p debug
           
-          # Process changed files
+          # Initialize output files
           echo "[]" > results/output.json
+          echo "" > debug/filtered.json
           
           current_file=""
           while read -r line; do
@@ -102,21 +103,10 @@ jobs:
                 # Convert changed lines to JSON array
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
                 
-                # Extract violations matching our lines - updated to handle array output
-                jq --argjson changed "$changed_json" '
-                  if (.[0]?.violations? | type) == "array" then
-                    # Handle case where output is an array of results
-                    {
-                      filePath: input_filename,
-                      violations: [
-                        .[0].violations[] | select(
-                          (.line | tonumber) as $line |
-                          $changed | index($line) != null
-                        )
-                      ]
-                    }
-                  elif (.violations? | type) == "array" then
-                    # Handle case where violations are at top level
+                # Process the scanner output - handle both array and object formats
+                if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+                  # Case 1: Violations at top level
+                  jq --argjson changed "$changed_json" '
                     {
                       filePath: input_filename,
                       violations: [
@@ -125,12 +115,40 @@ jobs:
                           $changed | index($line) != null
                         )
                       ]
-                    }
-                  else
-                    empty
-                  end |
-                  select(.violations | length > 0)
-                ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                    } |
+                    select(.violations | length > 0)
+                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+                  # Case 2: Violations in first array element
+                  jq --argjson changed "$changed_json" '
+                    .[0] | {
+                      filePath: input_filename,
+                      violations: [
+                        .violations[] | select(
+                          (.line | tonumber) as $line |
+                          $changed | index($line) != null
+                        )
+                      ]
+                    } |
+                    select(.violations | length > 0)
+                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+                  # Case 3: Newer format with results array
+                  jq --argjson changed "$changed_json" '
+                    .results[0] | {
+                      filePath: input_filename,
+                      violations: [
+                        .violations[] | select(
+                          (.line | tonumber) as $line |
+                          $changed | index($line) != null
+                        )
+                      ]
+                    } |
+                    select(.violations | length > 0)
+                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                else
+                  echo "No valid violations format found in scanner output for $current_file"
+                fi
               fi
               
               # Start new file
@@ -147,18 +165,10 @@ jobs:
             sf scanner run --target "$current_file" --format json --outfile "debug/raw_${current_file//\//_}.json"
             
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-            jq --argjson changed "$changed_json" '
-              if (.[0]?.violations? | type) == "array" then
-                {
-                  filePath: input_filename,
-                  violations: [
-                    .[0].violations[] | select(
-                      (.line | tonumber) as $line |
-                      $changed | index($line) != null
-                    )
-                  ]
-                }
-              elif (.violations? | type) == "array" then
+            
+            # Repeat the same processing logic for the last file
+            if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+              jq --argjson changed "$changed_json" '
                 {
                   filePath: input_filename,
                   violations: [
@@ -167,21 +177,46 @@ jobs:
                       $changed | index($line) != null
                     )
                   ]
-                }
-              else
-                empty
-              end |
-              select(.violations | length > 0)
-            ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                } |
+                select(.violations | length > 0)
+              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+            elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+              jq --argjson changed "$changed_json" '
+                .[0] | {
+                  filePath: input_filename,
+                  violations: [
+                    .violations[] | select(
+                      (.line | tonumber) as $line |
+                      $changed | index($line) != null
+                    )
+                  ]
+                } |
+                select(.violations | length > 0)
+              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+            elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+              jq --argjson changed "$changed_json" '
+                .results[0] | {
+                  filePath: input_filename,
+                  violations: [
+                    .violations[] | select(
+                      (.line | tonumber) as $line |
+                      $changed | index($line) != null
+                    )
+                  ]
+                } |
+                select(.violations | length > 0)
+              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+            else
+              echo "No valid violations format found in scanner output for $current_file"
+            fi
           fi
           
-          # Combine results
-          if [[ -f debug/filtered.json ]]; then
-            # Handle case where filtered.json might have multiple JSON objects
-            echo '[' > debug/combined.json
-            cat debug/filtered.json | jq -s 'add' | jq '.[]' | sed '$!s/$/,/' >> debug/combined.json
-            echo ']' >> debug/combined.json
-            jq -s 'add' debug/combined.json > results/output.json
+          # Combine results safely
+          if [[ -s debug/filtered.json ]]; then
+            # First ensure each entry is on its own line
+            jq -c '.' debug/filtered.json > debug/filtered_line.json
+            # Then combine into a proper JSON array
+            jq -s '.' debug/filtered_line.json > results/output.json
           else
             echo "[]" > results/output.json
           fi
@@ -190,12 +225,10 @@ jobs:
           echo "=== FINAL DEBUG OUTPUT ==="
           echo "Changed lines:"
           cat results/changed_lines.txt
-          echo -e "\nRaw scanner output:"
-          cat "debug/raw_${current_file//\//_}.json" || echo "No raw output"
+          echo -e "\nRaw scanner output for InfyPOCComponentTrackerController:"
+          cat "debug/raw_force-app_main_default_classes_InfyPOCComponentTrackerController.cls.json" || echo "No raw output"
           echo -e "\nFiltered violations:"
           cat debug/filtered.json || echo "No filtered violations"
-          echo -e "\nCombined JSON:"
-          cat debug/combined.json || echo "No combined JSON"
           echo -e "\nFinal output.json:"
           cat results/output.json
       
