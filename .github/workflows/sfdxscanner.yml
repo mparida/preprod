@@ -29,8 +29,8 @@ jobs:
       - name: Install Salesforce CLI and Scanner
         run: |
           # Install specific matching versions
-          npm install --global @salesforce/cli@5.0.0
-          sf plugins install @salesforce/plugin-code-analyzer@5.0.0
+          npm install --global @salesforce/cli@latest
+          sf plugins install @salesforce/plugin-code-analyzer@latest
           sudo apt-get update && sudo apt-get install -y jq
           sf --version
           sf plugins --core
