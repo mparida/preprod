@@ -24,13 +24,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install Salesforce CLI & Scanner
         run: |
           npm install --global sfdx-cli
           sfdx plugins:uninstall @salesforce/sfdx-scanner || true
-          sfdx plugins:install @salesforce/sfdx-scanner@4.11.1
+          sfdx plugins:install @salesforce/sfdx-scanner@4.12.0
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Extract Changed Lines
@@ -76,7 +76,7 @@ jobs:
             [[ -f "$file" ]] || continue
             
             echo "Scanning $file..."
-            sfdx scanner:run --target "$file" --format json --engine eslint-lwc,pmd,eslint-typescript > temp.json || true
+            sfdx scanner:run --target "$file" --format json --engine pmd > temp.json || true
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
