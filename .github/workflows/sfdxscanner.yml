@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Salesforce CLI and Scanner
         run: |
-          npm install --global sfdx-cli yarn
+          npm install --global sfdx-cli
           sfdx plugins:install @salesforce/sfdx-scanner@4.12.0
           sudo apt-get update && sudo apt-get install -y jq
 
