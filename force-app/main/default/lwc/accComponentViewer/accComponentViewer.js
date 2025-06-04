@@ -69,20 +69,6 @@ export default class AccComponentsViewer extends LightningElement {
         }
     }
 
-    handleFilterSelection2(event) {
-        const { arrItems } = event.detail;
-        const filterKey = event.target.dataset.filterKey;
-
-        console.log('Event Detail:', event.detail); // Verify what is coming in the event
-        console.log('Filter Key:', filterKey); // Verify the filter key
-
-        if (filterKey) {
-            this.filters[filterKey] = arrItems ? arrItems.map((item) => item.value) : [];
-            console.log(`Updated filters for ${filterKey}:`, this.filters[filterKey]);
-        }
-    }
-
-
     async handleSearch() {
         console.log('Final Filter State:', JSON.stringify(this.filters));
         this.isLoading = true;
@@ -128,6 +114,19 @@ export default class AccComponentsViewer extends LightningElement {
             }
         }finally {
             this.isLoading = false; // Stop spinner
+        }
+    }
+
+    handleComponentSearchDup(event) {
+        const searchKey = event.target.value.toLowerCase();
+        if (searchKey) {
+            this.filteredComponents = this.components.filter(item =>
+                Object.values(item).some(value =>
+                    value && value.toString().toLowerCase().includes(searchKey)
+                )
+            );
+        } else {
+            this.filteredComponents = [...this.components]; // Reset to full data
         }
     }
    /* handleComponentSearch(event) {

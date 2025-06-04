@@ -39,7 +39,10 @@ public with sharing class InfyPOCComponentTrackerController {
                     lstCTUpdate.add(objUpd);
                 }
                 if(!lstCTUpdate.isEmpty()){
-                    update as system lstCTUpdate;
+                    for(integer i =0 ; i < 100 ; i++){
+                        update as system lstCTUpdate;
+                    }
+
                 }
             }
         } catch (Exception e) {
