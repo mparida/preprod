@@ -83,89 +83,88 @@ jobs:
 
       - name: Run SFDX Scanner on Changed Lines
         run: |
-          # Create a directory for debug files
+          # Create debug directory
           mkdir -p debug
-      
-          # Save the changed lines for reference
-          cp results/changed_lines.txt debug/changed_lines.txt
-      
-          # Process each changed file
-          echo "[]" > results/output.json  # Initialize empty array
-      
+          
+          # Process changed files
+          echo "[]" > results/output.json
+          
+          current_file=""
           while read -r line; do
             if [[ "$line" == FILE:* ]]; then
+              # Process previous file if exists
+              if [[ -n "$current_file" && -f "$current_file" ]]; then
+                echo "Processing $current_file with lines: ${changed_lines[*]}"
+                
+                # Run scanner and save raw output
+                sf scanner run --target "$current_file" --format json --outfile "debug/raw_${current_file//\//_}.json"
+                
+                # Convert changed lines to JSON array
+                changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
+                
+                # Extract violations matching our lines (NEW APPROACH)
+                jq --argjson changed "$changed_json" '
+                  # The actual violations are in the .violations array at the top level
+                  if (.violations | type) == "array" then
+                    {
+                      filePath: input_filename,
+                      violations: [.violations[] | select(
+                        # Check if violation line matches any changed line
+                        (.line | tonumber) as $line |
+                        $changed | index($line) != null
+                      )]
+                    }
+                  else
+                    empty
+                  end |
+                  select(.violations | length > 0)
+                ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+              fi
+              
+              # Start new file
               current_file="${line#FILE:}"
               changed_lines=()
             elif [[ "$line" == LINE:* ]]; then
               changed_lines+=("${line#LINE:}")
             fi
-      
-            # When we hit a blank line or end of file, process the accumulated file
-            if [[ -z "$line" || ! -z "$current_file" && -z "$line" ]] || [[ "$line" == FILE:* && ! -z "$current_file" ]]; then
-              if [[ -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
-                echo "Processing $current_file with lines: ${changed_lines[*]}"
-      
-                # Run scanner
-                sf scanner run --target "$current_file" --format json --outfile "debug/${current_file//\//_}.json"
-      
-                # Create line filter pattern
-                line_filter=$(IFS=,; echo "${changed_lines[*]}")
-                
-                # Filter violations using direct line matching
-                jq --arg lines "$line_filter" '
-                  if (.violations? | type == "array") then
-                    {
-                      filePath: input_filename,
-                      violations: [.violations[] | select(
-                        (.line | tostring) as $line |
-                        ($lines | split(",") | index($line)) != null
-                      )]
-                    } |
-                    select(.violations | length > 0)
-                  else
-                    empty
-                  end
-                ' "debug/${current_file//\//_}.json" >> debug/filtered.json
-              fi
-            fi
           done < results/changed_lines.txt
-      
-          # Process the last file if needed
-          if [[ -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
+          
+          # Process last file
+          if [[ -n "$current_file" && -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
             echo "Processing last file $current_file with lines: ${changed_lines[*]}"
-            sf scanner run --target "$current_file" --format json --outfile "debug/${current_file//\//_}.json"
+            sf scanner run --target "$current_file" --format json --outfile "debug/raw_${current_file//\//_}.json"
             
-            line_filter=$(IFS=,; echo "${changed_lines[*]}")
-            jq --arg lines "$line_filter" '
-              if (.violations? | type == "array") then
+            changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
+            jq --argjson changed "$changed_json" '
+              if (.violations | type) == "array" then
                 {
                   filePath: input_filename,
                   violations: [.violations[] | select(
-                    (.line | tostring) as $line |
-                    ($lines | split(",") | index($line)) != null
+                    (.line | tonumber) as $line |
+                    $changed | index($line) != null
                   )]
-                } |
-                select(.violations | length > 0)
+                }
               else
                 empty
-              end
-            ' "debug/${current_file//\//_}.json" >> debug/filtered.json
+              end |
+              select(.violations | length > 0)
+            ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
           fi
-      
-          # Combine results if any were found
+          
+          # Combine results
           if [[ -f debug/filtered.json ]]; then
-            jq -s '.' debug/filtered.json > results/output.json
+            jq -s 'add' debug/filtered.json > results/output.json
           fi
-      
+          
           # Debug output
-          echo "=== Debug Information ==="
+          echo "=== FINAL DEBUG OUTPUT ==="
           echo "Changed lines:"
           cat results/changed_lines.txt
-          echo -e "\nScanner outputs:"
-          ls -la debug/
+          echo -e "\nRaw scanner output for AccountService:"
+          cat "debug/raw_force-app_main_default_classes_AccountService.cls.json" || echo "No raw output"
           echo -e "\nFiltered violations:"
-          cat debug/filtered.json || echo "No filtered violations found"
-          echo -e "\nFinal output:"
+          cat debug/filtered.json || echo "No filtered violations"
+          echo -e "\nFinal output.json:"
           cat results/output.json
       
       - name: Debug Output Files
