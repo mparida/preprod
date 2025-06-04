@@ -86,11 +86,9 @@ jobs:
             echo "Scanning $file..."
             sf code-analyzer run \
               --target "$file" \
-              --engine eslint-lwc \
-              --engine eslint-typescript \
-              --engine pmd \
-              --format json \
-              --outfile temp.json || true
+              --output-file temp.json || true
+          
+            [[ -f temp.json ]] || continue
 
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
