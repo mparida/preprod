@@ -3,7 +3,7 @@ public with sharing class OrgCredentialManagerController {
     public String existingUsername { get; set; }
     public String existingPassword { get; set; }
     public Boolean hasExistingCredential { get; private set; }
-    public List<SelectOption> orgOptions { get; private set; }
+    public List<SelectOption> orgOptions { get; private set; } 
     private Org_Credential__c currentCredential;
 
     public String newOrgName { get; set; }
@@ -18,7 +18,7 @@ public with sharing class OrgCredentialManagerController {
     private void loadOrgOptions() {
         orgOptions = new List<SelectOption>();
         orgOptions.add(new SelectOption('', '-- Select Org --'));
-        for (Org_Credential__c cred : [SELECT Name FROM Org_Credential__c ORDER BY Name]) {
+        for (Org_Credential__c cred : [SELECT Name FROM Org_Credential__c WHERE IsActive__c = true ORDER BY Name]) {
             orgOptions.add(new SelectOption(cred.Name, cred.Name));
         }
     }
@@ -40,6 +40,11 @@ public with sharing class OrgCredentialManagerController {
                 existingUsername = CredentialEncryptionUtil.decrypt(currentCredential.EncryptedUserName__c);
                 existingPassword = CredentialEncryptionUtil.decrypt(currentCredential.EncryptedPassword__c);
                 hasExistingCredential = true;
+                
+                //Log the retrieval
+                User u = [SELECT Id, Name from User where Id =: UserInfo.getUserId()];
+                Log_Credential_Access__c lca = new Log_Credential_Access__c(Org_Credential__c = currentCredential.Id, User_Who_Accessed__c = u.Name, Time_Accessed__c = System.now() );
+                insert lca;
             } catch (Exception e) {
                 ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Error decrypting credentials.'));
                 clearExistingCredentialFields();
@@ -96,6 +101,7 @@ public with sharing class OrgCredentialManagerController {
         newCred.Name = newOrgName;
         newCred.EncryptedUserName__c = CredentialEncryptionUtil.encrypt(newUsername);
         newCred.EncryptedPassword__c = CredentialEncryptionUtil.encrypt(newPassword);
+        newCred.IsActive__c = true;
         try {
             insert newCred;
 

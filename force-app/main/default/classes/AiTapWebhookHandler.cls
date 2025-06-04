@@ -1,7 +1,7 @@
 /**
  * Created by manojparida on 20/05/25.
  */
-@RestResource(urlMapping='/aitap/tests/webhook')
+@RestResource(UrlMapping='/aitap/tests/webhook')
 global without sharing class AiTapWebhookHandler {
     
     @HttpPost

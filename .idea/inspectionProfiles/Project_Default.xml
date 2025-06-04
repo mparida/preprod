@@ -17,7 +17,10 @@
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CertificationPageController.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CopadoUserStoryTriggerHandler.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/CredentialEncryptionUtil.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/JenkinsJobTrigger.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/JenkinsJobTriggerES.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/JSONReader.cls-meta.xml" />
+          <option value="$PROJECT_DIR$/force-app/main/default/classes/NewUserAccessProvisioningManagerTest.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/OrgCredentialManagerController.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManager.cls-meta.xml" />
           <option value="$PROJECT_DIR$/force-app/main/default/classes/TargetOrgAccessManagerTest.cls-meta.xml" />
