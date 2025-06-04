@@ -93,9 +93,9 @@ jobs:
               file_line_map["$current_file"]+="${line#LINE:} "
             fi
           done < results/changed_lines.txt
-
+      
           echo -n > all_violations.json
-
+      
           for file in "${!file_line_map[@]}"; do
             [[ -f "$file" ]] || continue
             
@@ -106,10 +106,19 @@ jobs:
               --outfile temp.json || true
           
             [[ -f temp.json ]] || continue
-
+      
+            # DEBUG: Print the raw scanner output
+            echo "=== RAW SCANNER OUTPUT FOR $file ==="
+            cat temp.json
+            echo "=== END RAW OUTPUT ==="
+      
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
-
+      
+            # DEBUG: Print the changed lines being filtered
+            echo "Changed lines for filtering: ${changed[@]}"
+            echo "Changed lines as JSON: $changed_json"
+      
             # Process violations with line number checking
             jq --argjson changed "$changed_json" '
               if (.result? | type == "array") then
@@ -123,14 +132,40 @@ jobs:
                 empty
               end
             ' temp.json >> all_violations.json
+      
+            # DEBUG: Print intermediate all_violations.json
+            echo "=== CURRENT all_violations.json ==="
+            cat all_violations.json
+            echo "=== END CURRENT all_violations.json ==="
           done
-
+      
+          # DEBUG: Print final all_violations.json before conversion
+          echo "=== FINAL all_violations.json BEFORE CONVERSION ==="
+          cat all_violations.json
+          echo "=== END FINAL all_violations.json ==="
+      
           # Create valid JSON array (empty array if no violations)
           if [ -s all_violations.json ]; then
             jq -s '.' all_violations.json > results/output.json
           else
             echo '[]' > results/output.json
           fi
+      
+          # DEBUG: Print the final output.json
+          echo "=== FINAL output.json ==="
+          cat results/output.json
+          echo "=== END FINAL output.json ==="
+      
+      - name: Debug Output Files
+        run: |
+          echo "=== Changed Lines ==="
+          cat results/changed_lines.txt
+          echo "=== All Violations ==="
+          cat all_violations.json || echo "No all_violations.json found"
+          echo "=== Output JSON ==="
+          cat results/output.json || echo "No output.json found"
+          echo "=== Payload JSON ==="
+          cat payload.json || echo "No payload.json found"
 
       - name: Prepare Payload
         run: |
