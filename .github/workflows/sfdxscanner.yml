@@ -83,59 +83,90 @@ jobs:
 
       - name: Run SFDX Scanner on Changed Lines
         run: |
-          declare -A file_line_map
-          current_file=""
+          # Create a directory for debug files
+          mkdir -p debug
+      
+          # Save the changed lines for reference
+          cp results/changed_lines.txt debug/changed_lines.txt
+      
+          # Process each changed file
+          echo "[]" > results/output.json  # Initialize empty array
+      
           while read -r line; do
             if [[ "$line" == FILE:* ]]; then
               current_file="${line#FILE:}"
-              file_line_map["$current_file"]=""
+              changed_lines=()
             elif [[ "$line" == LINE:* ]]; then
-              file_line_map["$current_file"]+="${line#LINE:} "
+              changed_lines+=("${line#LINE:}")
+            fi
+      
+            # When we hit a blank line or end of file, process the accumulated file
+            if [[ -z "$line" || ! -z "$current_file" && -z "$line" ]] || [[ "$line" == FILE:* && ! -z "$current_file" ]]; then
+              if [[ -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
+                echo "Processing $current_file with lines: ${changed_lines[*]}"
+      
+                # Run scanner
+                sf scanner run --target "$current_file" --format json --outfile "debug/${current_file//\//_}.json"
+      
+                # Create line filter pattern
+                line_filter=$(IFS=,; echo "${changed_lines[*]}")
+                
+                # Filter violations using direct line matching
+                jq --arg lines "$line_filter" '
+                  if (.violations? | type == "array") then
+                    {
+                      filePath: input_filename,
+                      violations: [.violations[] | select(
+                        (.line | tostring) as $line |
+                        ($lines | split(",") | index($line)) != null
+                      )]
+                    } |
+                    select(.violations | length > 0)
+                  else
+                    empty
+                  end
+                ' "debug/${current_file//\//_}.json" >> debug/filtered.json
+              fi
             fi
           done < results/changed_lines.txt
       
-          echo "[]" > all_violations.json  # Initialize with empty array
-      
-          for file in "${!file_line_map[@]}"; do
-            [[ -f "$file" ]] || continue
+          # Process the last file if needed
+          if [[ -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
+            echo "Processing last file $current_file with lines: ${changed_lines[*]}"
+            sf scanner run --target "$current_file" --format json --outfile "debug/${current_file//\//_}.json"
             
-            echo "Scanning $file with lines: ${file_line_map[$file]}..."
-            sf scanner run \
-              --target "$file" \
-              --format json \
-              --outfile temp.json || true
-          
-            [[ -f temp.json ]] || continue
-      
-            IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
-            changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
-      
-            # Process violations with proper line number matching
-            jq --argjson changed "$changed_json" '
+            line_filter=$(IFS=,; echo "${changed_lines[*]}")
+            jq --arg lines "$line_filter" '
               if (.violations? | type == "array") then
                 {
                   filePath: input_filename,
                   violations: [.violations[] | select(
-                    (.line | tonumber) as $line | 
-                    $changed | index($line)
+                    (.line | tostring) as $line |
+                    ($lines | split(",") | index($line)) != null
                   )]
                 } |
                 select(.violations | length > 0)
               else
                 empty
               end
-            ' temp.json >> filtered_violations.json
-          done
-      
-          # Combine all filtered violations
-          if [ -f filtered_violations.json ] && [ -s filtered_violations.json ]; then
-            jq -s 'add' filtered_violations.json > results/output.json
-          else
-            echo '[]' > results/output.json
+            ' "debug/${current_file//\//_}.json" >> debug/filtered.json
           fi
       
-          # Clean up
-          rm -f temp.json filtered_violations.json
+          # Combine results if any were found
+          if [[ -f debug/filtered.json ]]; then
+            jq -s '.' debug/filtered.json > results/output.json
+          fi
+      
+          # Debug output
+          echo "=== Debug Information ==="
+          echo "Changed lines:"
+          cat results/changed_lines.txt
+          echo -e "\nScanner outputs:"
+          ls -la debug/
+          echo -e "\nFiltered violations:"
+          cat debug/filtered.json || echo "No filtered violations found"
+          echo -e "\nFinal output:"
+          cat results/output.json
       
       - name: Debug Output Files
         run: |
