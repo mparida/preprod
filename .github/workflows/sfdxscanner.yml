@@ -113,7 +113,3 @@ jobs:
         with:
           name: sfdx-scanner-violations
           path: payload.json
-
-	          
-
-	        
