@@ -1,4 +1,4 @@
-name: Targeted SFDX Scanner Scan (Commit Based) 
+name: Targeted SFDX Scanner Scan (Commit Based)
 
 on:
   workflow_dispatch:
@@ -28,18 +28,34 @@ jobs:
 
       - name: Install Salesforce CLI and Scanner
         run: |
-          # Install modern Salesforce CLI
-          npm install --global @salesforce/cli@latest
-          
-          # Install the scanner plugin with matching version
-          sf plugins install @salesforce/plugin-code-analyzer@5.1.0
-          
-          # Install jq for JSON processing
+          # Install specific matching versions
+          npm install --global @salesforce/cli@5.0.0
+          sf plugins install @salesforce/plugin-code-analyzer@5.0.0
           sudo apt-get update && sudo apt-get install -y jq
-
-          # Verify installation
           sf --version
           sf plugins --core
+
+      - name: Configure Scanner Rules
+        run: |
+          # Create a basic rules configuration if none exists
+          if [ ! -f sfdx-scanner-config.json ]; then
+            echo '{
+              "rules": {
+                "pmd": {
+                  "rulesets": [
+                    "category/apex/security.xml",
+                    "category/apex/performance.xml",
+                    "category/apex/bestpractices.xml"
+                  ]
+                }
+              },
+              "engines": {
+                "eslint": {
+                  "auto_discover_eslint_config": true
+                }
+              }
+            }' > sfdx-scanner-config.json
+          fi
 
       - name: Extract Changed Lines
         run: |
@@ -83,28 +99,38 @@ jobs:
           for file in "${!file_line_map[@]}"; do
             [[ -f "$file" ]] || continue
             
-            echo "Scanning $file..."
-            sf code-analyzer run \
+            echo "Scanning $file with lines: ${file_line_map[$file]}..."
+            sf scanner run \
               --target "$file" \
-              --output-file temp.json || true
+              --format json \
+              --outfile temp.json || true
           
             [[ -f temp.json ]] || continue
-
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
 
+            # Process violations with line number checking
             jq --argjson changed "$changed_json" '
-              .result[]? | 
-              {
-                filePath: .filePath,
-                violations: [.violations[] | select(.line as $line | $changed | index($line))]
-              } |
-              select(.violations | length > 0)
+              if (.result? | type == "array") then
+                .result[] | 
+                {
+                  filePath: .filePath,
+                  violations: [.violations[] | select(.line as $line | $changed | index($line))]
+                } |
+                select(.violations | length > 0)
+              else
+                empty
+              end
             ' temp.json >> all_violations.json
           done
 
-          jq -s '.' all_violations.json > results/output.json
+          # Create valid JSON array (empty array if no violations)
+          if [ -s all_violations.json ]; then
+            jq -s '.' all_violations.json > results/output.json
+          else
+            echo '[]' > results/output.json
+          fi
 
       - name: Prepare Payload
         run: |
