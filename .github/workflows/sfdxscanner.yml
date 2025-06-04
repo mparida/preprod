@@ -21,15 +21,14 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.inputs.commitId }}
 
-      - name: Setup Node
+      - name: Setup Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '18'
 
-      - name: Install Salesforce CLI & Scanner
+      - name: Install Salesforce CLI and Scanner
         run: |
-          npm install --global sfdx-cli
-          sfdx plugins:uninstall @salesforce/sfdx-scanner || true
+          npm install --global sfdx-cli yarn
           sfdx plugins:install @salesforce/sfdx-scanner@4.12.0
           sudo apt-get update && sudo apt-get install -y jq
 
@@ -76,7 +75,7 @@ jobs:
             [[ -f "$file" ]] || continue
             
             echo "Scanning $file..."
-            sfdx scanner:run --target "$file" --format json --engine pmd > temp.json || true
+            sfdx scanner:run --target "$file" --format json --engine eslint-lwc,eslint-typescript,pmd > temp.json || true
 
             IFS=' ' read -r -a changed <<< "${file_line_map[$file]}"
             changed_json=$(printf '%s\n' "${changed[@]}" | jq -Rn '[inputs | tonumber]')
