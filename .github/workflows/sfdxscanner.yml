@@ -112,7 +112,7 @@ jobs:
                 echo "Processing $current_file with lines: ${changed_lines[*]}"
                 
                 # Run scanner and save raw output
-                sf scanner run --target "$current_file" --format json --outfile "debug/raw_${current_file//\//_}.json"
+                sf scanner run --target "$current_file" --engine eslint --format json --outfile "debug/raw_${current_file//\//_}.json"
                 
                 # Convert changed lines to JSON array
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
