@@ -1,7 +1,7 @@
 {
   "root": true,
   "extends": [
-    "@salesforce/eslint-config-lwc/recommended"
+    "eslint:recommended"
   ],
   "plugins": [
     "@lwc/eslint-plugin-lwc"
@@ -18,6 +18,11 @@
   },
   "globals": {
     "$A": "readonly",
-    "Lightning": "readonly"
+    "Lightning": "readonly",
+    "Browser": "readonly",
+    "ContentAsset": "readonly",
+    "Label": "readonly",
+    "Locale": "readonly",
+    "Resource": "readonly"
   }
 }
