@@ -1,0 +1,13 @@
+targets:
+  - "./force-app"
+
+engines:
+  - eslint
+  - pmd
+
+formatters:
+  - json
+
+normalize-severity: true
+
+config: sfdx-scanner-config.json
