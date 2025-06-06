@@ -51,7 +51,7 @@ jobs:
               },
               "engines": {
                 "eslint": {
-                  "auto_discover_eslint_config": true
+                  "auto_discover_eslint_config": false
                 }
               }
             }' > sfdx-scanner-config.json
