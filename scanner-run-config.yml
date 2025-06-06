@@ -1,13 +1,16 @@
-targets:
-  - "./force-app"
-
 engines:
-  - eslint
-  - pmd
+  pmd:
+    enabled: true
+    targetPatterns:
+      - "force-app/**/*.cls"
+      - "force-app/**/*.trigger"
+    rulesets:
+      - "./custom-rules/pmd/custom-pmd-ruleset.xml"
 
-formatters:
-  - json
+  eslint:
+    enabled: true
+    targetPatterns:
+      - "force-app/**/*.js"
+    config: "./.eslintrc.json"
 
-normalize-severity: true
-
-config: sfdx-scanner-config.json
+log_level: INFO
