@@ -25,11 +25,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-
+    
       - name: Install Salesforce CLI and Scanner Plugin
         run: |
           npm install --global @salesforce/cli@latest
-          sf plugins install @salesforce/sfdx-scanner@latest
+          sf plugins install @salesforce/sfdx-scanner
           sudo apt-get update && sudo apt-get install -y jq
           sf --version
           sf plugins --core
@@ -65,11 +65,15 @@ jobs:
           echo "Content of scanner-config.json (if exists):"
           cat scanner-config.json || echo "scanner-config.json not found"
 
-      - name: Run SFDX Scanner
+      - name: Run SFDX Scanner for Apex and LWC
         run: |
           mkdir -p debug
-          # Run scanner for all Apex and LWC files
-          sf scanner run --format json --target "./**/{*.cls,*.trigger,*.js,*.html,*.css,*.xml}" > debug/full_scan.json || echo "Scanner completed with findings"
+          # Run scanner for Apex files
+          sf scanner run --format json --target "**/*.cls" --target "**/*.trigger" > debug/apex_scan.json || echo "Apex scan completed with findings"
+          # Run scanner for LWC files
+          sf scanner run --format json --target "**/*.js" --target "**/*.html" --target "**/*.css" --target "**/*.xml" > debug/lwc_scan.json || echo "LWC scan completed with findings"
+          # Combine results
+          jq -s '.[0].result + .[1].result | {result: .}' debug/apex_scan.json debug/lwc_scan.json > debug/full_scan.json
 
       - name: Filter Violations by Changed Lines
         run: |
