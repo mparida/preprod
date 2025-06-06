@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+      - name: Install ESLint dependencies
+        run: npm install eslint@latest
 
       - name: Install Salesforce CLI and Code Analyzer v5.1.0
         run: |
