@@ -99,6 +99,14 @@ jobs:
             echo "[]" > debug/lwc_scan.json
           fi
 
+      - name: Print LWC Scan Output
+        run: |
+          echo "=== LWC Scan Output (debug/lwc_scan.json) ==="
+          if [ -s debug/lwc_scan.json ]; then
+            cat debug/lwc_scan.json | jq .
+          else
+            echo "debug/lwc_scan.json is empty or not created"
+          fi
 
 
       - name: Filter Violations by Changed Lines
