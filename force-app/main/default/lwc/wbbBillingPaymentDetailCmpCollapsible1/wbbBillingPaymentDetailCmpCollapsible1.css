@@ -1,0 +1,285 @@
+:host {
+    --cvvPadding: 10px;
+    --btnPadding: 0px;
+    --btnFontSize: 0.8125rem;
+  }
+  .activetabcls {
+    --slds-c-tabs-item-text-color-active : white;
+ }
+  .checkboxs-div {
+    padding-left: 4%;
+  }
+  .paymentDetailSectionsMargin{
+      margin: 16px 0px 0px 0px;
+  }
+  @font-face {
+      font-family: 'Salesforce Sans';
+      src: url('/resource/SalesforceSans/SalesforceSans-Regular.ttf') format('TrueType');
+  }
+  .editButton{
+    color: #000000;
+    margin-top: -25px;
+  }
+  
+  .paddingTopZero {
+      --lwc-spacingXxSmall: 0px;
+  }
+  
+  .borderBox {
+      border: 1px solid #DDDBDA;
+  }
+  
+  .fontclassBody {
+    font-family: 'Salesforce Sans', sans-serif;
+    font-size: 14px;
+    min-height: 60px;
+    padding: 12px;
+  }
+  
+  
+  .borderSection {
+      box-shadow: none;
+      border: 1px solid #DDDBDA;
+      border-radius: 0.25rem;
+  }
+  .payMsgBox {
+      background: #706E6B;
+  }
+  .cvv {
+      box-sizing: border-box;
+      /* Softly blue F7FBFF */
+    background: #f7fbff;
+      /* Strokes & lines DDDBDA */
+    border: 1px solid #dddbda;
+      border-radius: 4px;
+      /* height: 60px; */
+    padding: 0.5vw;
+      display: flex;
+      align-items: center;
+    justify-content: left;
+    margin-bottom: var(--lwc-varSpacingMedium);
+  }
+  .cvvTo {
+    box-sizing: border-box;
+     /* Softly blue F7FBFF */
+   background: #f7fbff;
+     /* Strokes & lines DDDBDA */
+   border: 1px solid #dddbda;
+     border-radius: 4px;
+     /* height: 60px; */
+   padding: 0.5vw;
+   margin-bottom: var(--lwc-varSpacingMedium);
+  }
+  .CVVlabel {
+    padding-top: var(--lwc-varSpacingSmall);
+  }
+  
+  .CVVCardNumber{
+    padding-top: var(--lwc-varSpacingSmall);
+    font-size: 0.75rem;
+  }
+  .padding-right{
+      padding-right: var(--lwc-varSpacingXLarge);
+  }
+  .OTPCardNumber {
+    padding-top: var(--lwc-varSpacingSmall);
+    font-size: 0.75rem;
+  }
+  
+  .CVVsize {
+    font-size: 0.75rem;
+  }
+  
+  .inputCVV {
+    padding-right: var(--cvvPadding);
+  }
+  
+  .buttonFontSize{
+    font-size: var(--btnFontSize);
+  }
+  
+  .btnPadding{
+    padding-right: var(--btnPadding);
+  }
+  .error{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: var(--lwc-varSpacingSmall);
+  gap: 12px;
+  width: 105%;
+  height: 48px;
+  background: #C23934;
+  flex: none;
+  order: 2;
+  align-self: stretch;
+  flex-grow: 0;
+  margin-top: var(--lwc-varSpacingMedium);
+  margin-left:-1rem;
+  }
+  .iconclass{
+    --sds-c-icon-color-foreground-default: white;
+    --sds-c-icon-color-foreground: white;
+  }
+  .textColorError{
+    color: #FFFFFF;
+  }
+  .paymentButtons{
+    margin-bottom: 16px;
+  }
+  .b3{
+    background-color: #706E6B;
+    display: block; 
+    align-items: center;
+    margin-bottom: 12px;/* CDEX-330769 */
+  }
+  .t2{
+    font-size: 13px;
+    color:#FFFFFF;
+    font-family: 'Segoe UI';
+    font-weight: bold;
+    
+  }
+  .t3{
+    font-size: 13px;
+    color:#FFFFFF;
+    font-family: 'Segoe UI';
+    margin-left: 30px;
+  }
+  
+  ul:not(.browser-default) li  {
+      list-style-type: disc;
+  }
+  .t4{ /* SPTSLSATT-13530 */
+    font-size: 13px;
+    color:#FFFFFF;
+    font-family: 'Segoe UI';
+    margin-left:23px; /* CDEX-330769 */
+    margin-top:5px;
+    margin-bottom:5px;
+    font-weight: bold;
+  }
+  /* SPTSLSATT-13530 */
+   @media only screen 
+    and (min-device-width: 768px) 
+    and (max-device-width: 1024px) 
+    and (-webkit-min-device-pixel-ratio: 1){
+      .b3{
+        background-color: #706E6B;
+        display: flex; 
+        align-items: center;
+        margin-bottom: 12px;/* CDEX-330769 */
+      }
+      .t2{
+        font-size: 13px;
+        color:#FFFFFF;
+        font-family: 'SF Pro Display';
+        font-weight: bold;
+        
+      }
+      .t3{
+        font-size: 13px;
+        color:#FFFFFF;
+        font-family: 'SF Pro Display';
+        margin-left: 30px;
+      }
+      .t4{ /* SPTSLSATT-13530 */
+        font-size: 13px;
+        color:#FFFFFF;
+        font-family: 'SF Pro Display';
+        margin-left:23px; /* CDEX-330769 */
+        margin-top:5px;
+        margin-bottom:5px;
+        font-weight: bold;
+      } 
+      /* SPTSLSATT-13530 */
+    }
+  @media only screen and (min-device-width: 0px) and (max-device-width: 1023px) {
+    .activetabcls {
+      --slds-c-tabs-item-text-color-active : white;
+   }
+
+      .editButton{
+          color: #000000;
+          margin-top: -35px;
+  }
+      .b3{
+    background-color: #706E6B;
+    display: block; 
+    align-items: center;
+  }
+      .t2{
+    font-size: 13px;
+    color:#FFFFFF;
+    font-family: 'SF Pro Display';
+    font-weight: bold;
+    
+  }
+  .t3{
+    font-size: 13px;
+    color:#FFFFFF;
+    font-family: 'SF Pro Display';
+    margin-left: 30px;
+      }
+    .paymentButtons{
+      margin-bottom: 16px;
+    }
+  }
+  /*Added for SPTSLSATT-8762*/
+  .voiceMaskingButtonDetail {
+    margin-top: -26px;
+    position: relative;
+    margin-left: 453px;
+  }
+  .voiceMaskingButton {
+    margin-top: -26px;
+    position: relative;
+    margin-left: 453px;
+  }
+   @media only screen 
+    and (min-device-width: 768px) 
+    and (max-device-width: 1024px) 
+    and (-webkit-min-device-pixel-ratio: 1){
+      .b3{
+        background-color: #706E6B;
+        display: flex; 
+        align-items: center;
+      }
+  
+      .warningClass{
+        display:grid; 
+        z-index:0;
+      }
+    }
+  
+  .editButtonwithVoicemaskingbutton{
+    color: #000000;
+    margin-top: -34px;
+  }
+  .cardInfo{
+    font-weight:bold;
+  }
+  .verifyCVV{
+    font-weight:bold;
+  }
+  /*CDEX-312261 - New CSS class added to fix alignment issues Start. */ 
+  .cvvUnEnroll { 
+    box-sizing: border-box; 
+    background: #f7fbff; 
+    border: 1px solid #dddbda;  
+    border-radius: 4px; 
+    padding: 0.5vw;  
+    margin-bottom: var(--lwc-varSpacingMedium); 
+  } 
+  /*CDEX-312261 - New CSS class added to fix alignment issues End. */
+  
+  .aiaAbp{
+    font-size: 13px;
+    color:#FFFFFF;
+    font-family: 'Segoe UI';
+  }
+  
+  .warningClass{
+    display:grid; 
+    z-index:0;
+  }

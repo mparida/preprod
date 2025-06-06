@@ -1,0 +1,44 @@
+.payBillBox{
+    background: #706E6B;
+}
+.hrClass{
+    margin : 0px;
+}
+.editButton{
+    color: #000000;
+    margin-top: -25px;
+  }
+.borderBox {
+    border: 1px solid #DDDBDA;
+}
+.fontclassBody {
+    font-family: 'Salesforce Sans', sans-serif;
+    font-size: 14px;
+    min-height: 60px;
+    padding: 12px;
+}
+.iconstyle{
+    --sds-c-icon-color-foregtound-default:black !important;
+    --sds-c-icon-color-foregtound:black !important;
+    filter: brightness(0) invert(1);
+}
+
+.horizontalLine{
+    width: 105.4%;
+    margin-left: -16px;
+}
+
+.continueButton {
+    display: flex; 
+    justify-content: flex-end; 
+}
+
+  @media only screen and (min-device-width: 0px) and (max-device-width: 1023px) {
+	.editButton{
+        color: #000000;
+        margin-top: -35px;
+    }
+    .continueBtn{
+        margin-top: -5px;
+    }
+}
