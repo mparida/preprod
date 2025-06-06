@@ -3,7 +3,7 @@ engines:
     custom_rulesets:
       - "./custom-rules/pmd/custom-pmd-ruleset.xml"
     file_extensions:
-      apex: true
+      apex: [".cls",".trigger"]
 
   eslint:
     eslint_config_file: "./.eslintrc.json"
@@ -11,4 +11,4 @@ engines:
     disable_lwc_base_config: true
     disable_typescript_base_config: true
     file_extensions:
-      javascript: true
+      javascript: [".js"]
