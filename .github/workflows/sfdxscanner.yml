@@ -33,6 +33,10 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
           sf --version
           sf plugins --core
+      - name: Install ESLint Parser Dependencies
+        run: |
+          npm init -y
+          npm install --save-dev @babel/core @babel/eslint-parser @babel/plugin-syntax-class-properties @babel/plugin-syntax-decorators
 
       - name: Extract Changed Lines
         run: |
