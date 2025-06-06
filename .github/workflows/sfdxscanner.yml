@@ -57,6 +57,20 @@ jobs:
             }' > sfdx-scanner-config.json
           fi
 
+      - name: Create .eslintrc.json
+        run: |
+          cat <<EOF > .eslintrc.json
+          {
+            "extends": ["@salesforce/eslint-config-lwc/recommended"],
+            "plugins": ["@lwc/lwc"],
+            "env": {
+              "browser": true,
+              "es2021": true,
+              "node": true
+            }
+          }
+          EOF
+
       - name: Extract Changed Lines
         run: |
           mkdir -p results
