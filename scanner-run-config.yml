@@ -1,16 +1,14 @@
+log_level: INFO
+
 engines:
   pmd:
-    enabled: true
-    targetPatterns:
-      - "force-app/**/*.cls"
-      - "force-app/**/*.trigger"
     rulesets:
       - "./custom-rules/pmd/custom-pmd-ruleset.xml"
+    file_extensions:
+      - .cls
+      - .trigger
 
   eslint:
-    enabled: true
-    targetPatterns:
-      - "force-app/**/*.js"
-    config: "./.eslintrc.json"
-
-log_level: INFO
+    eslint_config_file: "./.eslintrc.json"
+    file_extensions:
+      - .js
