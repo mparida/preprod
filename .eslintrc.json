@@ -1,16 +1,16 @@
 {
   "root": true,
-  "env": {
-    "browser": true,
-    "node": true,
-    "es2021": true
-  },
   "parser": "@babel/eslint-parser",
   "parserOptions": {
     "requireConfigFile": false,
     "babelOptions": {
       "plugins": ["@babel/plugin-syntax-class-properties", "@babel/plugin-syntax-decorators"]
     }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
   },
   "rules": {
     "no-console": "warn",
