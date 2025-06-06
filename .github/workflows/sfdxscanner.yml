@@ -58,14 +58,41 @@ jobs:
             }
           ' > results/changed_lines.txt
 
-      - name: Run SFDX Scanner for Apex and LWC
+      - name: Run SFDX Scanner for Apex and LWC (Committed Files Only)
         run: |
           mkdir -p debug
-          # Apex scan (PMD engine)
-          sf scanner run --target "**/*.cls" --target "**/*.trigger" --format json --engine pmd --outfile debug/apex_scan.json || echo "Apex scan complete with or without findings"
-          
-          # LWC scan (ESLint engine, JS/HTML/CSS)
-          sf scanner run --target "**/*.js" --target "**/*.html" --target "**/*.css" --format json --engine eslint --outfile debug/lwc_scan.json || echo "LWC scan complete with or without findings"
+          apex_files=()
+          lwc_files=()
+
+          # Read changed file paths
+          while read -r line; do
+            if [[ "$line" == FILE:* ]]; then
+              file="${line#FILE:}"
+              if [[ "$file" == *.cls || "$file" == *.trigger ]]; then
+                apex_files+=("$file")
+              elif [[ "$file" == *.js || "$file" == *.html || "$file" == *.css ]]; then
+                lwc_files+=("$file")
+              fi
+            fi
+          done < results/changed_lines.txt
+
+          # Run Apex scan if files exist
+          if [ ${#apex_files[@]} -gt 0 ]; then
+            echo "Running Apex scan on committed files only"
+            sf scanner run --format json --engine pmd --target "${apex_files[@]}" --outfile debug/apex_scan.json || echo "Apex scan complete"
+          else
+            echo "No Apex files changed in this commit"
+            echo "[]" > debug/apex_scan.json
+          fi
+
+          # Run LWC scan if files exist
+          if [ ${#lwc_files[@]} -gt 0 ]; then
+            echo "Running LWC scan on committed files only"
+            sf scanner run --format json --engine eslint --target "${lwc_files[@]}" --outfile debug/lwc_scan.json || echo "LWC scan complete"
+          else
+            echo "No LWC files changed in this commit"
+            echo "[]" > debug/lwc_scan.json
+          fi
 
 
       - name: Filter Violations by Changed Lines
