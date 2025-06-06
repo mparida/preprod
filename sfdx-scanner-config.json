@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "pmd": {
+      "enabled": true,
+      "rulesets": [
+        "./custom-rules/pmd/custom-pmd-ruleset.xml"
+      ]
+    },
+    "eslint": {
+      "enabled": true
+    }
+  },
+  "engines": {
+    "eslint": {
+      "auto_discover_eslint_config": true
+    }
+  }
+}
