@@ -1,28 +1,3 @@
 {
-  "root": true,
-  "parser": "@babel/eslint-parser",
-  "parserOptions": {
-    "requireConfigFile": false,
-    "babelOptions": {
-      "plugins": ["@babel/plugin-syntax-class-properties", "@babel/plugin-syntax-decorators"]
-    }
-  },
-  "env": {
-    "browser": true,
-    "node": true,
-    "es2021": true
-  },
-  "rules": {
-    "no-console": "warn",
-    "no-unused-vars": "error"
-  },
-  "globals": {
-    "$A": "readonly",
-    "Lightning": "readonly",
-    "Browser": "readonly",
-    "ContentAsset": "readonly",
-    "Label": "readonly",
-    "Locale": "readonly",
-    "Resource": "readonly"
-  }
+  "extends": "@salesforce/eslint-config-lwc"
 }
