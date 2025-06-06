@@ -1,28 +1,9 @@
 {
-  "root": true,
-  "extends": [
-    "eslint:recommended"
-  ],
-  "plugins": [
-    "@lwc/eslint-plugin-lwc"
-  ],
-  "rules": {
-    "@lwc/lwc/no-async-await": "warn",
-    "no-console": "warn",
-    "no-unused-vars": "error"
-  },
+  "extends": ["@salesforce/eslint-config-lwc/recommended"],
+  "plugins": ["@lwc/lwc"],
   "env": {
     "browser": true,
     "es2021": true,
     "node": true
-  },
-  "globals": {
-    "$A": "readonly",
-    "Lightning": "readonly",
-    "Browser": "readonly",
-    "ContentAsset": "readonly",
-    "Label": "readonly",
-    "Locale": "readonly",
-    "Resource": "readonly"
   }
 }
