@@ -26,31 +26,18 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Salesforce CLI and Scanner
+      - name: Install Salesforce CLI and Code Analyzer v5.1.0
         run: |
           npm install --global @salesforce/cli@latest
-          sf plugins install @salesforce/plugin-code-analyzer@latest
+          sf plugins install @salesforce/plugin-code-analyzer@5.1.0
           sudo apt-get update && sudo apt-get install -y jq
           sf --version
           sf plugins --core
 
-      - name: Create .eslintrc.json
-        run: |
-          cat <<EOF > .eslintrc.json
-          {
-            "extends": ["@salesforce/eslint-config-lwc/recommended"],
-            "plugins": ["@lwc/lwc"],
-            "env": {
-              "browser": true,
-              "es2021": true,
-              "node": true
-            }
-          }
-          EOF
-
       - name: Extract Changed Lines
         run: |
           mkdir -p results
+          echo "Extracting changed lines for commit: ${{ github.event.inputs.commitId }}"
           git show --unified=0 -w ${{ github.event.inputs.commitId }} | awk '
             /^diff --git/ {
               if (filename) print "";
@@ -71,9 +58,9 @@ jobs:
             }
           ' > results/changed_lines.txt
 
-      - name: Run Scans on Changed Files
+      - name: Run Code Analyzer on Changed Lines
         run: |
-          mkdir -p debug results
+          mkdir -p debug
           echo "[]" > results/output.json
           echo "" > debug/filtered.json
 
@@ -81,21 +68,38 @@ jobs:
           while read -r line; do
             if [[ "$line" == FILE:* ]]; then
               if [[ -n "$current_file" && -f "$current_file" ]]; then
+                echo "Processing $current_file with lines: ${changed_lines[*]}"
                 ext="${current_file##*.}"
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
 
-                if [[ "$ext" == "cls" || "$ext" == "trigger" ]]; then
-                  sf scanner run --target "$current_file" --engine pmd --format json --outfile "debug/raw_${current_file//\//_}.json"
-                elif [[ "$ext" == "js" ]]; then
-                  npx eslint "$current_file" -f json -c .eslintrc.json > "debug/raw_${current_file//\//_}.json"
-                fi
+                sf code-analyzer run --target "$current_file" --engine pmd,eslint --format json --config sfdx-scanner-config.json --outfile "debug/raw_${current_file//\//_}.json"
 
-                if jq -e '.[0].messages? or .violations? or .results[0].violations?' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+                if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
                   jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                    .[0].messages? // .violations? // .results[0].violations // [] |
-                    map(select((.line | tonumber) as $line | $changed | index($line) != null)) |
-                    select(length > 0) |
-                    {filePath: $original_path, violations: .}
+                    {
+                      filePath: $original_path,
+                      violations: [
+                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                      ]
+                    } | select(.violations | length > 0)
+                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
+                    .[0] | {
+                      filePath: $original_path,
+                      violations: [
+                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                      ]
+                    } | select(.violations | length > 0)
+                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+                elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
+                    .results[0] | {
+                      filePath: $original_path,
+                      violations: [
+                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                      ]
+                    } | select(.violations | length > 0)
                   ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
                 fi
               fi
@@ -107,19 +111,38 @@ jobs:
           done < results/changed_lines.txt
 
           if [[ -n "$current_file" && -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
+            echo "Processing last file $current_file with lines: ${changed_lines[*]}"
             ext="${current_file##*.}"
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-            if [[ "$ext" == "cls" || "$ext" == "trigger" ]]; then
-              sf scanner run --target "$current_file" --engine pmd --format json --outfile "debug/raw_${current_file//\//_}.json"
-            elif [[ "$ext" == "js" ]]; then
-              npx eslint "$current_file" -f json -c .eslintrc.json > "debug/raw_${current_file//\//_}.json"
-            fi
-            if jq -e '.[0].messages? or .violations? or .results[0].violations?' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+
+            sf code-analyzer run --target "$current_file" --engine pmd,eslint --format json --config sfdx-scanner-config.json --outfile "debug/raw_${current_file//\//_}.json"
+
+            if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
               jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                .[0].messages? // .violations? // .results[0].violations // [] |
-                map(select((.line | tonumber) as $line | $changed | index($line) != null)) |
-                select(length > 0) |
-                {filePath: $original_path, violations: .}
+                {
+                  filePath: $original_path,
+                  violations: [
+                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                  ]
+                } | select(.violations | length > 0)
+              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+            elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
+                .[0] | {
+                  filePath: $original_path,
+                  violations: [
+                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                  ]
+                } | select(.violations | length > 0)
+              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
+            elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
+              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
+                .results[0] | {
+                  filePath: $original_path,
+                  violations: [
+                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                  ]
+                } | select(.violations | length > 0)
               ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
             fi
           fi
@@ -130,6 +153,15 @@ jobs:
           else
             echo "[]" > results/output.json
           fi
+
+      - name: Debug Output Files
+        run: |
+          echo "=== Changed Lines ==="
+          cat results/changed_lines.txt
+          echo "=== Output JSON ==="
+          cat results/output.json || echo "No output.json found"
+          echo "=== Payload JSON ==="
+          cat payload.json || echo "No payload.json found"
 
       - name: Prepare Payload
         run: |
