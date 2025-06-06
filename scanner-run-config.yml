@@ -1,14 +1,36 @@
-engines:
-  pmd:
-    custom_rulesets:
-      - "./custom-rules/pmd/custom-pmd-ruleset.xml"
-    file_extensions:
-      apex: [".cls",".trigger"]
+scanner:
+  engines:
+    eslint:
+      enabled: true
+      config: ./.eslintrc.json
+      file_extensions:
+        javascript: [".js", ".ts", ".js-meta.xml"]
+      env:
+        node: true
+      options: "--resolve-plugins-relative-to ."
+      exclude:
+        - "**/node_modules/**"
+        - "**/staticresources/**"
+        - "**/__tests__/**"
 
-  eslint:
-    eslint_config_file: "./.eslintrc.json"
-    disable_javascript_base_config: true
-    disable_lwc_base_config: true
-    disable_typescript_base_config: true
-    file_extensions:
-      javascript: [".js"]
+    pmd:
+      enabled: true
+      rulesets: "./custom-rules/pmd/custom-pmd-ruleset.xml"
+      file_extensions:
+        apex: [".cls", ".trigger"]
+      exclude:
+        - "**/Test.cls"
+        - "**/*Test.cls"
+      version: "6.55.0"
+
+  project:
+    sourcePaths:
+      - "force-app/main/default"
+    apiVersion: "58.0"
+
+  general:
+    workingDirectory: .
+    failOnError: false
+    output:
+      format: "json"
+      path: "debug/"
