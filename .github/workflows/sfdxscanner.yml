@@ -85,14 +85,20 @@ jobs:
             echo "[]" > debug/apex_scan.json
           fi
 
-          # Run LWC scan if files exist
+          # Run LWC scan using sfdx scanner (ESLint engine)
           if [ ${#lwc_files[@]} -gt 0 ]; then
-            echo "Running LWC scan on committed files only"
-            sf scanner run --format json --engine eslint --target "${lwc_files[@]}" --outfile debug/lwc_scan.json || echo "LWC scan complete"
+            echo "Running LWC scan on committed JS files only"
+            
+            echo "Files being scanned:"
+            printf '%s\n' "${lwc_files[@]}"
+          
+            # Run the scanner only on committed .js files
+            sf scanner run --engine eslint --format json --target "${lwc_files[@]}" --outfile debug/lwc_scan.json || echo "LWC scan completed with violations"
           else
-            echo "No LWC files changed in this commit"
+            echo "No LWC JS files changed in this commit"
             echo "[]" > debug/lwc_scan.json
           fi
+
 
 
       - name: Filter Violations by Changed Lines
