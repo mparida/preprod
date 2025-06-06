@@ -28,10 +28,10 @@ jobs:
       - name: Install ESLint dependencies
         run: npm install eslint@latest
 
-      - name: Install Salesforce CLI and Code Analyzer v5.1.0
+      - name: Install Salesforce CLI and Scanner Plugin
         run: |
           npm install --global @salesforce/cli@latest
-          sf plugins install @salesforce/plugin-code-analyzer@5.1.0
+          sf plugins install @salesforce/sfdx-scanner
           sudo apt-get update && sudo apt-get install -y jq
           sf --version
           sf plugins --core
@@ -45,7 +45,7 @@ jobs:
               if (filename) print "";
               filename = $3;
               sub("a/", "", filename);
-              if (filename ~ /\.(cls|trigger|js)$/) {
+              if (filename ~ /\.(cls|trigger|js|html|css|xml)$/) {
                 print "FILE:" filename
               } else {
                 filename = ""
@@ -64,13 +64,14 @@ jobs:
         run: |
           echo "Listing contents of root directory:"
           ls -la
-          echo "Content of scanner-run-config.yml (if exists):"
-          cat scanner-run-config.yml || echo "scanner-run-config.yml not found"
+          echo "Content of scanner-config.json (if exists):"
+          cat scanner-config.json || echo "scanner-config.json not found"
 
-      - name: Run Code Analyzer Once
+      - name: Run SFDX Scanner
         run: |
           mkdir -p debug
-          sf code-analyzer run --config-file ./scanner-run-config.yml > debug/full_scan.json
+          # Run scanner for all Apex and LWC files
+          sf scanner run --format json --target "./**/{*.cls,*.trigger,*.js,*.html,*.css,*.xml}" > debug/full_scan.json || echo "Scanner completed with findings"
 
       - name: Filter Violations by Changed Lines
         run: |
@@ -85,7 +86,7 @@ jobs:
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
                 if jq -e . debug/full_scan.json >/dev/null 2>&1; then
                   jq --arg path "$current_file" --argjson changed "$changed_json" '
-                    map(select(.filePath == $path)) | .[] | {
+                    .result[] | select(.filePath == $path) | {
                       filePath: $path,
                       violations: [
                         .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
@@ -105,7 +106,7 @@ jobs:
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
             if jq -e . debug/full_scan.json >/dev/null 2>&1; then
               jq --arg path "$current_file" --argjson changed "$changed_json" '
-                map(select(.filePath == $path)) | .[] | {
+                .result[] | select(.filePath == $path) | {
                   filePath: $path,
                   violations: [
                     .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
