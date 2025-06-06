@@ -65,65 +65,61 @@ jobs:
           echo "Content of scanner-config.json (if exists):"
           cat scanner-config.json || echo "scanner-config.json not found"
 
-      - name: Run SFDX Scanner for Apex and LWC
-        run: |
-          mkdir -p debug
-          # Run scanner for Apex files
-          sf scanner run --format json --target "**/*.cls" --target "**/*.trigger" > debug/apex_scan.json || echo "Apex scan completed with findings"
-          # Run scanner for LWC files
-          sf scanner run --format json --target "**/*.js" --target "**/*.html" --target "**/*.css" --target "**/*.xml" > debug/lwc_scan.json || echo "LWC scan completed with findings"
-          # Combine results
-          jq -s '.[0].result + .[1].result | {result: .}' debug/apex_scan.json debug/lwc_scan.json > debug/full_scan.json
+            - name: Run SFDX Scanner for Apex and LWC
+              run: |
+                mkdir -p debug
+                # Apex scan (PMD engine)
+                sf scanner run --target "**/*.cls" --target "**/*.trigger" --format json --engine pmd --outfile debug/apex_scan.json || echo "Apex scan complete with or without findings"
+                
+                # LWC scan (ESLint engine, JS/HTML/CSS)
+                sf scanner run --target "**/*.js" --target "**/*.html" --target "**/*.css" --format json --engine eslint --outfile debug/lwc_scan.json || echo "LWC scan complete with or without findings"
 
-      - name: Filter Violations by Changed Lines
-        run: |
-          echo "[]" > results/output.json
-          echo "[]" > debug/filtered.json
 
-          current_file=""
-          changed_lines=()
-          while read -r line; do
-            if [[ "$line" == FILE:* ]]; then
-              if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
-                changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-                if jq -e . debug/full_scan.json >/dev/null 2>&1; then
-                  jq --arg path "$current_file" --argjson changed "$changed_json" '
-                    .result[] | select(.filePath == $path) | {
-                      filePath: $path,
-                      violations: [
-                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                      ]
-                    } | select(.violations | length > 0)
-                  ' debug/full_scan.json >> debug/filtered.json
+            - name: Filter Violations by Changed Lines
+              run: |
+                echo "[]" > debug/filtered.json
+                current_file=""
+                changed_lines=()
+      
+                while read -r line; do
+                  if [[ "$line" == FILE:* ]]; then
+                    if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
+                      changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
+                      for scan_file in debug/apex_scan.json debug/lwc_scan.json; do
+                        jq --arg path "$current_file" --argjson changed "$changed_json" '
+                          .[] | select(.filePath == $path) | {
+                            filePath: $path,
+                            violations: [
+                              .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                            ]
+                          } | select(.violations | length > 0)
+                        ' "$scan_file" >> debug/filtered.json || true
+                      done
+                    fi
+                    current_file="${line#FILE:}"
+                    changed_lines=()
+                  elif [[ "$line" == LINE:* ]]; then
+                    changed_lines+=("${line#LINE:}")
+                  fi
+                done < results/changed_lines.txt
+      
+                # Process last file
+                if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
+                  changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
+                  for scan_file in debug/apex_scan.json debug/lwc_scan.json; do
+                    jq --arg path "$current_file" --argjson changed "$changed_json" '
+                      .[] | select(.filePath == $path) | {
+                        filePath: $path,
+                        violations: [
+                          .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                        ]
+                      } | select(.violations | length > 0)
+                    ' "$scan_file" >> debug/filtered.json || true
+                  done
                 fi
-              fi
-              current_file="${line#FILE:}"
-              changed_lines=()
-            elif [[ "$line" == LINE:* ]]; then
-              changed_lines+=("${line#LINE:}")
-            fi
-          done < results/changed_lines.txt
+      
+                jq -s '.' debug/filtered.json > results/output.json
 
-          if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
-            changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-            if jq -e . debug/full_scan.json >/dev/null 2>&1; then
-              jq --arg path "$current_file" --argjson changed "$changed_json" '
-                .result[] | select(.filePath == $path) | {
-                  filePath: $path,
-                  violations: [
-                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                  ]
-                } | select(.violations | length > 0)
-              ' debug/full_scan.json >> debug/filtered.json
-            fi
-          fi
-
-          if [[ -s debug/filtered.json ]]; then
-            jq -c '.' debug/filtered.json > debug/filtered_line.json
-            jq -s '.' debug/filtered_line.json > results/output.json
-          else
-            echo "[]" > results/output.json
-          fi
 
       - name: Debug Output Files
         run: |
