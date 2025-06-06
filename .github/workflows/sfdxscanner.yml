@@ -72,7 +72,7 @@ jobs:
                 ext="${current_file##*.}"
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
 
-                sf code-analyzer run --target "$current_file" --engine pmd,eslint --format json --config sfdx-scanner-config.json --outfile "debug/raw_${current_file//\//_}.json"
+                sf code-analyzer run --config-file scanner-run-config.yml > "debug/raw_${current_file//\//_}.json"
 
                 if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
                   jq --arg original_path "$current_file" --argjson changed "$changed_json" '
