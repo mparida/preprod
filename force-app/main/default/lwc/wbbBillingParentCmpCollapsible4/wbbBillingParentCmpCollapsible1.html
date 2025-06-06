@@ -1,0 +1,263 @@
+<template>
+    <!--CCSTSP-424 Start-->
+    <template if:true={isLoading}>
+        <c-reusable-spinner-utility if:true={isLoadingNextPage}
+            show-modal-spinner={showModalSpinnerPrt}></c-reusable-spinner-utility>
+        <div class="slds-var-p-horizontal_large fontSet slds-p-bottom_medium">
+            <!--CCSTSP-424 End-->
+            <template if:true={resumeService}>
+                <div class="slds-col slds-size_1-of-6 slds-p-top_medium slds-p-bottom_medium">
+                    <c-service-address-display content={serviceAddress1} other-info={serviceAddress2}
+                        oneditserviceaddress={showAddressPage} show-edit-icon={editServiceAddress}>
+                    </c-service-address-display>
+                </div>
+                <c-navigation-util></c-navigation-util>
+                <div
+                    class="slds-col slds-size_5-of-6 slds-align_absolute-center slds-p-vertical_x-large slds-m-bottom_xx-small fontStyle">
+                    <span class="header-text__bold">Billing:&nbsp;</span>Account:&nbsp;<a
+                        onclick={navigateToAccount}>{accountNumberHeaderText}</a>
+                </div>
+            </template>
+
+            <template if:false={resumeService}>
+                <div class="slds-align_absolute-center slds-p-vertical_x-large slds-m-bottom_xx-small fontStyle">
+                    {label.billingPageTitle}
+                </div>
+            </template>
+
+            <div class="slds-var-p-horizontal_small sectionsWidth">
+                <template if:true={myDetails}>
+                    <c-reusable-status-message-cmp message-label={errorMessageLabel} message-icon={errorMessageIcon}
+                        message-background={errorMessageBackground} is-close-btn-required={isCloseBtnRequired}
+                        timeout-required={timeoutRequired} onmyevent={hideSuccessMessage}
+                        onclosewarning={hideSuccessMessage}></c-reusable-status-message-cmp>
+                </template>
+                <div data-id="topErrorDiv">
+                    <template if:true={showTopError}>
+                        <c-reusable-status-message-cmp message-label={errorMessageLabel} message-icon={errorMessageIcon}
+                            message-background={errorMessageBackground} is-close-btn-required={isCloseBtnRequired}
+                            timeout-required={timeoutRequired} onmyevent={hideSuccessMessage}
+                            onclosewarning={hideSuccessMessage}>
+                        </c-reusable-status-message-cmp>
+                    </template>
+                </div>
+            </div>
+
+            <!--Billing Details Section-->
+            <div class="slds-var-p-horizontal_small slds-m-bottom_medium sectionsWidth">
+                <c-wbb-billing-address-details-cmp-collapsible original-city={originalCity}
+                    original-state={originalState} original-address1={originalAddress1}
+                    original-address2={originalAddress2} original-zip-code={originalZipCode}
+                    billing-address-place-id-value={billingAddressPlaceId} section-data={billingSectionData}
+                    customer-type={customerType} flow-name={flowName} product-type={productType}
+                    interaction-id={recordId} onaddressmatchvalidationbilling={addressMatchValidationParent}
+                    oneditclick={onEditClick} oncontinueclick={onContinueClick} migration-from={migrationFrom}
+                    ban-id={props.customer.interactionDetails.BAN} is-existing-customer={isExistingCustomer}
+                    all-product-order-line-item-id-list={allProductOrderLineItemIdList} cart-id={cartId} uuid={uuid}
+                    interaction-record-id-value={interactionRecordIdValue}
+                    billing-edit-button-variant={billingEditButtonVariant}>
+                </c-wbb-billing-address-details-cmp-collapsible>
+            </div>
+            <!--Payment Method Section-->
+            <!-- SPTSLSDEL-4510 adding  attribute prepayment-charges & other-charges -->
+
+            <!--Security Information Start -->
+            <template if:true={showSecuritySection}>
+                <div class="slds-var-p-horizontal_small slds-m-bottom_medium sectionsWidth">
+                    <c-wbb-security-information-section-cmp-collapsible
+                        security-info-section-data={securityInfoSectionData} cart-id={cartId} uu-id={uuid}
+                        interaction-record-id-value={interactionRecordIdValue} ban-id={getBan} record-id={recordId}
+                        oneditclick={onEditClick} oncontinueclick={onContinueClick}
+                        onissecurityinformationchanged={handleSecurityInformation} card-captured={cardCaptured}
+                        show-secure-payment-section={showSecurePaymentSection} prefetched-data={prefetchedData}>
+                        <!-- SPTSLSATT-20805 : sk9969 04/03 -->
+                    </c-wbb-security-information-section-cmp-collapsible>
+                </div>
+            </template>
+            <!--Security Information End -->
+
+            <!--Billing Perference Start -->
+            <template if:true={showBillingPerfrences}>
+                <div class="slds-var-p-horizontal_small slds-m-bottom_medium sectionsWidth">
+                    <c-wbb-billing-preferences-cmp-collapsible
+                        record-id={recordId}
+                        billing-preferences-section-data={billingPreferenceSectionData} product-type={productType}
+                        oncontinueclick={onContinueClick} oneditclick={onEditClick}
+                        onispaperlessbillingchanged={handlePaperlessBillingChanged} 
+                        onenrollpaperlessbillingcheckbox={paperlessBillingCheckbox} 
+                        onenrollautopaycheckboxval={EnrollAutopayCheckboxHandler}
+                        onispaymenttermschangedparent={handlePaymentTermsChanged}
+                        supplied-values={suppliedValues}>
+                    </c-wbb-billing-preferences-cmp-collapsible>
+                </div>
+            </template>
+            <!--Billing Perference  End -->
+
+             <!--Terms Conidtion Start   -->
+             <template if:true={showTermsConditionsection}>
+                <div class="slds-var-p-horizontal_small slds-m-bottom_medium sectionsWidth">
+                    <c-wbb-terms-condition-parent-cmp-collapsible store-id-for-child={storeIdForChild} 
+                     onsendtermsdetailsparent={handleBillingTnCDetailsParent}
+                     oneditclick={onEditClick} terms-and-conditions-section-data={termsAndConditionsSectionData} 
+                     record-id={interactionRecordIdValue} uuid={uuid} cart-id={cartId} 
+                     ontermsconditioncheckboxvalue ={TermsConditionsHandler}  terms-consent={termsConsent}  
+                     flow-name={flowName} onsigncheck={handleSignCheck} onpopupwindowclose ={handleButtons} 
+                     product-sub-category-aia={productSubCategoryAIA} product-sub-category-bb={productSubCategoryBB} 
+                     is-retail={isRetail} is-centers={isCenters} show-billing-terms={showBillingTerms} 
+                     onupdatingtermsandconditionssectiondata ={updatingTncFlag} onbillingtermscontinueenable={billingTermContinueHandler} 
+                     oncontinuedisable={handleContinueDisable} is-disable-tnc-on-customer-device={isDisableTncOnCustomerDevice} 
+                     onbillingtermschangedparent={handleBillingTermsChangedParent} section-data-track={sectionDataTrack} 
+                     oncontinuedisablecollapview={handleContinueDisableCollapview} ondataforanalytics={handleDataOnAnalytics}
+                     enroll-paperless-billing-check-box-val={enrollPaperlessBillingCheckBoxVal} onistncaccepted={handleTncUpdate} 
+                     is-tnc-reacceptance-required={isTncReacceptanceRequired}
+                     authorization-json={authorizationJson} billing-account-number={billingAccountNumber} billing-account-id={billingAccountId}
+                     business-keys={paymentBusinessKeys} payment-term-toast={paymentTermToast} is-new-billing-page-enabled={isNewBillingPageEnabled}>
+                     </c-wbb-terms-condition-parent-cmp-collapsible>
+                    </div>
+             </template>
+            <!--Terms Conidtion End   -->
+
+            <!--Paymant Details Start   -->
+            <template if:true={showPaymentSection}>
+            <template if:true={displayPaymentDetailSection}>
+                <div class="slds-var-p-horizontal_small slds-m-bottom_medium sectionsWidth">
+                            <c-wbb-billing-payment-detail-cmp-collapsible
+                            payment-detail-section-data={paymentDetailSectionData}
+                            business-keysfrom-metadata={businessKeysfromMetadata}
+                            payment-business-keys={paymentBusinessKeys}
+                            flow-name={flowName}
+                            onshowresponsemessage={showResponseMessage}
+                            show-secure-payment-section={showSecurePaymentSection}
+                            onhandlesecurepaymentcompleted={handleSecurePaymentCompleted}
+                            onparentbankaccountselected={parentbankaccountselected} 
+                            onbuttonselection={handletoggle} 
+                            show-toast-error={showToastError}
+                            show-toast-autopay={showToastErrorAutopay}
+                            onotpfilterlist={handleFilterList}   
+                            onselectedoption={handleSelectedOption}
+                            onsavecarddata={handleSavedData} 
+                            payment-type-method-button-required={paymentTypeMethodButtonRequired}
+                            onclosewarningclick={closewarningclick}
+                            onnewentryfill={checkNewEntryWarning}
+                            onexpiredcardactiveparent={handleButtonFunctionality}
+                            ondisregardotplist={ignoreOTPUserSelection}
+                            onotpchecked={oneTimePaymentCheck}
+                            onsavecarddataonetime={handleSavedDataForOneTime}
+                            error-message-label={errorMessageLabel}
+                            error-message-label-one-time={errorMessageLabelOneTime} 
+                            error-message-icon={errorMessageIcon} 
+                            error-message-background={errorMessageBackground}
+                            show-alert={showAlert}
+                            show-alert-one-time={showAlertOneTime} final-data ={finalData}
+                            onautopayselection={payMethodId}
+                            onotpselection ={otpMethodId}
+                            status-message={statusMessage}
+                            success-flag={successFlag}
+                            new-card-selected-for-o-t-p={newCardSelectedForOTP}
+                            store-one-time-payment-profile={storeOneTimePaymentProfile}
+                            user-selected-o-t-p-c-heck={userSelectedOTPCHeck}
+                            ondateinsertedpnt={handleCardDetails} 
+                            oncardinsertedpnt={handleCardDetails}
+                            onzipinsertedpnt={handleCardDetails} 
+                            onholderinsertedpnt={handleCardDetails}
+                            oncodeinsertedpnt={handleCardDetails}
+                            ondateemptypnt={handleCardDetails} 
+                            oncardemptypnt={handleCardDetails}
+                            onzipemptypnt={handleCardDetails} 
+                            onholderemptypnt={handleCardDetails}
+                            oncodeemptypnt={handleCardDetails}
+                            onbanktypepnt={handleBankDetails}
+                            onbankacctpnt={handleBankDetails}
+                            onbankacctrnpnt={handleBankDetails}
+                            onbankacctanpnt={handleBankDetails}
+                            onbankacctemptypnt={handleBankDetails}
+                            onbankacctrnemprypnt={handleBankDetails}
+                            onbankacctanemprypnt={handleBankDetails}
+                            onperipheralbtnclick={handlePeripheralbtnClick}
+                            show-error={getError}
+                            update-error-field-name={updateErrorFieldName}
+                            timeout-required={timeoutRequired} 
+                            is-close-btn-required={isCloseBtnRequired}
+                            show-loading-spinner={parentSpinner}
+                            show-loading-spinner-o-t-p={parentSpinnerOTP}
+                            prepayment-message={label.prepaymentMessage}
+                            pre-payment-charges={oneTimeCharges}
+                            adv-pay={advPay}
+                            pro-ration-amount-msg={label.proRationAmountMsg}
+                            prorated-charges={strProrationAmount}
+                            is-one-time-payment-checkbox={userSelectedOTPCHeck}
+                            ot-payment-method-id={otpMethodIdParent}
+                            record-id={recordId}
+                            show-peripheral={showPeripheral}
+                            peripheral-parameters={props.peripheralParameters}
+                            show-peripheral-card={showPeripheralRC}
+                            show-peripheral-oc-check={showPeripheralOC}
+                            prefetched-data={prefetchedData}
+                            ban={getBan}
+                            hide-abp={clearOutABPandHideABP}
+                            copy-abp-to-otp={copyDataFromABPToOTPandHideABP}
+                            display-otp-hide-abp={displayOTPSectionandHideABP}
+                            display-abp={enrollInAutoPaycheckbox}
+                            onperipheralpaymentid={handlePeripheralPaymentId}
+                            interaction-record-id-value={interactionRecordIdValue} patching-details={patchingDetails} terms-and-payment={termsAndPayment} enroll-in-auto-paycheckbox={enrollInAutoPaycheckbox} cart-id={cartId}
+                            original-individual-id={originalIndividualId} oneditclick={onEditClick} oncontinueclick={onContinueClick}
+                            onisraisractive={handleRaisrStatus}
+                            product-type={productType}  agent-id={c__userId}
+                            is-payment-retrival-required={isPaymentRetrivalRequired}
+                            is-ach-retail-feature-flag-enabled={isAchRetailFeatureFlagEnabled}
+                            is-retail={isRetail} is-centers={isCenters}>
+                            </c-wbb-billing-payment-detail-cmp-collapsible>
+                </div>
+            </template>
+            </template>
+            <!--Paymant Details End   -->
+
+            <div class="slds-var-p-horizontal_small slds-p-top_medium sectionsWidth">
+                <c-read-aloud-framework -section="BuyFlow_KT_BillingInformation"
+                    context-map={props.readAloudContext}></c-read-aloud-framework>
+                <!-- added context-map SPTSLSDEL-29058-->
+            </div>
+        </div>
+
+        <div class="hideDiv"></div>
+
+        <div class="buttonAlignment">
+            <lightning-button label="Back" onclick={backClickHandler} disabled={disableBackButton}
+                class="buttonAlignment_back"></lightning-button>
+            <!--CDEX-359025 CCSTSP-1352 WLS Added BackButton Disabled-->
+            <lightning-button label="Continue" disabled={disableButton} variant="Brand" onclick={executeContinueButton}
+                class="buttonAlignment_continue"></lightning-button>
+        </div>
+
+        <template if:true={isModalOpen}>
+            <c-wbb-back-screen-cmp onclosetabback={backScreenAction}
+                onclosemodal={closeModalParent}></c-wbb-back-screen-cmp>
+        </template>
+    </template>
+
+    <template if:false={isLoading}>
+        <c-reusable-spinner-utility show-modal-spinner={showModalSpinnerPrt}></c-reusable-spinner-utility>
+        <!--CCSTSP-424-->
+    </template>
+
+    <!-- Show Toast Message For Any Error in Payment AUthorization API #8684-->
+    <c-wbb-toast-message-for-iso style={styleForToast}
+        close-error-toast={closeErrorToast}></c-wbb-toast-message-for-iso>
+
+    <div>
+        <c-reusable-encryption-component onencript={handleEncrypt}></c-reusable-encryption-component>
+    </div>
+    <template if:true={showPeripheralBlocker}>
+        <c-buy-flow-peripheral-blocker-modal is-body-message-center="true" onclose={handleCancelTransaction}
+            onmodalbuttonclick={handleCancelTransaction}>
+        </c-buy-flow-peripheral-blocker-modal>
+    </template>
+    <!-- Edit Modal Popup -->
+    <div>
+        <template if:true={boolEditPopup}>
+            <c-wbb-set-up-billing-edit-modal-popup oncontinueeditoptout={handleEditOptOut}
+                oncanceleditoptout={handleEditOptOut}>
+            </c-wbb-set-up-billing-edit-modal-popup>
+        </template>
+    </div>
+</template>
