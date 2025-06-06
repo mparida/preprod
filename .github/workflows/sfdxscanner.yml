@@ -80,7 +80,7 @@ jobs:
               if (filename) print "";
               filename = $3;
               sub("a/", "", filename);
-              if (filename ~ /\.(cls|trigger|js|html|cmp|app|page|evt|design|tokens|auradoc|svg|css)$/) {
+              if (filename ~ /\.(cls|trigger|js)$/) {
                 print "FILE:" filename
               } else {
                 filename = ""
