@@ -58,49 +58,29 @@ jobs:
             }
           ' > results/changed_lines.txt
 
-      - name: Run Code Analyzer on Changed Lines
+      - name: Run Code Analyzer Once
         run: |
           mkdir -p debug
+          sf code-analyzer run --config-file scanner-run-config.yml > debug/full_scan.json
+
+      - name: Filter Violations by Changed Lines
+        run: |
           echo "[]" > results/output.json
           echo "" > debug/filtered.json
 
           current_file=""
           while read -r line; do
             if [[ "$line" == FILE:* ]]; then
-              if [[ -n "$current_file" && -f "$current_file" ]]; then
-                echo "Processing $current_file with lines: ${changed_lines[*]}"
+              if [[ -n "$current_file" ]]; then
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-
-                sf code-analyzer run --config-file ./scanner-run-config.yml > "debug/raw_${current_file//\//_}.json"
-
-                if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                    {
-                      filePath: $original_path,
-                      violations: [
-                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                      ]
-                    } | select(.violations | length > 0)
-                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
-                elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                    .[0] | {
-                      filePath: $original_path,
-                      violations: [
-                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                      ]
-                    } | select(.violations | length > 0)
-                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
-                elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-                  jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                    .results[0] | {
-                      filePath: $original_path,
-                      violations: [
-                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                      ]
-                    } | select(.violations | length > 0)
-                  ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
-                fi
+                jq --arg path "$current_file" --argjson changed "$changed_json" '
+                  map(select(.filePath == $path)) | .[] | {
+                    filePath: $path,
+                    violations: [
+                      .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                    ]
+                  } | select(.violations | length > 0)
+                ' debug/full_scan.json >> debug/filtered.json
               fi
               current_file="${line#FILE:}"
               changed_lines=()
@@ -109,40 +89,16 @@ jobs:
             fi
           done < results/changed_lines.txt
 
-          if [[ -n "$current_file" && -f "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
-            echo "Processing last file $current_file with lines: ${changed_lines[*]}"
+          if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-
-            sf code-analyzer run --config-file ./scanner-run-config.yml > "debug/raw_${current_file//\//_}.json"
-
-            if jq -e '.violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                {
-                  filePath: $original_path,
-                  violations: [
-                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                  ]
-                } | select(.violations | length > 0)
-              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
-            elif jq -e '.[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                .[0] | {
-                  filePath: $original_path,
-                  violations: [
-                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                  ]
-                } | select(.violations | length > 0)
-              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
-            elif jq -e '.results[0].violations? | type == "array"' "debug/raw_${current_file//\//_}.json" >/dev/null; then
-              jq --arg original_path "$current_file" --argjson changed "$changed_json" '
-                .results[0] | {
-                  filePath: $original_path,
-                  violations: [
-                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                  ]
-                } | select(.violations | length > 0)
-              ' "debug/raw_${current_file//\//_}.json" >> debug/filtered.json
-            fi
+            jq --arg path "$current_file" --argjson changed "$changed_json" '
+              map(select(.filePath == $path)) | .[] | {
+                filePath: $path,
+                violations: [
+                  .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                ]
+              } | select(.violations | length > 0)
+            ' debug/full_scan.json >> debug/filtered.json
           fi
 
           if [[ -s debug/filtered.json ]]; then
