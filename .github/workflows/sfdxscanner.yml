@@ -25,13 +25,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      - name: Install ESLint dependencies
-        run: npm install eslint@latest
 
       - name: Install Salesforce CLI and Scanner Plugin
         run: |
           npm install --global @salesforce/cli@latest
-          sf plugins install @salesforce/sfdx-scanner
+          sf plugins install @salesforce/sfdx-scanner@latest
           sudo apt-get update && sudo apt-get install -y jq
           sf --version
           sf plugins --core
