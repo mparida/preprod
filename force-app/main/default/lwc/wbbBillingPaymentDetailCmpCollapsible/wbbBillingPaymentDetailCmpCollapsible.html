@@ -1,0 +1,939 @@
+<template>
+    <template if:true={showLoadingSpinner}>
+    <c-reusable-spinner-utility  show-modal-spinner={showModalSpinner}></c-reusable-spinner-utility>     
+    </template>
+    <!--Added for CCSTSP-424-->
+    <div if:true={showVoiceRedactionButton} data-name="raisrConnectionStatus" class="slds-grid slds-grid_vertical slds-m-top_x-small">
+        <c-bwc-raisr-connection-status-cmp ondispatchraisractive={handleisRaisrActive}></c-bwc-raisr-connection-status-cmp>
+    </div>
+        <div class="slds-box slds-has-bottom-magnet slds-theme_shade borderBox">
+
+             <!--SPTSLSATT-8762-->
+            
+            <div class="slds-text-heading_small">{label.paymentDetailsTitle}</div>
+            <span>
+                <!--SPTSLSATT-8762-->
+                <template if:true={isVoiceMaskingButtonVisible}>
+                <div if:true={showVoiceRedactionButton} class="slds-col_bump-left slds-text-body_small slds-m-top_xx-small voiceMaskingButtonDetail">
+                    <c-bwc-raisr-form-ctrl-cmp  
+                        isbuyflow="true" 
+                        icon-classes="raisr-recieving slds-button__icon slds-button__icon_right">
+                    </c-bwc-raisr-form-ctrl-cmp>
+                </div>
+                </template>
+
+                <template if:true={showVoiceRedactionButton}>
+                    <lightning-button-icon 
+                        icon-name="utility:edit" 
+                        alternative-text="Edit Payment Detail" 
+                        variant={editButtonVariant}
+                        class='slds-float_right editButtonwithVoicemaskingbutton  slds-box_inverse slds-theme_default' 
+                        title="Edit Payment Detail" 
+                        disabled={paymentDetailSectionData.isDisabled}
+                        onclick={handleEdit}>
+                    </lightning-button-icon>
+                </template>
+
+                <template if:false={showVoiceRedactionButton}>
+                    <lightning-button-icon 
+                    icon-name="utility:edit" 
+                    alternative-text="Edit Payment Detail" 
+                    variant={editButtonVariant}
+                    class='slds-float_right editButton  slds-box_inverse slds-theme_default' 
+                    title="Edit Payment Detail" 
+                    disabled={paymentDetailSectionData.isDisabled}
+                    onclick={handleEdit}>
+                </lightning-button-icon>
+                </template>
+
+                
+            </span>
+        </div>
+        <div class={hidePaymentDetailSection}><!--SPTSLSATT-20239-->
+          <div class={hideOnCatchError}><!--CDEX-398186-->
+        <template if:true={paymentDetailSectionData.isEdited}>
+            <template if:true={displayAbp}>
+            <div class="slds-box slds-has-top-magnet slds-wrap fontclassBody borderBox">
+                <template if:true={autoPaySummaryView}>
+                    <div class="slds-p-top_medium slds-p-bottom_small"> 
+                        <b>AutoPayment Details</b>
+                    </div>
+                </template>
+                <c-wbb-summary-view summary-data={paymentDetailSummaryData}></c-wbb-summary-view>
+            </div>
+        </template>
+            <template if:true={otpSummaryView}>
+                <div class="slds-box slds-has-top-magnet slds-wrap fontclassBody borderBox">
+                    <div class="slds-p-top_medium slds-p-bottom_small"> 
+                        <b>One-time payment Details</b>
+                    </div>
+                    <c-wbb-summary-view summary-data={paymentDetailOTPSummaryData}></c-wbb-summary-view>
+                </div>
+        </template> 
+
+        <!--Cash Enhancement starts-->
+        <template if:true={otpSummaryViewCash}>
+            <div class="slds-box slds-has-top-magnet slds-wrap fontclassBody borderBox">
+                <c-buy-flow-billing-results-cash-success
+                show-cash-success={otpSummaryViewCash}></c-buy-flow-billing-results-cash-success>
+            </div>
+        </template>
+        <!--Cash Enhancement ends-->
+        </template>  
+    <template if:true={paymentDetailSectionData.isEditing}>
+        <template if:true={displayAbp}>
+        <div class="slds-card slds-has-top-magnet borderSection">
+            <div class="slds-p-around_medium">
+                <template if:true={paymentTypeMethodButtonRequired}>
+                    <div class="slds-has-top-magnet">
+                        <!-- <c-reusable-spinner-utility if:true={showLoadingSpinner} show-modal-spinner={showModalSpinnerPdt}></c-reusable-spinner-utility>--><!--Added for CCSTSP-424-->
+                         <template if:true={tenderInfoBanner}> <!-- SPTSLSATT-13531 -->
+                        <div class="slds-box slds-p-bottom_medium b3"> 
+                                <template if:true={bankDisc}>
+                            <div style="display: flex;">
+                            <lightning-icon icon-name="utility:info" variant="inverse" size="small" ></lightning-icon>
+                            <p  class="alert-message slds-p-left_small t2">{label.wbbAutopay}</p>
+                            </div>
+                                    <ul  class="slds-list_dotted slds-p-left_large t3">              
+                                        <li>{label.wbbAutopayGreyBox} {bankDisc} </li>
+                                    </ul >
+                                </template>
+                                <template if:true={boolPrePayment}> <!-- SPTSLSATT-13530 Starts-->
+                                    <template if:true={cashvisibility}>
+                                        <p  class="alert-message slds-p-left_small t4">{label.OneTimePayment}</p>
+                                        <ul class="slds-list_dotted slds-p-left_large t3">
+                                            <li>{label.OneTimePaymentMessageCash}</li>
+                                        </ul>
+                                    </template>
+                                    <template if:false={cashvisibility}>
+                                        <p  class="alert-message slds-p-left_small t4">{label.OneTimePayment}</p>
+                                        <ul class="slds-list_dotted slds-p-left_large t3">
+                                            <li>{label.OneTimePaymentMessage}</li>
+                                        </ul>
+                                    </template>
+                                </template>  <!-- SPTSLSATT-13530 Ends-->
+                            </div>
+                        </template>
+                            <!-- CCSTSP-352 - start for AIA -->
+                            <template lwc:if={showAiaTenderInfo}>
+                                <div class="slds-box b3">
+                                    <lightning-icon icon-name="utility:info" variant="inverse"
+                                        size="small"></lightning-icon>
+                                    <span class="alert-message slds-p-left_small aiaAbp">{AIADiscountInfo}</span>
+                                </div>
+                            </template>
+                            <!-- CCSTSP-352 - end for AIA -->
+                      <!--<div class="paymentButtons"> 
+                            <lightning-button lwc:ref="accountTab"
+                                class="account" 
+                                label={label.paymentMethodAccountButton} 
+                                variant="brand" 
+                                disabled={retailBankEnabler}
+                                onclick={accountSelection}>
+                            </lightning-button>
+                                
+                            <lightning-button lwc:ref="cardTab"
+                                class="card" 
+                                label={label.paymentMethodCardButton}
+                                onclick={cardSelection}>
+                            </lightning-button>
+                        </div>-->
+                    </div>
+                </template>
+                <template if:false={tenderInfoBanner}> <!-- SPTSLSATT-13530 -->
+                <template if:true={boolPrePayment}>
+                    <lightning-card>
+                        <template if:true={cashvisibility}><!--  CDEX-291568Start-->
+                        <div class="slds-box slds-box_small payMsgBox">
+                            <lightning-icon icon-name='utility:info' variant="inverse" alternative-text='info' size='small' title='info_alt'></lightning-icon>
+                            <span class="slds-var-p-left_medium slds-text-color_inverse"> {prepaymentMessage}</span>
+                        </div>
+                        </template>
+                        <template if:false={cashvisibility}>
+                            <div class="slds-box slds-box_small payMsgBox">
+                                <lightning-icon icon-name='utility:info' variant="inverse" alternative-text='info' size='small' title='info_alt'></lightning-icon>
+                                <span class="slds-var-p-left_medium slds-text-color_inverse"> {label.prepaymentMessageNonCash}</span>
+                            </div>
+                        </template>
+                    </lightning-card><!--   CDEX-291568End-->
+                </template>
+                </template>
+                <template if:true={boolProratedCharges}>
+                    <lightning-card>
+                        <div class="slds-box slds-box_small payMsgBox">
+                            <lightning-icon icon-name='utility:info' variant="inverse" alternative-text='info' size='small' title='info_alt'></lightning-icon>
+                            <span class="slds-var-p-left_medium slds-text-color_inverse"> {proRationAmountMsg}</span>
+                        </div>
+                    </lightning-card>
+                </template>
+                <!--Success banner for payment completed by secure component for ABP -->
+                <template if:true={showSuccessBannerForABP}>
+                    <div class="slds-p-bottom_medium slds-p-top_medium">
+                        <c-reusable-status-message-cmp message-label={label.Secure_Link_Payment_Success_Message}
+                                                        message-icon='utility:success' message-background='success'
+                                                        timeout-required="false"></c-reusable-status-message-cmp>
+                    </div>
+                </template>
+                <!-- SPTSLSATT-13531 Start here -->
+                <template if:true={showNonACHReadAlaud}>
+                    <div>
+                        <c-read-aloud-framework -section="BuyFlowNonACHTendersOnPaymentDetails">
+                        </c-read-aloud-framework>
+                    </div>
+                </template>
+                <!-- SPTSLSATT-13531 End here -->
+                <!-- CCSTSP-352 - start for AIA -->
+                <template lwc:if={showAiaReadToCust}>
+                    <c-read-aloud-framework -section={AIATenderReadToCustObj}>
+                    </c-read-aloud-framework>
+                </template>
+
+                <!-- CCSTSP-352 - end for AIA -->
+                    
+               
+            </div>
+
+             
+
+            <lightning-tabset active-tab-value={activeTabValue} class="activetabcls">
+              <!--BANK ACCOUNT  TAB and Content-->  
+             <lightning-tab label="Bank Account" value="ACH" onactive={accountSelection}>
+                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                    <div class="slds-card slds-has-top-magnet">
+                        <template if:true={isBankAccount}>
+                        <template if:true={hasPaymentMethod}>
+                            <c-reusable-card-list-cmp isbankaccount={cardListValue} toggle-section={cardListValue}
+                                onbankaccountselected={handlebankaccountselected}
+                                card-final-data={profileListDetails} oncallpayment={handleCallPaymentDetails}
+                                ontileselected={handleTileSelected} name-for-payment={nameForPayment}
+                                onexpiredcard={handleDisableButton} onupdatebankprofile={handleBankProfileUpdate}
+                                onexpiredcardactive={handleEnableButton} ondeletecard={handleCardDelete}
+                                onbanksection={handleBanksection}
+                                onupdatecarddetails={handleCardDetailsUpdate}
+                                autopay-required={isAutopayRequired}
+                                onmessage={fetchAutoPayId}
+                                error-message-label={errorMessageLabel}
+                                error-message-icon={errorMessageIcon}
+                                error-message-background={errorMessageBackground}
+                                is-close-btn-required={isCloseBtnRequired}
+                                timeout-required={timeoutRequired}
+                                display-error={showError}
+                                update-error-field-name={updateErrorFieldName}
+                                onfirespinner={handleFireSpinner}
+                                is-one-time-payment="false"
+                                show-peripheral={showPeripheral}
+                                is-raisr-active={isRaisrActive}
+                                context="recurringCardList"
+                                show-secure-payment-section={showSecurePaymentSection} onselectedcarddetails={handleSelectedCardDetails} onselectedbankdetails={handleSelectedBankDetails} onsavecarddata={handleSaveCard}
+                                onshowcardcomponnetabp={handleShowCardComponentForAbp} onhassavedpayment={handleHasSavedPayments}
+                                is-bank-section-render={isBankSectionRender} onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}><!--SPTSLSATT-20214 added onpaymentdetailfieldcheck--><!-- added onhassavedpayment SPTSLSATT-19998 Start-->
+                            </c-reusable-card-list-cmp>
+                        </template>
+                        </template>
+                         <br>
+                        <div>
+                            <template if:true={cardListValue}>
+                                <template if:true={showPaymentFormForBank}>
+                                    <template if:true={showSecurePaymentSection}>
+                                        <c-bwc-secure-payment-agent 
+                                            interaction-id={recordId} 
+                                            ban={ban}   
+                                            oncompleted={handleSecurePaymentCompleted} 
+                                            capabilities={buyFlowCapabilities} 
+                                            prefetched-data={prefetchedData}>
+                                        </c-bwc-secure-payment-agent>
+                                    </template>
+                                    <template if:false={showSecurePaymentSection}>
+    
+                                       <template if:false={hasRaisrPermissions}>
+                                        <template if:false={isRetailBankEnabled}><!--SPTSLSATT-20214-->
+                                        <c-reusable-bank-details-cmp is-scan-button-required={isScanButtonRequired}
+                                    onsavedcard={handleSaveCard} is-card={isCreditOrDebit}
+                                    is-store-detail-check-box-required={isStoreDetailCheckBoxRequired}
+                                    is-auto-pay-check-box-required={isAutoPayCheckBoxRequired}
+                                    final-data={finalData}
+                                    onbankcheckboxexecute={handleCheckboxExecuteBank}
+                                    onbankcheckboxnotexecute={handleCheckboxNotExecuteBank}
+                                    onbanktype={handleBankTypeDetails}
+                                    onbankacct={handleBankAcctDetails}
+                                    onbankacctrn={handleBankAcctRnDetails}
+                                    onbankacctan={handleBankAcctAnDetails}
+                                    onbankacctempty={handleBankAcctDetailsEmpty}
+                                    onbankacctrnempty={handleBankAcctRnDetailsEmpty}
+                                    onbankacctanempty={handleBankAcctAnDetailsEmpty}
+                                    onvanisherror={handleVanishError}
+                                    show-peripheral={showPeripheral}
+                                    onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}
+                                    pre-payment-charges={prePaymentCharges}>
+                                        </c-reusable-bank-details-cmp>
+                                        </template><!--SPTSLSATT-20214-->
+    
+                                        <template if:true={isRetailBankEnabled}><!--SPTSLSATT-20214-->
+                                            <c-reusable-bank-details-cmp-retail is-scan-button-required={isScanButtonRequired}
+                                                onsavedcard={handleSaveCard} is-card={isCreditOrDebit}
+                                                is-store-detail-check-box-required={isStoreDetailCheckBoxRequired}
+                                                is-auto-pay-check-box-required={isAutoPayCheckBoxRequired}
+                                                final-data={finalData}
+                                                onbankcheckboxexecute={handleCheckboxExecuteBank}
+                                                onbankcheckboxnotexecute={handleCheckboxNotExecuteBank}
+                                                onbanktype={handleBankTypeDetails}
+                                                onbankacct={handleBankAcctDetails}
+                                                onbankacctrn={handleBankAcctRnDetails}
+                                                onbankacctan={handleBankAcctAnDetails}
+                                                onbankacctempty={handleBankAcctDetailsEmpty}
+                                                onbankacctrnempty={handleBankAcctRnDetailsEmpty}
+                                                onbankacctanempty={handleBankAcctAnDetailsEmpty}
+                                                onvanisherror={handleVanishError}
+                                                onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsibleRetail}
+                                                pre-payment-charges={prePaymentCharges}>
+                                            </c-reusable-bank-details-cmp-retail>
+                                        </template><!--SPTSLSATT-20214-->
+                                    </template>
+    
+                                        <template if:true={hasRaisrPermissions}>
+                                        <c-reusable-bank-details-cmp is-scan-button-required={isScanButtonRequired}
+                                        onsavedcard={handleSaveCard} is-card={isCreditOrDebit}
+                                        is-store-detail-check-box-required={isStoreDetailCheckBoxRequired}
+                                        is-auto-pay-check-box-required={isAutoPayCheckBoxRequired}
+                                        final-data={finalData}
+                                        onbankcheckboxexecute={handleCheckboxExecuteBank}
+                                        onbankcheckboxnotexecute={handleCheckboxNotExecuteBank}
+                                        onbanktype={handleBankTypeDetails}
+                                        onbankacct={handleBankAcctDetails}
+                                        onbankacctrn={handleBankAcctRnDetails}
+                                        onbankacctan={handleBankAcctAnDetails}
+                                        onbankacctempty={handleBankAcctDetailsEmpty}
+                                        onbankacctrnempty={handleBankAcctRnDetailsEmpty}
+                                        onbankacctanempty={handleBankAcctAnDetailsEmpty}
+                                        onvanisherror={handleVanishError}
+                                        show-peripheral={showPeripheral}
+                                        onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}
+                                        is-raisr-enabled="true"
+                                        is-raisr-active={isRaisrActive}
+                                        context="recurringnewbank">
+                                        </c-reusable-bank-details-cmp>
+                                        </template>
+                                    
+                                    </template>
+                                </template>
+                            </template>
+                        </div>
+                        </div>
+                    
+                   
+                    <template if:false={showPeripheral}>
+                        <template if:true={showOneTimeChargesCheckbox}>
+                            <div class="">
+                                <lightning-input class="paddingTopZero fontCheckbox slds-p-top_x-small" type="checkbox" label={label.payOneTimeCheckBoxLabel}
+                                    onchange={onChangeEventHandler} disabled={isDisabled} checked={isChecked}>                   
+                                </lightning-input>
+                            </div>
+                        </template>
+                    </template>
+                    
+                   
+                  
+                    <div data-id="showToastAutoPayDiv">
+                    <div if:true={isShowToastAutoPay} class="slds-var-p-horizontal_small slds-m-top_small slds-var-p-bottom_large">
+                        <c-reusable-status-message-cmp onclosewarning={closeWarningHandler} message-label={messageLabelAutoPay}
+                            message-icon={messageIcon} message-background={messageBackground}>
+                            </c-reusable-status-message-cmp>
+                        </div>
+                    </div>
+    
+                    <!-- This Component is called when we receive a receive a response with error code 400/500 on click of continue button -->
+                    <div data-id="showAlertDiv">
+                        <template if:true={showAlert}>
+                            <div class="slds-m-around_small">
+                        <c-reusable-status-message-cmp message-label={errorMessageLabel} message-icon={errorMessageIcon}
+                            message-background={errorMessageBackground}></c-reusable-status-message-cmp>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+             </lightning-tab>
+
+
+              <!--DEBIT/CREDIT Card  TAB and Content-->  
+             <lightning-tab label="Debit/Credit Card" value="CARD" onactive={cardSelection}>
+                
+                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                    <div class="slds-card slds-has-top-magnet">
+                          <template if:false={isBankAccount}>
+                          <template if:true={hasPaymentMethod}>
+                         <c-reusable-card-list-cmp isbankaccount={cardListValue} toggle-section={cardListValue}
+                                onbankaccountselected={handlebankaccountselected}
+                                card-final-data={profileListDetails} oncallpayment={handleCallPaymentDetails}
+                                ontileselected={handleTileSelected} name-for-payment={nameForPayment}
+                                onexpiredcard={handleDisableButton} onupdatebankprofile={handleBankProfileUpdate}
+                                onexpiredcardactive={handleEnableButton} ondeletecard={handleCardDelete}
+                                onbanksection={handleBanksection}
+                                onupdatecarddetails={handleCardDetailsUpdate}
+                                autopay-required={isAutopayRequired}
+                                onmessage={fetchAutoPayId}
+                                error-message-label={errorMessageLabel}
+                                error-message-icon={errorMessageIcon}
+                                error-message-background={errorMessageBackground}
+                                is-close-btn-required={isCloseBtnRequired}
+                                timeout-required={timeoutRequired}
+                                display-error={showError}
+                                update-error-field-name={updateErrorFieldName}
+                                onfirespinner={handleFireSpinner}
+                                is-one-time-payment="false"
+                                show-peripheral={showPeripheral}
+                                is-raisr-active={isRaisrActive}
+                                context="recurringCardList"
+                                show-secure-payment-section={showSecurePaymentSection} onselectedcarddetails={handleSelectedCardDetails} onselectedbankdetails={handleSelectedBankDetails} onsavecarddata={handleSaveCard}
+                                onshowcardcomponnetabp={handleShowCardComponentForAbp} onhassavedpayment={handleHasSavedPayments}
+                                is-bank-section-render={isBankSectionRender} onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}><!--SPTSLSATT-20214 added onpaymentdetailfieldcheck--><!-- added onhassavedpayment SPTSLSATT-19998 Start-->
+                            </c-reusable-card-list-cmp>
+                        </template>
+                       </template>
+                        <br>
+                        <div>
+                            <template if:false={cardListValue}>
+                                <template if:true={showPaymentFormForCard}>
+                                    <template if:true={showSecurePaymentSection}>
+                                        <c-bwc-secure-payment-agent interaction-id={recordId} ban={ban}   oncompleted={handleSecurePaymentCompleted} capabilities={buyFlowCapabilities} prefetched-data={prefetchedData} >
+                                        </c-bwc-secure-payment-agent>
+                                    </template>
+                                    <template if:false={showSecurePaymentSection}>
+                                        <template if:false={hasRaisrPermissions}>
+                                        <c-reusable-card-details-cmp is-scan-button-required={isScanButtonRequired}
+                                            is-store-detail-check-box-required={isStoreDetailCheckBoxRequired} onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}
+                                            is-auto-pay-check-box-required={isAutoPayCheckBoxRequired} is-card={isCard} final-data={finalData}
+                                            oncheckboxexecute={handleCheckboxExecute} oncheckboxnotexecute={handleCheckboxNotExecute}
+                                            onsavedcard={handleSaveCard} ondateinserted={handleDateInserted} oncardinserted={handleCardInserted}
+                                            onzipinserted={handleZipInserted} onholderinserted={handleHolderInserted} oncodeinserted={handleCodeInserted}
+                                            ondateempty={handleDateEmpty} oncardempty={handleCardEmpty} onzipempty={handleZipEmpty}
+                                            onholderempty={handleHolderEmpty} oncodeempty={handleCodeEmpty} onvanisherror={handleVanishError}
+                                            show-peripheral={showPeripheral}>
+                                        </c-reusable-card-details-cmp>
+                                        </template>
+    
+                                        <template if:true={hasRaisrPermissions}>
+                                            <c-reusable-card-details-cmp is-scan-button-required={isScanButtonRequired}
+                                            is-store-detail-check-box-required={isStoreDetailCheckBoxRequired} onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}
+                                            is-auto-pay-check-box-required={isAutoPayCheckBoxRequired} is-card={isCard} final-data={finalData}
+                                            oncheckboxexecute={handleCheckboxExecute} oncheckboxnotexecute={handleCheckboxNotExecute}
+                                            onsavedcard={handleSaveCard} ondateinserted={handleDateInserted} oncardinserted={handleCardInserted}
+                                            onzipinserted={handleZipInserted} onholderinserted={handleHolderInserted} oncodeinserted={handleCodeInserted}
+                                            ondateempty={handleDateEmpty} oncardempty={handleCardEmpty} onzipempty={handleZipEmpty}
+                                            onholderempty={handleHolderEmpty} oncodeempty={handleCodeEmpty} onvanisherror={handleVanishError}
+                                            show-peripheral={showPeripheral}
+                                            is-raisr-enabled="true"
+                                            is-raisr-active={isRaisrActive}
+                                            context="recurringnewcard">
+                                        </c-reusable-card-details-cmp>
+                                        </template>
+                                    </template>
+    
+                                </template>
+                    <!-- // The showOneTimeChargesChecbox logic is disrupting the normal flow of the set up billing page as we are unable to see the checkbox for emabling the 
+    One Time Payment Section -->
+                    <template if:true={showPeripheralCard}>
+                                    <template if:true={showWarningMsgForToggleBank}>
+                                        <div class="slds-notify_container slds-is-relative warningClass">
+                                            <div class="slds-notify slds-notify_toast slds-theme_warning" role="status">
+                                            <span class="slds-assistive-text">warning</span>
+                                            <span class="slds-icon_container slds-icon-utility-warning slds-m-right_small slds-no-flex slds-align-top" 
+                                                title="Description of icon when needed">
+                                                <lightning-icon
+                                                class="iconColor"
+                                                        icon-name="utility:warning"
+                                                        size="small"
+                                                        alternative-text="Indicates warning"
+                                                    >
+                                                    </lightning-icon>
+                                            </span>
+                                            <div class="slds-notify__content">
+                                            <h2 class="slds-text-heading_small ">You have to remove the authorized card before you move to bank account.
+                                            </h2>
+                                            </div>
+                                            </div>
+                                            </div>
+                                    </template>
+                        <div class="cvv">
+                            <lightning-layout multiple-rows="true">
+                                <template if:false={verified}>
+                                    <lightning-layout-item size="6" class="slds-p-left--small CVVlabel CVVsize">
+                                        <p class="cardInfo">Card info captured; please verify CVV.</p>
+                                    </lightning-layout-item>
+                                </template>
+                                <template if:true={verified}>
+                                    <lightning-layout-item size="5" class="slds-p-left--small CVVCardNumber">
+                                        {cardType} ending in {cardLastfourDigits} | Exp: {expMonth}/{expYear}
+                                    </lightning-layout-item>
+                                </template>
+                                <lightning-layout-item size={cvvInputSize} class="inputCVV">
+                                    <lightning-input name="rcCvv" type="password" placeholder="Enter CVV" autocomplete="off"
+                                        variant="label-hidden" required pattern="[0-9]{3,4}$" max-length="4"
+                                        message-when-pattern-mismatch="Invalid security code" value={rcCvv}
+                                        onchange={handleCvvInput}
+                                        disabled={cvvDisable}></lightning-input>
+                                        <lightning-input class="slds-p-top_xx-small" name="rcZip" type="text" placeholder="Enter Zip" autocomplete="off"
+                                        variant="label-hidden" required pattern="[0-9]{5}$" max-length="5"
+                                        message-when-pattern-mismatch="Invalid zip code" value={rcZip}
+                                        onchange={handleRCZipInput} 
+                                        disabled={cvvDisable}></lightning-input>
+                                </lightning-layout-item>
+                                <lightning-layout-item size={authButtonSize}>
+                                    <lightning-button variant="Neutral" label={verifyLabel} onclick={verifyCVVHandler}
+                                        class="slds-align_absolute-center btnPadding"
+                                        disabled={veriedDisabled}></lightning-button>
+                                </lightning-layout-item>
+                                <template if:true={displayDel}>
+                                    <lightning-layout-item size="3">
+                                        <lightning-button 
+                                            variant="Neutral"
+                                            name="rcCancel" 
+                                            class="slds-button_text-destructive buttonFontSize" 
+                                            icon-name="utility:delete"
+                                            label={delCancelLabel} 
+                                            onclick={handleCancelPayment}>
+                                        </lightning-button>
+                                    </lightning-layout-item>
+                                </template>
+                            </lightning-layout>
+                        </div>
+                    </template>
+                            </template>
+                        </div>
+                        </div>
+                    
+                    <!-- differentiate peripheral and non-peripheral scenarios until alignment for both is available-->
+                    <template if:true={showPeripheral}>
+                        <template if:true={showOneTimeChargesCheckbox}>
+                            <div class="">
+                                <lightning-input class="paddingTopZero fontCheckbox" type="checkbox" label={label.payOneTimeCheckBoxLabel}
+                                    onchange={onChangeEventHandler} disabled={isDisabled} checked={isChecked}>                   
+                                </lightning-input>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={showPeripheral}>
+                        <template if:true={showOneTimeChargesCheckbox}>
+                            <div class="">
+                                <lightning-input class="paddingTopZero fontCheckbox slds-p-top_x-small" type="checkbox" label={label.payOneTimeCheckBoxLabel}
+                                    onchange={onChangeEventHandler} disabled={isDisabled} checked={isChecked}>                   
+                                </lightning-input>
+                            </div>
+                        </template>
+                    </template>
+                    <!--Peripheral Button-->
+                    
+                    <template if:true={showPeripheral}>
+                        <div class="slds-m-top_small slds-m-bottom_medium">
+                            <lightning-button variant="brand-outline" label={label.usePaymentTerminal}  onclick={handlePeripheralClick} class="slds-m-left_x-small" disabled={isDisableUseCardReadRC}></lightning-button>
+                            <lightning-button variant="brand-outline" label="Pay on Station" onclick={handlePeripheralClick} class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </template>
+                  
+                    <template if:true={showPeripheralError}>
+                        <div class="error" >
+                            <lightning-icon  class="iconclass" icon-name=utility:error alternative-text="Status"
+                                size="small"></lightning-icon> &nbsp;
+                            <lightning-formatted-rich-text class=textColorError
+                                value={peripheralErrorMsg}></lightning-formatted-rich-text>
+                        </div>
+                    </template>
+                    <div data-id="showToastAutoPayDiv">
+                    <div if:true={isShowToastAutoPay} class="slds-var-p-horizontal_small slds-m-top_small slds-var-p-bottom_large">
+                        <c-reusable-status-message-cmp onclosewarning={closeWarningHandler} message-label={messageLabelAutoPay}
+                            message-icon={messageIcon} message-background={messageBackground}>
+                            </c-reusable-status-message-cmp>
+                        </div>
+                    </div>
+    
+                    <!-- This Component is called when we receive a receive a response with error code 400/500 on click of continue button -->
+                    <div data-id="showAlertDiv">
+                        <template if:true={showAlert}>
+                            <div class="slds-m-around_small">
+                        <c-reusable-status-message-cmp message-label={errorMessageLabel} message-icon={errorMessageIcon}
+                            message-background={errorMessageBackground}></c-reusable-status-message-cmp>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </lightning-tab>
+            </lightning-tabset>
+
+
+
+            
+
+
+
+
+
+
+        </div>
+    </template>
+    
+    <!--Store this payment method to payment profiles checkbox-->
+    <template if:true={otp}>
+        <template if:false={paymentDetailSectionData.isDisabled}>
+        <div class="slds-card slds-has-top-magnet borderSection">
+            <div class="slds-p-around_medium">
+                <template if:true={paymentTypeMethodButtonRequired}>
+                        <c-reusable-spinner-utility if:true={showLoadingSpinnerOTP} show-modal-spinner={showModalSpinner}></c-reusable-spinner-utility><!--Added for CCSTSP-424-->
+                            <lightning-tabset active-tab-value={activeTabValueOTP} class="activetabcls">
+                              <template if:false={accountSelectionOneTimeDisabled}>
+                              <lightning-tab label="Bank Account" value="ACHOTP" onactive={accountSelectionOneTime}>
+                                <div class="slds-p-top_medium slds-p-bottom_medium">
+                                    <b>One-time payment Details</b>
+                                </div>
+                            
+                                  <template if:false={isCreditOrDebitOneTime} >
+                                  <template if:true={showExistingPaymentMethod}>
+                                    <c-reusable-card-list-cmp isbankaccount={cardListValueOneTime} class="reusableCardListCmpOTPBank"
+                                        card-final-data={uncheckedArray} toggle-section={cardListValueOneTime}
+                                        oncallpayment={handleOneTimeCallPaymentDetails} ontileselected={handleOneTimeTileSelected}
+                                        name-for-payment={nameForOneTimePayment} onexistingpaymentmethod={handleExistingPayment}
+                                        onexpiredcardotp={handleDisableButtonOtp} ondeletecard={handleCardDelete}
+                                        onexpiredcardactiveotp={handleEnableButtonOtp} onupdatebankprofile={handleBankProfileUpdate}
+                                        onupdatecarddetails={handleCardDetailsUpdate}
+                                        onmessage={fetchOCPayId}
+                                        error-message-label={errorMessageLabel}
+                                        error-message-icon={errorMessageIcon}
+                                        error-message-background={errorMessageBackground}
+                                        update-error-field-name={updateErrorFieldName}
+                                        is-close-btn-required={isCloseBtnRequired}
+                                        timeout-required={timeoutRequired}
+                                        display-error={showError}
+                                        onfirespinner={handleFireSpinner}
+                                        is-one-time-payment="true"
+                                        show-peripheral={showPeripheral}
+                                        copy-abp-to-otp={copyAbpToOtp}
+                                        abp-card-data={abpCardData}
+                                        otp-card-data-in-collapsible={otpCardDataInCollapsible} 
+                                        abp-card-data-otp={abpCardDataOtp}
+                                        show-secure-payment-section={showSecurePaymentSection}
+                                        is-raisr-active={isRaisrActive}
+                                        context="oneTimeCardList"
+                                        onsavecarddata={handleSaveCard}
+                                        onshowcardcomponentotp = {handleShowCardComponentForOTP}>
+                                    </c-reusable-card-list-cmp>
+                                  </template>
+                                </template>
+
+                                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                <div class="slds-card slds-has-top-magnet">
+                                    <template if:true={cardListValueOneTime}>
+                                        <template if:true={OneTimeShowPaymentFormForBank}>
+                                            <template if:true={showSecurePaymentSection}>                                        
+                                                <c-bwc-secure-payment-agent 
+                                                    interaction-id={recordId} 
+                                                    ban={ban} 
+                                                    oncompleted={handleOTPSecurePaymentCompleted} 
+                                                    capabilities={buyFlowCapabilitiesOtp} 
+                                                    prefetched-data={prefetchedData}>
+                                                </c-bwc-secure-payment-agent>
+                                            </template>
+                                            <template if:false={showSecurePaymentSection}>
+                                                <template if:false={hasRaisrPermissions}>
+                                                <c-reusable-bank-details-cmp is-scan-button-required={isScanButtonRequired}
+                                                    onsavedcard={handleSaveCardOneTime} is-card={isAccountOtp}
+                                                    final-data={finalData}
+                                                    is-store-detail-check-box-required={isStoreDetailCheckBoxRequiredOtp}
+                                                    is-auto-pay-check-box-required={isAutoPayCheckBoxRequiredOtp}
+                                                    onvanisherror={handleVanishOneTimeError}
+                                                    show-peripheral={showPeripheral}
+                                                    bool-one-time-payment={OneTimeShowPaymentFormForBank}
+                                                    onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}>
+                                                </c-reusable-bank-details-cmp>
+                                            </template>
+                                                <template if:true={hasRaisrPermissions}>
+                                                    <c-reusable-bank-details-cmp is-scan-button-required={isScanButtonRequired}
+                                                    onsavedcard={handleSaveCardOneTime} is-card={isAccountOtp}
+                                                    final-data={finalData}
+                                                    is-store-detail-check-box-required={isStoreDetailCheckBoxRequiredOtp}
+                                                    is-auto-pay-check-box-required={isAutoPayCheckBoxRequiredOtp}
+                                                    onvanisherror={handleVanishOneTimeError}
+                                                    show-peripheral={showPeripheral}
+                                                    bool-one-time-payment={OneTimeShowPaymentFormForBank}
+                                                    onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}
+                                                    is-raisr-enabled="true"
+                                                    is-raisr-active={isRaisrActive}
+                                                    context="oneTimenewbank">
+                                                </c-reusable-bank-details-cmp>
+                                                </template>
+                
+                
+                                               
+                                            </template>
+                                        </template>
+                                    </template>
+
+
+
+                                </div>
+                            </div>
+
+
+
+                              </lightning-tab>
+                              </template>
+
+
+                            <lightning-tab label="Debit/Credit Card" value="CARDOTP" onactive={cardSelectionOneTime}>
+                                <div class="slds-p-top_medium slds-p-bottom_medium">
+                                    <b>One-time payment Details</b>
+                                </div>
+
+                                <template if:true={isCreditOrDebitOneTime} >
+                                <template if:true={showExistingPaymentMethod}>
+                                    <c-reusable-card-list-cmp isbankaccount={cardListValueOneTime} class="reusableCardListCmpOTPBank"
+                                        card-final-data={uncheckedArray} toggle-section={cardListValueOneTime}
+                                        oncallpayment={handleOneTimeCallPaymentDetails} ontileselected={handleOneTimeTileSelected}
+                                        name-for-payment={nameForOneTimePayment} onexistingpaymentmethod={handleExistingPayment}
+                                        onexpiredcardotp={handleDisableButtonOtp} ondeletecard={handleCardDelete}
+                                        onexpiredcardactiveotp={handleEnableButtonOtp} onupdatebankprofile={handleBankProfileUpdate}
+                                        onupdatecarddetails={handleCardDetailsUpdate}
+                                        onmessage={fetchOCPayId}
+                                        error-message-label={errorMessageLabel}
+                                        error-message-icon={errorMessageIcon}
+                                        error-message-background={errorMessageBackground}
+                                        update-error-field-name={updateErrorFieldName}
+                                        is-close-btn-required={isCloseBtnRequired}
+                                        timeout-required={timeoutRequired}
+                                        display-error={showError}
+                                        onfirespinner={handleFireSpinner}
+                                        is-one-time-payment="true"
+                                        show-peripheral={showPeripheral}
+                                        copy-abp-to-otp={copyAbpToOtp}
+                                        abp-card-data={abpCardData}
+                                        otp-card-data-in-collapsible={otpCardDataInCollapsible} 
+                                        abp-card-data-otp={abpCardDataOtp}
+                                        show-secure-payment-section={showSecurePaymentSection}
+                                        is-raisr-active={isRaisrActive}
+                                        context="oneTimeCardList"
+                                        onsavecarddata={handleSaveCard}
+                                        onshowcardcomponentotp = {handleShowCardComponentForOTP}>
+                                    </c-reusable-card-list-cmp>
+                                </template>
+                                </template>
+
+                                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                 <div class="slds-card slds-has-top-magnet">
+                                  
+                                    <template if:false={cardListValueOneTime}>
+                                        <template if:true={OneTimeShowPaymentFormForCard}>
+                                            <template if:true={showSecurePaymentSection}>                                        
+                                                <c-bwc-secure-payment-agent 
+                                                    interaction-id={recordId} 
+                                                    ban={ban} 
+                                                    oncompleted={handleOTPSecurePaymentCompleted} 
+                                                    capabilities={buyFlowCapabilitiesOtp} 
+                                                    prefetched-data={prefetchedData} >
+                                                </c-bwc-secure-payment-agent>
+                                            </template>
+                                            <template if:true={showPeripheralOcCheck}>
+                                                <div class={cvvClass}>
+                                                    <lightning-layout multiple-rows="true">
+                                                        <template if:false={verifiedOTP}>
+                                                            <template if:true={cardInfo}>
+                                                                <lightning-layout-item size="6"
+                                                                    class="padding-right slds-p-left--small CVVlabel CVVsize">
+                                                                    <p class="verifyCVV">{label.verifyCVV}</p>
+                                                                </lightning-layout-item>
+                                                            </template>
+                                                            <template if:false={cardInfo}>
+                                                                <lightning-layout-item size="6"
+                                                                    class="padding-right slds-p-left--small CVVlabel CVVsize">
+                                                                    <p class="verifyCVV">{label.cardInfo}</p>
+                                                                </lightning-layout-item>
+                                                            </template>
+                                                        </template>
+                                                        <template if:true={verifiedOTP}>
+                                                            <lightning-layout-item size="5" class="slds-p-left--small OTPCardNumber">
+                                                                {cardOTPType} ending in {cardOTPLastfourDigits} | Exp:{expMonthOTP}/{expYearOTP}
+                                                            </lightning-layout-item>
+                                                        </template>
+                                                        <template if:false={hideCVV}>
+                                                            <lightning-layout-item size="2" class="inputCVV">
+                                                                <lightning-input name="ocCvv" type="password" placeholder="Enter CVV"
+                                                                    autocomplete="off" variant="label-hidden" value={ocCvv} required
+                                                                    pattern="[0-9]{3,4}$" max-length="4" onchange={handleCvvInput}
+                                                                    message-when-pattern-mismatch="Invalid security code"
+                                                                    disabled={cvvDisableOtp}></lightning-input>
+                                                            </lightning-layout-item>
+                                                        </template>
+                                                        <template if:false={hideVerifyBtn}>
+                                                            <lightning-layout-item size={otpButtonSize}>
+                                                                <lightning-button 
+                                                                    variant="Neutral" 
+                                                                    label={verifyOTPLabel}
+                                                                    class="slds-align_absolute-center btnPadding" 
+                                                                    onclick={verifyOTPHandler}
+                                                                    disabled={veriedDisabledOTP}>
+                                                                </lightning-button>
+                                                            </lightning-layout-item>
+                                                        </template>
+                                                        <template if:true={displayOTPDel}>
+                                                           <!--CDEX-312261 Start--> 
+                                                            <!--<template if:true={cancelPaymentBtnSize}><lightning-layout-item size="4"></lightning-layout-item></template>--> 
+                                                            <!--CDEX-312261 End--> 
+                                                            <lightning-layout-item size="3">
+                                                                <lightning-button variant="Neutral" name="ocCancel"
+                                                                    class="slds-button_text-destructive buttonFontSize"
+                                                                    icon-name="utility:delete" label="Cancel Payment"
+                                                                    onclick={handleCancelPayment}></lightning-button>
+                                                            </lightning-layout-item>
+                                                        </template>
+                                                    </lightning-layout>
+                                                </div>
+                                            </template>
+                                             <!--CDEX-295466--><template if:true={showCardComponent}>
+                                            <template if:false={showSecurePaymentSection}>
+                                                <template if:false={hasRaisrPermissions}>
+                                                <c-reusable-card-details-cmp is-scan-button-required={isScanButtonRequired}
+                                                    is-store-detail-check-box-required={isStoreDetailCheckBoxRequiredOtp}
+                                                    is-auto-pay-check-box-required={isAutoPayCheckBoxRequiredOtp} is-card={isCard}
+                                                    final-data={finalData}
+                                                    oncheckboxexecute={handleCheckboxExecute}
+                                                    oncheckboxnotexecute={handleCheckboxNotExecute} onsavedcard={handleSaveCardOneTime}
+                                                    onnewentrytotalfilled={isNewEntryNotNull}
+                                                    onvanisherror={handleVanishOneTimeError}
+                                                    show-peripheral={showPeripheral}
+                                                    bool-one-time-payment={OneTimeShowPaymentFormForCard}
+                                                    copy-abp-to-otp={copyAbpToOtp}
+                                                    abp-card-data={abpCardData}
+                                                    otp-card-data-in-collapsible={otpCardDataInCollapsible} 
+                                                    abp-card-data-otp={abpCardDataOtp}
+                                                    is-disable-checkbox={isDisableCheckbox}
+                                                    onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}>
+                                                </c-reusable-card-details-cmp>
+                                            </template>
+                                                <template if:true={hasRaisrPermissions}>
+                                                    <c-reusable-card-details-cmp is-scan-button-required={isScanButtonRequired}
+                                                    is-store-detail-check-box-required={isStoreDetailCheckBoxRequiredOtp}
+                                                    is-auto-pay-check-box-required={isAutoPayCheckBoxRequiredOtp} is-card={isCard}
+                                                    final-data={finalData}
+                                                    oncheckboxexecute={handleCheckboxExecute}
+                                                    oncheckboxnotexecute={handleCheckboxNotExecute} onsavedcard={handleSaveCardOneTime}
+                                                    onnewentrytotalfilled={isNewEntryNotNull}
+                                                    onvanisherror={handleVanishOneTimeError}
+                                                    show-peripheral={showPeripheral}
+                                                    bool-one-time-payment={OneTimeShowPaymentFormForCard}
+                                                    copy-abp-to-otp={copyAbpToOtp}
+                                                    abp-card-data={abpCardData}
+                                                    otp-card-data-in-collapsible={otpCardDataInCollapsible} 
+                                                    abp-card-data-otp={abpCardDataOtp}
+                                                    is-disable-checkbox={isDisableCheckbox}
+                                                    onpaymentdetailfieldcheck={handlePaymentdetailFieldCheckCollapsible}
+                                                    is-raisr-enabled="true"
+                                                    is-raisr-active={isRaisrActive}
+                                                    context="oneTimenewCard"
+                                                    assign-one-time-payment-null={isOneTimePayment}>
+                                                </c-reusable-card-details-cmp>
+                                                </template>
+                
+                                                
+                                            </template>
+                                              <!--CDEX-295466--> </template> 
+
+
+                                        </template>
+                                    </template>
+                               </div>
+                               <template if:true={showPeripheral}>
+                                <div class="slds-m-top_small slds-m-bottom_medium">
+                                    <lightning-button variant="brand-outline" label={label.usePaymentTerminal}  onclick={handleOneTimePaymentPeripheralClick} class="slds-m-left_x-small" disabled={isDisableUseCardRead}></lightning-button>
+                                    <lightning-button variant="brand-outline" label="Pay on Station" onclick={handlePeripheralClick} class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                            </template>
+                            
+
+                               </div>
+
+
+
+                            
+                            
+                            </lightning-tab>
+                            <!--Cash Enhancement ends-->  
+                            </lightning-tabset>
+                            <!--Cash Enhancement Starts-->
+                            <c-buyflow-onetime-cash-payment-l-w-c 
+                            record-id={recordId}
+                            page-name={pageName}
+                            amount={prePaymentCharges}
+                            oncashbuttonclick ={toggleCashUI}
+                            oncashbuttonvisible={cashvisibilitystatus}><!--   CDEX-291568-->
+                            </c-buyflow-onetime-cash-payment-l-w-c>
+                            <!--Cash Enhancement ends-->
+
+                        
+                    
+                </template>
+                <!--Success banner for payment completed by secure component for OTP -->
+                <template if:true={showSuccessBannerForOTP}>
+                    <div class="slds-p-bottom_medium slds-p-top_medium">
+                        <c-reusable-status-message-cmp message-label={label.Secure_Link_Payment_Success_Message}
+                                                        message-icon='utility:success' message-background='success'
+                                                        timeout-required="false"></c-reusable-status-message-cmp>
+                    </div>
+                </template>
+                
+
+            </div>
+               <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <div class="slds-card slds-has-top-magnet">
+                    
+                </div>
+               
+               
+                <template if:true={showPeripheralErrorOTP}>
+                    <div class="error" >
+                        <lightning-icon  class="iconclass" icon-name=utility:error alternative-text="Status"
+                            size="small"></lightning-icon> &nbsp;
+                        <lightning-formatted-rich-text class=textColorError
+                            value={peripheralErrorMsg}></lightning-formatted-rich-text>
+                    </div>
+                </template>
+                <template if:true={otp}>
+                    <div data-id="showAlertOneTimeDiv">
+                        <template if:true={showAlertOneTime}>
+                            <div class="slds-m-around_small">
+                                <c-reusable-status-message-cmp data-error-cmp="otp"
+                                    message-label={errorMessageLabelOneTime} message-icon={errorMessageIcon}
+                                    message-background={errorMessageBackground}></c-reusable-status-message-cmp>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!--vo923r toast message ERROR-->
+                <div data-id="showToastDiv">
+                <div if:true={isShowToast} class="slds-var-p-horizontal_small slds-m-top_small slds-var-p-bottom_large">
+                        <c-reusable-status-message-cmp onclosewarning={closeWarningHandler} message-label={messageLabel}
+                            message-icon={messageIcon} message-background={messageBackground}>
+                        </c-reusable-status-message-cmp>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    </template>
+    <div>
+        <c-reusable-encryption-component onencript={handleEncrypt}></c-reusable-encryption-component>
+    </div>
+    <template if:false={otp}></template>
+    <div class="slds-box slds-has-top-magnet slds-wrap fontclassBody borderBox"> 
+        <lightning-button 
+            variant="Brand" 
+            label="Continue" 
+            class="slds-float_right continueBtn" 
+            title="Continue"
+            onclick={executeContinue} 
+            disabled={isContinueButtonDisable}>
+        </lightning-button>
+    </div>
+    </template>
+            </div><!--CDEX-398186-->
+    </div><!--SPTSLSATT-20239-->
+
+<c-bwc-raisr-msg-pub-sub-cmp parent-id="wbbPaymentDetailCmpCollapsible" onraisrevent={onRaisrEvent}> </c-bwc-raisr-msg-pub-sub-cmp>
+</template>
