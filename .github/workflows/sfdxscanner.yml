@@ -81,14 +81,16 @@ jobs:
             if [[ "$line" == FILE:* ]]; then
               if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-                jq --arg path "$current_file" --argjson changed "$changed_json" '
-                  map(select(.filePath == $path)) | .[] | {
-                    filePath: $path,
-                    violations: [
-                      .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                    ]
-                  } | select(.violations | length > 0)
-                ' debug/full_scan.json >> debug/filtered.json
+                if jq -e . debug/full_scan.json >/dev/null 2>&1; then
+                  jq --arg path "$current_file" --argjson changed "$changed_json" '
+                    map(select(.filePath == $path)) | .[] | {
+                      filePath: $path,
+                      violations: [
+                        .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                      ]
+                    } | select(.violations | length > 0)
+                  ' debug/full_scan.json >> debug/filtered.json
+                fi
               fi
               current_file="${line#FILE:}"
               changed_lines=()
@@ -99,14 +101,16 @@ jobs:
 
           if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
             changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
-            jq --arg path "$current_file" --argjson changed "$changed_json" '
-              map(select(.filePath == $path)) | .[] | {
-                filePath: $path,
-                violations: [
-                  .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
-                ]
-              } | select(.violations | length > 0)
-            ' debug/full_scan.json >> debug/filtered.json
+            if jq -e . debug/full_scan.json >/dev/null 2>&1; then
+              jq --arg path "$current_file" --argjson changed "$changed_json" '
+                map(select(.filePath == $path)) | .[] | {
+                  filePath: $path,
+                  violations: [
+                    .violations[] | select((.line | tonumber) as $line | $changed | index($line) != null)
+                  ]
+                } | select(.violations | length > 0)
+              ' debug/full_scan.json >> debug/filtered.json
+            fi
           fi
 
           if [[ -s debug/filtered.json ]]; then
