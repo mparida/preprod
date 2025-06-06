@@ -73,12 +73,13 @@ jobs:
       - name: Filter Violations by Changed Lines
         run: |
           echo "[]" > results/output.json
-          echo "" > debug/filtered.json
+          echo "[]" > debug/filtered.json
 
           current_file=""
+          changed_lines=()
           while read -r line; do
             if [[ "$line" == FILE:* ]]; then
-              if [[ -n "$current_file" ]]; then
+              if [[ -n "$current_file" && ${#changed_lines[@]} -gt 0 ]]; then
                 changed_json=$(printf '%d\n' "${changed_lines[@]}" | jq -s '.')
                 jq --arg path "$current_file" --argjson changed "$changed_json" '
                   map(select(.filePath == $path)) | .[] | {
