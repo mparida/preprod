@@ -7,6 +7,8 @@ public with sharing class ACCComponentsViewerController {
         List<String> epicIds = filters.containsKey('epicIds') ? filters.get('epicIds') : new List<String>();
         List<String> userStoryIds = filters.containsKey('userStoryIds') ? filters.get('userStoryIds') : new List<String>();
         List<String> componentIds = filters.containsKey('componentIds') ? filters.get('componentIds') : new List<String>();
+List<String> userStoryIds = filters.containsKey('userStoryIds') ? filters.get('userStoryIds') : new List<String>();
+        List<String> componentIds = filters.containsKey('componentIds') ? filters.get('componentIds') : new List<String>();
         List<String> developerIds = filters.containsKey('developerIds') ? filters.get('developerIds') : new List<String>();
         List<String> teamIds = filters.containsKey('teamIds') ? filters.get('teamIds') : new List<String>();
         List<String> environmentIds = filters.containsKey('environmentIds') ? filters.get('environmentIds') : new List<String>();
