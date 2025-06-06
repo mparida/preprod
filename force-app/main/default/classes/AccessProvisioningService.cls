@@ -10,6 +10,7 @@ public with sharing class AccessProvisioningService {
     @future(callout=true)
     public static void provisionAccessAsync(Id accessRecordId) {
         provisionAccess(accessRecordId);
+provisionAccess(accessRecordId);
     }
 
     public static void provisionAccess(String accessRecordId) {
