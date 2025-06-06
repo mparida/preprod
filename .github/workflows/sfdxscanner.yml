@@ -58,10 +58,17 @@ jobs:
             }
           ' > results/changed_lines.txt
 
+      - name: Verify Config File Exists
+        run: |
+          echo "Listing contents of root directory:"
+          ls -la
+          echo "Content of scanner-run-config.yml (if exists):"
+          cat scanner-run-config.yml || echo "scanner-run-config.yml not found"
+
       - name: Run Code Analyzer Once
         run: |
           mkdir -p debug
-          sf code-analyzer run --config-file scanner-run-config.yml > debug/full_scan.json
+          sf code-analyzer run --config-file ./scanner-run-config.yml > debug/full_scan.json
 
       - name: Filter Violations by Changed Lines
         run: |
